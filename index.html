@@ -11,44 +11,44 @@
         * { -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box; touch-action: none; }
         body { margin: 0; padding: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; }
         
+        /* MENU */
         #menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: radial-gradient(circle, #222 0%, #000 100%); color: #fff; text-align: center; z-index: 100; position: relative; }
         .btn { padding: 20px; width: 300px; margin: 15px; font-weight: bold; cursor: pointer; border: 4px solid #fff; background: transparent; color: #fff; font-family: 'Orbitron'; text-transform: uppercase; border-radius: 12px; }
 
+        /* TV HOST UI */
         #host-ui { position: absolute; width: 100%; height: 100%; pointer-events: none; display: none; z-index: 10; }
         #host-info { position: absolute; top: 20px; right: 20px; background: #fff; color: #000; padding: 12px 25px; border-radius: 12px; font-weight: 900; pointer-events: auto; border: 3px solid #ff0055; }
         #fps { position: absolute; bottom: 10px; left: 10px; color: #00ff00; font-size: 0.9rem; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 5px; }
 
+        /* HP CONTROLLER UI */
         #ctrl-view { display: none; height: 100vh; width: 100vw; background: #050505; position: relative; }
         #dash { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background: #111; border: 3px solid #444; padding: 10px; text-align: center; border-radius: 20px; width: 220px; }
         #spd { color: #fff; font-size: 3.5rem; display: block; line-height: 1; }
         
-        /* POSISI NITRO & STEERING KIRI */
-        .left-controls { position: absolute; bottom: 25px; left: 25px; display: flex; flex-direction: column; gap: 20px; align-items: center; }
-        #nitro-btn { width: 110px; height: 110px; background: #ff0055; border: 4px solid #fff; border-radius: 50%; color: #fff; font-weight: 900; display: flex; align-items: center; justify-content: center; font-size: 1rem; box-shadow: 0 6px 0 #80002b; }
-        #nitro-btn.active_n { background: #00f2ff; box-shadow: 0 0 30px #00f2ff; color: #000; transform: translateY(6px); box-shadow: none; }
-        .s-grp { display: flex; gap: 15px; }
-        .btn-s { width: 110px; height: 110px; background: #111; color: #fff; border-radius: 50%; border: 4px solid #444; display: flex; align-items: center; justify-content: center; font-size: 3rem; box-shadow: 0 8px 0 #000; }
+        #nitro-btn { position: absolute; top: 20px; left: 20px; width: 90px; height: 90px; background: #ff0055; border: 4px solid #fff; border-radius: 50%; color: #fff; font-weight: 900; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; box-shadow: 0 6px 0 #80002b; }
+        #nitro-btn.active_n { background: #00f2ff; box-shadow: 0 0 30px #00f2ff; color: #000; transform: translateY(4px); box-shadow: none; }
 
-        /* ANALOG CAM DI TENGAH */
-        #cam-joy { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); width: 180px; height: 180px; background: rgba(255,255,255,0.03); border: 2px dashed rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        #stick { width: 80px; height: 80px; background: radial-gradient(circle, #fff 0%, #aaa 100%); border-radius: 50%; box-shadow: 0 0 25px rgba(255,255,255,0.4); position: absolute; transition: transform 0.05s linear; border: 4px solid #444; }
+        /* CAMERA ANALOG - POSISI DI KIRI BRAKE */
+        #cam-joy { position: absolute; bottom: 35px; right: 160px; width: 130px; height: 130px; background: rgba(255,255,255,0.05); border: 3px dashed rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        #stick { width: 55px; height: 55px; background: #fff; border-radius: 50%; box-shadow: 0 0 20px rgba(255,255,255,0.4); position: absolute; }
 
-        /* PEDAL KANAN */
         .p-grp { position: absolute; bottom: 25px; right: 25px; display: flex; flex-direction: column; gap: 15px; }
-        .pedal { width: 130px; border-radius: 20px; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 4px solid #333; }
-        .gas { height: 260px; background: linear-gradient(to bottom, #008800, #004400); font-size: 1.8rem; }
-        .rem { height: 110px; background: linear-gradient(to bottom, #880000, #440000); font-size: 1.2rem; }
+        .pedal { width: 120px; border-radius: 20px; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 4px solid #333; }
+        .gas { height: 240px; background: linear-gradient(to bottom, #008800, #004400); font-size: 1.5rem; }
+        .rem { height: 100px; background: linear-gradient(to bottom, #880000, #440000); font-size: 1.1rem; }
         
-        .act { filter: brightness(2); transform: translateY(6px); box-shadow: none !important; }
+        .s-grp { position: absolute; bottom: 25px; left: 25px; display: flex; gap: 15px; }
+        .btn-s { width: 110px; height: 110px; background: #111; color: #fff; border-radius: 50%; border: 4px solid #444; display: flex; align-items: center; justify-content: center; font-size: 3rem; box-shadow: 0 8px 0 #000; }
+        .act { filter: brightness(2.2); transform: translateY(6px); box-shadow: none !important; }
     </style>
 </head>
 <body>
 
 <div id="menu">
-    <h1 style="letter-spacing: 8px; font-size: 3.5rem; margin: 0;">BLOCK DRIFT</h1>
-    <p style="color: #ff0055;">V1.5 - STABLE TV PRO</p>
-    <button class="btn" onclick="sys('host')">TV MODE</button>
-    <button class="btn" onclick="sys('ctrl')">HP CONTROLLER</button>
+    <h1 style="letter-spacing: 10px; font-size: 3rem; margin: 0;">BLOCK DRIFT</h1>
+    <p style="color: #ff0055;">V1.5 - REAL ENGINE & ANALOG</p>
+    <button class="btn" onclick="sys('host')">TV MODE (HOST)</button>
+    <button class="btn" onclick="sys('ctrl')">HP MODE (JOIN)</button>
 </div>
 
 <div id="host-ui">
@@ -58,31 +58,22 @@
 
 <div id="ctrl-view">
     <div id="setup" style="padding-top: 100px; text-align: center;">
-        <input type="text" id="target" placeholder="KODE TV" maxlength="7" style="padding:20px; font-size:1.5rem; width:80%; text-align:center; border-radius:15px; border:3px solid #fff; background:#000; color:#fff; font-family:'Orbitron';">
-        <br><br><button class="btn" onclick="join()">CONNECT</button>
+        <input type="text" id="target" placeholder="KODE TV" maxlength="7" style="padding:20px; font-size:1.5rem; width:80%; text-align:center; border-radius:15px; border:3px solid #fff; background:#000; color:#fff; font-family:'Orbitron';"><br><br>
+        <button class="btn" onclick="join()">IGNITION</button>
     </div>
     <div id="pad" style="display:none; width:100%; height:100%;">
         <div id="dash"><span id="spd">0</span><small>KM/H</small></div>
+        <div id="nitro-btn">NITRO</div>
         
-        <div class="left-controls">
-            <div id="nitro-btn">NITRO</div>
-            <div class="s-grp">
-                <div class="btn-s" id="l">←</div>
-                <div class="btn-s" id="r">→</div>
-            </div>
-        </div>
-
         <div id="cam-joy"><div id="stick"></div></div>
 
-        <div class="p-grp">
-            <div class="pedal gas" id="u">GAS</div>
-            <div class="pedal rem" id="d">BRAKE</div>
-        </div>
+        <div class="s-grp"><div class="btn-s" id="l">←</div><div class="btn-s" id="r">→</div></div>
+        <div class="p-grp"><div class="pedal gas" id="u">GAS</div><div class="pedal rem" id="d">BRAKE</div></div>
     </div>
 </div>
 
 <script>
-let players=[], scene, renderer, peer, audioCtx, keys={u:0,d:0,l:0,r:0,nitro_on:false,cx:0,cy:0};
+let players=[], scene, renderer, peer, audioCtx, keys={u:0,d:0,l:0,r:0,n:0,cx:0,cy:0};
 const myId = 'HAM-' + Math.floor(100+Math.random()*899);
 
 function sys(mode) {
@@ -99,88 +90,92 @@ function sys(mode) {
 }
 
 function initHost() {
-    scene = new THREE.Scene(); scene.background = new THREE.Color(0x010101);
+    scene = new THREE.Scene(); scene.background = new THREE.Color(0x020202);
     renderer = new THREE.WebGLRenderer({ antialias: false, precision: 'mediump' });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
     
-    scene.add(new THREE.AmbientLight(0xffffff, 1.2));
-    const roadTex = new THREE.MeshBasicMaterial({color: 0x111111});
-    const road = new THREE.Mesh(new THREE.PlaneGeometry(10000,10000), roadTex);
+    scene.add(new THREE.AmbientLight(0xffffff, 1.5));
+    
+    const roadTex = new THREE.CanvasTexture(createRoadCanvas());
+    roadTex.wrapS = roadTex.wrapT = THREE.RepeatWrapping; roadTex.repeat.set(200, 200);
+    const road = new THREE.Mesh(new THREE.PlaneGeometry(10000, 10000), new THREE.MeshBasicMaterial({map: roadTex}));
     road.rotation.x = -Math.PI/2; scene.add(road);
 
-    // BUILDINGS (OPTIMIZED)
-    const inst = new THREE.InstancedMesh(new THREE.BoxGeometry(10,1,10), new THREE.MeshStandardMaterial({color:0x0a0a0a}), 500);
-    const dmy = new THREE.Object3D();
-    for(let i=0; i<500; i++){
-        let x=(Math.random()-0.5)*2500, z=(Math.random()-0.5)*2500;
-        if(Math.abs(x)<60) x+=80*(x>0?1:-1);
-        dmy.position.set(x,0,z); dmy.scale.set(1+Math.random()*2, 10+Math.random()*60, 1+Math.random()*2);
-        dmy.updateMatrix(); inst.setMatrixAt(i, dmy.matrix);
-    }
-    scene.add(inst);
-
-    let frames=0;
+    let frames = 0;
     peer.on('connection', cn => {
         const p = { 
-            conn: cn, speed: 0, steer: 0, camX:0, camY:0,
+            conn: cn, speed: 0, steer: 0, camRot: {x:0, y:0},
             car: createCar(), 
             cam: new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 3000), 
-            input: {u:0,d:0,l:0,r:0,nitro_on:false,cx:0,cy:0} 
+            input: {u:0,d:0,l:0,r:0,n:0,cx:0,cy:0} 
         };
-        const osc = audioCtx.createOscillator(); const gn = audioCtx.createGain();
-        osc.type = 'square'; gn.gain.value = 0.05; osc.connect(gn); gn.connect(audioCtx.destination); osc.start();
-        p.audio = {osc, gn}; scene.add(p.car); players.push(p);
+
+        // REALISTIC ENGINE SYNTH (Brown Noise + Low Pass)
+        const bufferSize = 2 * audioCtx.sampleRate, buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate), data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+        const noise = audioCtx.createBufferSource(); noise.buffer = buffer; noise.loop = true;
+        const filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.Q.value = 15;
+        const gn = audioCtx.createGain(); gn.gain.value = 0.1;
+        noise.connect(filter); filter.connect(gn); gn.connect(audioCtx.destination); noise.start();
+        
+        p.audio = {filter, gn}; scene.add(p.car); players.push(p);
         cn.on('data', d => p.input = d);
         if(players.length === 1) renderLoop();
     });
-    setInterval(() => { document.getElementById('fps').innerText = "FPS: "+frames; frames=0; }, 1000);
+    setInterval(() => { document.getElementById('fps').innerText = "FPS: " + frames; frames = 0; }, 1000);
+}
+
+function createRoadCanvas() {
+    const c = document.createElement('canvas'); c.width = 128; c.height = 128;
+    const ctx = c.getContext('2d'); ctx.fillStyle = '#151515'; ctx.fillRect(0,0,128,128);
+    ctx.fillStyle = '#444'; ctx.fillRect(60, 0, 8, 128); return c;
 }
 
 function createCar() {
     const g = new THREE.Group();
-    const b = new THREE.Mesh(new THREE.BoxGeometry(2, 0.8, 4), new THREE.MeshStandardMaterial({color: 0xff0055}));
-    b.position.y = 0.6; g.add(b);
+    const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.8, 4.5), new THREE.MeshStandardMaterial({color: 0xff0055}));
+    body.position.y = 0.6; g.add(body);
     return g;
 }
 
 function renderLoop() {
     requestAnimationFrame(renderLoop);
     players.forEach(p => {
-        let n = p.input.nitro_on ? 2.6 : 1.0;
-        if(p.input.u) p.speed = Math.min(p.speed + 0.02, 1.8 * n); else p.speed *= 0.98;
-        if(p.input.d) p.speed *= 0.8;
+        let n = p.input.nitro_on ? 2.8 : 1.0;
+        if(p.input.u) p.speed = Math.min(p.speed + 0.025, 2.0 * n); else p.speed *= 0.985;
+        if(p.input.d) p.speed *= 0.85;
         
-        let ts = 0; if(p.input.l) ts = 0.048; if(p.input.r) ts = -0.048;
-        p.steer += (ts - p.steer) * 0.14;
+        let ts = 0; if(p.input.l) ts = 0.05; if(p.input.r) ts = -0.05;
+        p.steer += (ts - p.steer) * 0.12;
         p.car.translateZ(-p.speed);
-        if(Math.abs(p.speed) > 0.05) p.car.rotation.y += p.steer * Math.min(p.speed, 1.2);
+        if(Math.abs(p.speed) > 0.05) p.car.rotation.y += p.steer * (p.speed/1.4);
 
-        p.audio.osc.frequency.setTargetAtTime(30 + (p.speed * 45), audioCtx.currentTime, 0.1);
+        // ENGINE SOUND FREQUENCY UPDATE
+        p.audio.filter.frequency.setTargetAtTime(100 + (p.speed * 400), audioCtx.currentTime, 0.05);
+        p.audio.gn.gain.setTargetAtTime(p.input.u ? 0.25 : 0.1, audioCtx.currentTime, 0.1);
 
-        // ORBIT CAM LOGIC
-        p.camX += (p.input.cx * 0.06); p.camY += (p.input.cy * 0.04);
-        p.camX *= 0.94; p.camY *= 0.94; // Auto-center
+        // CAMERA ANALOG
+        p.camRot.y += (p.input.cx * 0.06); p.camRot.x += (p.input.cy * 0.04);
+        p.camRot.y *= 0.94; p.camRot.x *= 0.94;
 
-        let camPos = new THREE.Vector3(0, 5, 12);
-        camPos.applyAxisAngle(new THREE.Vector3(0,1,0), p.camX);
-        camPos.applyAxisAngle(new THREE.Vector3(1,0,0), p.camY);
-        camPos.applyQuaternion(p.car.quaternion);
-
-        p.cam.position.copy(p.car.position).add(camPos);
-        p.cam.lookAt(p.car.position);
+        let cO = new THREE.Vector3(0, 5, 14);
+        cO.applyAxisAngle(new THREE.Vector3(0,1,0), p.camRot.y);
+        cO.applyAxisAngle(new THREE.Vector3(1,0,0), p.camRot.x);
+        cO.applyQuaternion(p.car.quaternion);
+        p.cam.position.copy(p.car.position).add(cO); p.cam.lookAt(p.car.position);
         
-        if(Date.now() % 4 === 0) p.conn.send({type:'spd', val: Math.round(p.speed*115)});
+        if(Math.floor(performance.now()) % 10 < 2) p.conn.send({type:'spd', val: Math.round(p.speed * 120)});
         renderer.render(scene, p.cam);
     });
 }
 
 function join() {
     const tid = document.getElementById('target').value.toUpperCase().trim();
+    if(!tid) return;
     peer.connect(tid).on('open', function() {
         window.activeConn = this;
-        document.getElementById('setup').style.display='none';
-        document.getElementById('pad').style.display='block';
+        document.getElementById('setup').style.display='none'; document.getElementById('pad').style.display='block';
         initCtrl();
         this.on('data', d => { if(d.type==='spd') document.getElementById('spd').innerText = d.val; });
     });
@@ -191,21 +186,15 @@ function initCtrl() {
     const sync = () => window.activeConn.send({...keys});
     
     joy.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        const rect = joy.getBoundingClientRect();
-        const touch = e.touches[0];
-        let x = touch.clientX - (rect.left + rect.width/2);
-        let y = touch.clientY - (rect.top + rect.height/2);
-        const dist = Math.min(Math.sqrt(x*x + y*y), 65);
-        const angle = Math.atan2(y, x);
+        e.preventDefault(); const rect = joy.getBoundingClientRect(); const touch = e.touches[0];
+        let x = touch.clientX - (rect.left + rect.width/2), y = touch.clientY - (rect.top + rect.height/2);
+        const dist = Math.min(Math.sqrt(x*x + y*y), 50); const angle = Math.atan2(y, x);
         x = Math.cos(angle) * dist; y = Math.sin(angle) * dist;
         stick.style.transform = `translate(${x}px, ${y}px)`;
-        keys.cx = x / 65; keys.cy = y / 65; sync();
-    });
-    joy.addEventListener('touchend', () => {
-        stick.style.transform = `translate(0px, 0px)`;
-        keys.cx = 0; keys.cy = 0; sync();
-    });
+        keys.cx = x / 50; keys.cy = y / 50; sync();
+    }, {passive: false});
+    
+    joy.addEventListener('touchend', () => { stick.style.transform = `translate(0px, 0px)`; keys.cx = 0; keys.cy = 0; sync(); });
 
     const bnd = (id, k) => {
         const el = document.getElementById(id);
@@ -217,7 +206,7 @@ function initCtrl() {
     document.getElementById('nitro-btn').addEventListener('touchstart', (e) => {
         e.preventDefault(); keys.nitro_on = true; sync();
         document.getElementById('nitro-btn').classList.add('active_n');
-        setTimeout(() => { keys.nitro_on = false; sync(); document.getElementById('nitro-btn').classList.remove('active_n'); }, 2500);
+        setTimeout(() => { keys.nitro_on = false; sync(); document.getElementById('nitro-btn').classList.remove('active_n'); }, 3000);
     });
 }
 </script>
