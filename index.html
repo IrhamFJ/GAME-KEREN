@@ -2,44 +2,47 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HAM_CITY V2.3 - ULTRA STABLE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>HAM_CITY V2.4 - GESTURE LOCKED</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
     <style>
         :root { --neon-blue: #00f3ff; --neon-pink: #ff00ea; --neon-green: #39ff14; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #000; color: white; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; }
         
-        #menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #000; }
-        .btn { padding: 12px 30px; border: 2px solid var(--neon-blue); color: white; background: none; cursor: pointer; font-weight: bold; margin: 8px; width: 220px; text-transform: uppercase; border-radius: 4px; z-index: 10; }
+        /* Mencegah scroll dan seleksi teks agar tidak mengganggu kontrol */
+        * { -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; user-select: none; }
         
-        #ui-overlay { position: absolute; top: 15px; right: 15px; z-index: 1000; display: none; }
-        .kode-box { background: rgba(0,0,0,0.9); padding: 12px 25px; border: 2px solid var(--neon-blue); border-radius: 10px; font-family: monospace; font-size: 1.3rem; box-shadow: 0 0 15px var(--neon-blue); }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #000; color: white; overflow: hidden; touch-action: none; }
+        
+        #menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #000; z-index: 50; position: relative; }
+        .btn { padding: 15px 35px; border: 2px solid var(--neon-blue); color: white; background: none; cursor: pointer; font-weight: bold; margin: 10px; width: 240px; text-transform: uppercase; border-radius: 6px; font-size: 1rem; }
+        
+        #ui-overlay { position: absolute; top: 20px; right: 20px; z-index: 1000; display: none; }
+        .kode-box { background: rgba(0,0,0,0.9); padding: 12px 25px; border: 2px solid var(--neon-blue); border-radius: 12px; font-family: monospace; font-size: 1.4rem; box-shadow: 0 0 20px rgba(0,243,255,0.3); }
 
-        /* CONTROLLER LAYOUT */
         #ctrl-view { display: none; height: 100vh; width: 100vw; background: #050505; position: relative; overflow: hidden; }
         
-        /* Tombol Belok (Pojok Kiri) */
-        .steer-group { position: absolute; bottom: 40px; left: 40px; display: flex; gap: 25px; }
-        .arrow-btn { width: 110px; height: 110px; background: #1a1a1a; border: 3px solid #333; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+        /* Tombol Belok - Pojok Kiri */
+        .steer-group { position: absolute; bottom: 40px; left: 40px; display: flex; gap: 30px; z-index: 100; }
+        .arrow-btn { width: 120px; height: 120px; background: rgba(40,40,40,0.6); border: 3px solid #444; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; }
         
-        /* Tombol Pedal (Pojok Kanan) */
-        .pedal-group { position: absolute; bottom: 40px; right: 40px; display: flex; flex-direction: column; gap: 20px; align-items: center; }
-        .pedal { width: 100px; background: #222; border: 4px solid #444; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; }
-        .pedal-gas { height: 180px; border-color: var(--neon-green); color: var(--neon-green); }
-        .pedal-brake { height: 110px; border-color: #f00; color: #f00; }
+        /* Tombol Pedal - Pojok Kanan */
+        .pedal-group { position: absolute; bottom: 40px; right: 40px; display: flex; flex-direction: column; gap: 25px; align-items: center; z-index: 100; }
+        .pedal { width: 110px; background: rgba(50,50,50,0.6); border: 4px solid #555; border-radius: 25px; display: flex; align-items: center; justify-content: center; font-weight: 1000; font-size: 1.2rem; }
+        .pedal-gas { height: 200px; border-color: var(--neon-green); color: var(--neon-green); }
+        .pedal-brake { height: 120px; border-color: #f00; color: #f00; }
 
-        .nitro-btn { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 160px; height: 70px; background: linear-gradient(to top, #800075, var(--neon-pink)); border: none; border-radius: 35px; color: white; font-weight: bold; font-size: 1.2rem; }
+        .nitro-btn { position: absolute; bottom: 45px; left: 50%; transform: translateX(-50%); width: 180px; height: 80px; background: linear-gradient(to top, #800075, var(--neon-pink)); border: none; border-radius: 40px; color: white; font-weight: bold; font-size: 1.4rem; box-shadow: 0 0 15px var(--neon-pink); z-index: 100; }
 
-        .active-btn { background: var(--neon-blue) !important; color: #000 !important; transform: scale(0.92); box-shadow: 0 0 20px var(--neon-blue); }
-        #target-id { padding: 18px; text-align: center; background: #111; border: 2px solid #444; color: var(--neon-blue); width: 260px; font-size: 1.6rem; border-radius: 12px; margin-bottom: 25px; outline: none; }
+        .active-btn { background: var(--neon-blue) !important; color: #000 !important; transform: scale(0.9); box-shadow: 0 0 30px var(--neon-blue); border-color: #fff !important; }
+        #target-id { padding: 20px; text-align: center; background: #111; border: 2px solid #555; color: var(--neon-blue); width: 280px; font-size: 1.8rem; border-radius: 15px; margin-bottom: 30px; outline: none; }
     </style>
 </head>
 <body>
 
     <div id="menu">
-        <h1 style="color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); margin:0; font-size: 3.5rem;">HAM_CITY</h1>
-        <p style="opacity:0.4; letter-spacing: 6px; margin-bottom: 30px;">V2.3 FINAL STABLE</p>
+        <h1 style="color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); margin:0; font-size: 4rem;">HAM_CITY</h1>
+        <p style="opacity:0.5; letter-spacing: 8px; margin-bottom: 40px;">V2.4 ULTIMATE</p>
         <button class="btn" onclick="preStart('screen')">HOST CITY (PC)</button>
         <button class="btn" onclick="preStart('controller')" style="border-color: var(--neon-pink);">JOIN DRIVE (HP)</button>
     </div>
@@ -47,9 +50,9 @@
     <div id="ui-overlay"><div class="kode-box">CODE: <span id="peer-id-text" style="color:var(--neon-blue)">...</span></div></div>
 
     <div id="ctrl-view">
-        <div id="setup-ui" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center;">
+        <div id="setup-ui" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; z-index: 200;">
             <input type="text" id="target-id" placeholder="KODE HOST" spellcheck="false" autocomplete="off">
-            <button class="btn" style="width: 260px; border-color: var(--neon-green);" onclick="connectToServer()">START ENGINE</button>
+            <button class="btn" style="width: 280px; border-color: var(--neon-green);" onclick="connectToServer()">START ENGINE</button>
         </div>
 
         <div id="game-pad" style="display: none; width: 100%; height: 100%;">
@@ -71,7 +74,17 @@
         let prevKeysStr = "";
         const myCustomId = 'HAM-' + Math.floor(10000 + Math.random() * 90000);
 
+        // --- FULLSCREEN LOGIC ---
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.warn(`Fullscreen error: ${err.message}`);
+                });
+            }
+        }
+
         function preStart(type) {
+            toggleFullScreen(); // Trigger pas klik tombol menu
             document.getElementById('menu').style.display = 'none';
             peer = new Peer(myCustomId);
             if(type === 'screen') {
@@ -84,6 +97,7 @@
             }
         }
 
+        // --- WORLD LOGIC ---
         function createCar(color) {
             const g = new THREE.Group();
             const b = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.5, 3), new THREE.MeshPhongMaterial({ color, shininess: 100 }));
@@ -91,9 +105,9 @@
             const c = new THREE.Mesh(new THREE.SphereGeometry(0.65, 12, 12, 0, 6.3, 0, 1.6), new THREE.MeshPhongMaterial({ color: 0x000, transparent: true, opacity: 0.85 }));
             c.scale.set(1, 0.75, 1.6); c.position.set(0, 0.5, 0.2); g.add(c);
             [[-0.8, 1], [0.8, 1], [-0.8, -1], [0.8, -1]].forEach(p => {
-                const w = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.3, 12), new THREE.MeshPhongMaterial({color:0x111}));
+                const w = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.35, 12), new THREE.MeshPhongMaterial({color:0x111}));
                 w.rotation.z = Math.PI/2; w.position.set(p[0], 0.1, p[1]);
-                const pk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.32, 6), new THREE.MeshPhongMaterial({color, emissive: color, emissiveIntensity: 2}));
+                const pk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.37, 6), new THREE.MeshPhongMaterial({color, emissive: color, emissiveIntensity: 3}));
                 pk.rotation.z = Math.PI/2; pk.position.copy(w.position);
                 g.add(w, pk);
             });
@@ -105,21 +119,21 @@
             clock = new THREE.Clock();
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimasi performa
             document.body.appendChild(renderer.domElement);
             scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-            scene.add(new THREE.GridHelper(4000, 80, 0x00f3ff, 0x111111));
-            for(let i=0; i<350; i++) {
-                const h = Math.random()*45+10;
+            scene.add(new THREE.GridHelper(5000, 100, 0x00f3ff, 0x111111));
+            for(let i=0; i<400; i++) {
+                const h = Math.random()*50+15;
                 const b = new THREE.Mesh(new THREE.BoxGeometry(8, h, 8), new THREE.MeshPhongMaterial({color: 0x111, emissive: 0x001122}));
-                b.position.set((Math.random()-0.5)*2000, h/2, (Math.random()-0.5)*2000);
+                b.position.set((Math.random()-0.5)*2500, h/2, (Math.random()-0.5)*2500);
                 scene.add(b);
             }
             peer.on('connection', conn => {
                 if(players.length >= 2) return;
                 const pID = players.length + 1;
                 const p = { conn, id: pID, input: { up:0, down:0, left:0, right:0, nitro:0 }, car: createCar(pID===1?0xff00ea:0x39ff14), cam: new THREE.PerspectiveCamera(75, 1, 0.1, 5000), speed: 0, rot: 0 };
-                p.car.position.set(pID*15, 0, 0); scene.add(p.car); players.push(p);
+                p.car.position.set(pID*18, 0, 0); scene.add(p.car); players.push(p);
                 conn.on('data', d => { p.input = d; });
                 if(players.length === 1) loop();
             });
@@ -132,15 +146,15 @@
             renderer.setScissorTest(isSplit);
             players.forEach((p, i) => {
                 let targetSpeed = 0;
-                if(p.input.up) targetSpeed = p.input.nitro ? 2.2 : 0.9;
-                if(p.input.down) targetSpeed = -0.5;
-                p.speed = THREE.MathUtils.lerp(p.speed, targetSpeed, 0.07);
+                if(p.input.up) targetSpeed = p.input.nitro ? 2.4 : 1.0;
+                if(p.input.down) targetSpeed = -0.6;
+                p.speed = THREE.MathUtils.lerp(p.speed, targetSpeed, 0.08);
                 const turnMod = (p.speed > 0 ? 1 : -1) * (Math.abs(p.speed) > 0.1 ? 1 : 0);
-                if(p.input.left) p.rot += 0.045 * turnMod;
-                if(p.input.right) p.rot -= 0.045 * turnMod;
+                if(p.input.left) p.rot += 0.048 * turnMod;
+                if(p.input.right) p.rot -= 0.048 * turnMod;
                 p.car.rotation.y = p.rot; p.car.translateZ(-p.speed);
                 p.cam.aspect = isSplit ? w / (h / 2) : w / h; p.cam.updateProjectionMatrix();
-                const off = new THREE.Vector3(0, 4.5, 13).applyMatrix4(p.car.matrixWorld);
+                const off = new THREE.Vector3(0, 4.8, 14).applyMatrix4(p.car.matrixWorld);
                 p.cam.position.lerp(off, 0.12); p.cam.lookAt(p.car.position);
                 if(isSplit) {
                     const bottom = i === 0 ? h/2 : 0;
@@ -156,24 +170,28 @@
                 const update = (val) => { 
                     keys[key] = val; 
                     if(val) el.classList.add('active-btn'); else el.classList.remove('active-btn');
-                    // Throttle: Hanya kirim jika status tombol benar-benar berubah
                     const currentKeysStr = JSON.stringify(keys);
                     if(window.currentConn && currentKeysStr !== prevKeysStr) {
                         window.currentConn.send(keys);
                         prevKeysStr = currentKeysStr;
                     }
                 };
-                el.addEventListener('touchstart', (e) => { e.preventDefault(); update(true); if(navigator.vibrate) navigator.vibrate(25); });
-                el.addEventListener('touchend', (e) => { e.preventDefault(); update(false); });
-                el.addEventListener('touchcancel', (e) => { e.preventDefault(); update(false); });
+                el.addEventListener('touchstart', (e) => { 
+                    e.preventDefault(); // Mencegah navigasi browser
+                    update(true); 
+                    if(navigator.vibrate) navigator.vibrate(25); 
+                }, { passive: false });
+                el.addEventListener('touchend', (e) => { e.preventDefault(); update(false); }, { passive: false });
+                el.addEventListener('touchcancel', (e) => { e.preventDefault(); update(false); }, { passive: false });
             };
             bind('btn-up', 'up'); bind('btn-down', 'down');
             bind('btn-left', 'left'); bind('btn-right', 'right');
             bind('btn-nitro', 'nitro');
-            window.onblur = () => { Object.keys(keys).forEach(k => keys[k] = false); };
+            window.addEventListener('blur', () => { Object.keys(keys).forEach(k => keys[k] = false); });
         }
 
         function connectToServer() {
+            toggleFullScreen(); // Re-trigger pas user mau main
             const val = document.getElementById('target-id').value.toUpperCase().trim();
             if(!val) return;
             const conn = peer.connect(val);
@@ -184,6 +202,9 @@
                 if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
             });
         }
+        
+        // Klik di mana saja di awal untuk Full Screen
+        document.body.addEventListener('click', toggleFullScreen, { once: true });
     </script>
 </body>
 </html>
