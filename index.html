@@ -3,76 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HAM 3D SUPER SPORT - FINAL</title>
+    <title>HAM 3D - ULTIMATE STABLE</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
     <style>
         :root { --neon-blue: #00f3ff; --neon-pink: #ff00ea; --neon-green: #39ff14; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #000; color: white; overflow: hidden; touch-action: none; }
         
-        #menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; z-index: 100; position: relative; background: radial-gradient(circle, #111 0%, #000 100%); }
-        .btn { padding: 15px 40px; border: 2px solid var(--neon-blue); color: white; background: none; cursor: pointer; letter-spacing: 3px; font-weight: bold; transition: 0.3s; margin: 10px; width: 280px; text-transform: uppercase; }
+        #menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; z-index: 100; position: relative; background: radial-gradient(circle, #111, #000); }
+        .btn { padding: 15px 40px; border: 2px solid var(--neon-blue); color: white; background: none; cursor: pointer; letter-spacing: 3px; font-weight: bold; transition: 0.3s; margin: 10px; width: 280px; text-transform: uppercase; border-radius: 4px; }
         .btn:hover { background: var(--neon-blue); box-shadow: 0 0 25px var(--neon-blue); color: #000; }
         
-        #ui-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: none; z-index: 10; }
-        .p-label { position: absolute; background: rgba(0,0,0,0.8); padding: 8px 15px; border: 1px solid #333; font-size: 0.9rem; font-family: monospace; }
-        .id-display { top: 10px; right: 10px; color: var(--neon-blue); border: 1px solid var(--neon-blue); }
+        #ui-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: none; z-index: 1000; }
+        .p-label { position: absolute; background: rgba(0,0,0,0.8); padding: 12px 25px; border: 2px solid var(--neon-blue); font-size: 1.3rem; font-family: 'Courier New', monospace; border-radius: 10px; pointer-events: auto; }
+        .id-display { top: 20px; right: 20px; color: #fff; box-shadow: 0 0 15px rgba(0,243,255,0.3); }
 
         #ctrl-view { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #050505; }
-        .stier { width: 180px; height: 180px; border: 10px double #333; border-top: 10px solid var(--neon-blue); border-radius: 50%; transition: transform 0.05s linear; }
-        .nitro-zone { width: 100%; height: 35%; position: absolute; bottom: 0; background: linear-gradient(transparent, rgba(0,243,255,0.05)); display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--neon-blue); border-top: 1px solid #222; }
+        .stier { width: 180px; height: 180px; border: 10px double #333; border-top: 10px solid var(--neon-blue); border-radius: 50%; box-shadow: 0 0 20px rgba(0,243,255,0.1); }
+        .nitro-zone { width: 100%; height: 35%; position: absolute; bottom: 0; background: linear-gradient(transparent, rgba(0,243,255,0.1)); display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--neon-blue); border-top: 1px solid #222; font-size: 1.2rem; }
 
-        #landscape-warn {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #900; color: white; z-index: 9999;
-            flex-direction: column; align-items: center; justify-content: center; text-align: center;
-        }
-        @media (orientation: portrait) {
-            #ctrl-view { display: none !important; }
-            #landscape-warn { display: flex; }
-        }
+        #landscape-warn { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #700; color: white; z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        @media (orientation: portrait) { #ctrl-view { display: none !important; } #landscape-warn { display: flex; } }
     </style>
 </head>
 <body>
 
-    <div id="landscape-warn">
-        <h1 style="font-size: 5rem; margin: 0;">🔄</h1>
-        <h2>PUTAR KE LANDSCAPE</h2>
-        <p>Gunakan mode miring untuk mengontrol mobil sport!</p>
-    </div>
+    <div id="landscape-warn"><h1>🔄</h1><h2>MIRINGKAN HP (LANDSCAPE)</h2><p>Mode setir membutuhkan layar lebar.</p></div>
 
     <div id="menu">
-        <h1 style="font-size: 3rem; margin: 0; color: var(--neon-blue); text-shadow: 0 0 20px var(--neon-blue);">HAM_<span style="color:white">CITY</span></h1>
-        <p style="opacity:0.5; margin-bottom: 30px; letter-spacing: 5px;">SUPER SPORT EDITION</p>
-        <button class="btn" onclick="startAs('screen')">HOST CITY (PC)</button>
-        <button class="btn" onclick="startAs('controller')" style="border-color: var(--neon-pink);">JOIN DRIVE (HP)</button>
+        <h1 style="font-size: 4rem; color: var(--neon-blue); text-shadow: 0 0 25px var(--neon-blue); margin:0;">HAM_CITY</h1>
+        <p style="opacity:0.5; letter-spacing: 10px; margin-bottom: 40px;">SUPER SPORT</p>
+        <button class="btn" onclick="preStart('screen')">HOST CITY (PC)</button>
+        <button class="btn" onclick="preStart('controller')" style="border-color: var(--neon-pink);">JOIN DRIVE (HP)</button>
     </div>
 
     <div id="ui-overlay">
-        <div class="p-label id-display">ID: <span id="peer-id-text">INIT...</span></div>
+        <div class="p-label id-display">KODE: <span id="peer-id-text" style="color:var(--neon-blue); font-weight:bold;">...</span></div>
     </div>
 
     <div id="ctrl-view">
         <div id="wheel" class="stier"></div>
-        <input type="text" id="target-id" placeholder="PASTE ID: ham_..." style="margin: 20px; padding: 12px; text-align: center; background: #111; border: 1px solid #333; color: var(--neon-blue); width: 220px;">
-        <button class="btn" onclick="connectToServer()">START LINK</button>
-        <div class="nitro-zone">HOLD FOR NITRO</div>
+        <input type="text" id="target-id" placeholder="INPUT KODE" style="margin: 25px; padding: 15px; text-align: center; background: #111; border: 1px solid #333; color: var(--neon-blue); width: 240px; font-size: 1.3rem; border-radius: 5px; outline: none;">
+        <button class="btn" onclick="connectToServer()">CONNECT ENGINE</button>
+        <div class="nitro-zone">HOLD FOR NITRO BOOST</div>
     </div>
 
     <script>
         let players = [];
-        let scene, renderer, clock;
-        const worldSize = 800;
+        let scene, renderer, clock, peer;
+        // ID dibuat di awal secara instan
+        const myCustomId = 'HAM-' + Math.floor(10000 + Math.random() * 90000); 
 
-        function genId() {
-            return 'ham_' + Math.random().toString(36).substr(2, 9);
-        }
-        const peer = new Peer(genId());
-
-        function startAs(type) {
+        function preStart(type) {
             document.getElementById('menu').style.display = 'none';
+            peer = new Peer(myCustomId); 
+
             if(type === 'screen') {
                 document.getElementById('ui-overlay').style.display = 'block';
+                document.getElementById('peer-id-text').innerText = myCustomId;
                 initWorld();
             } else {
                 document.getElementById('ctrl-view').style.display = 'flex';
@@ -81,43 +69,21 @@
 
         function createCarModel(color) {
             const group = new THREE.Group();
-            const bodyMat = new THREE.MeshPhongMaterial({ color: color, shininess: 100 });
-            const glassMat = new THREE.MeshPhongMaterial({ color: 0x000000, transparent: true, opacity: 0.6 });
-            const wheelMat = new THREE.MeshPhongMaterial({ color: 0x111111 });
-            const neonMat = new THREE.MeshPhongMaterial({ color: color, emissive: color, emissiveIntensity: 2 });
-
-            // Body Utama
-            const body = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.5, 3), bodyMat);
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.5, 3), new THREE.MeshPhongMaterial({ color, shininess: 80 }));
             body.position.y = 0.3;
-            group.add(body);
-
-            // Kabin
-            const cabin = new THREE.Mesh(new THREE.SphereGeometry(0.6, 16, 16, 0, Math.PI*2, 0, Math.PI/2), glassMat);
-            cabin.scale.set(1.2, 0.8, 1.8);
-            cabin.position.set(0, 0.5, 0.2);
-            group.add(cabin);
-
-            // Spoiler
-            const s1 = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.4, 0.1), bodyMat);
-            s1.position.set(0.5, 0.6, 1.3);
-            const s2 = s1.clone();
-            s2.position.x = -0.5;
-            const wing = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.05, 0.5), bodyMat);
-            wing.position.set(0, 0.8, 1.3);
-            group.add(s1, s2, wing);
-
-            // Roda & Pelek Neon
+            const cabin = new THREE.Mesh(new THREE.SphereGeometry(0.6, 16, 16, 0, Math.PI*2, 0, Math.PI/2), new THREE.MeshPhongMaterial({ color: 0x000000, transparent: true, opacity: 0.7 }));
+            cabin.scale.set(1.1, 0.75, 1.6); cabin.position.set(0, 0.5, 0.2);
+            group.add(body, cabin);
+            
+            // Ban & Pelek
             const wPos = [[-0.8, 1.1], [0.8, 1.1], [-0.8, -1.1], [0.8, -1.1]];
             wPos.forEach(p => {
-                const w = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.3, 12), wheelMat);
-                w.rotation.z = Math.PI / 2;
-                w.position.set(p[0], 0.1, p[1]);
-                const pelek = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.32, 6), neonMat);
-                pelek.rotation.z = Math.PI/2;
-                pelek.position.copy(w.position);
+                const w = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.3, 12), new THREE.MeshPhongMaterial({color:0x111111}));
+                w.rotation.z = Math.PI/2; w.position.set(p[0], 0.1, p[1]);
+                const pelek = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.32, 6), new THREE.MeshPhongMaterial({color, emissive: color, emissiveIntensity: 2}));
+                pelek.rotation.z = Math.PI/2; pelek.position.copy(w.position);
                 group.add(w, pelek);
             });
-
             return group;
         }
 
@@ -127,21 +93,21 @@
             clock = new THREE.Clock();
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             document.body.appendChild(renderer.domElement);
 
-            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-            scene.add(new THREE.GridHelper(2000, 100, 0x00f3ff, 0x111111));
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            scene.add(new THREE.GridHelper(2500, 100, 0x00f3ff, 0x111111));
 
-            // Bangunan
-            for(let i=0; i<400; i++) {
-                const h = Math.random()*40+10;
-                const b = new THREE.Mesh(new THREE.BoxGeometry(6, h, 6), new THREE.MeshPhongMaterial({color: 0x111111, emissive: 0x001122}));
-                b.position.set((Math.random()-0.5)*1200, h/2, (Math.random()-0.5)*1200);
-                if(Math.abs(b.position.x) < 20) b.position.x += 40;
+            // Buildings
+            for(let i=0; i<450; i++) {
+                const h = Math.random()*35+10;
+                const b = new THREE.Mesh(new THREE.BoxGeometry(7, h, 7), new THREE.MeshPhongMaterial({color: 0x111111, emissive: 0x001122}));
+                b.position.set((Math.random()-0.5)*1500, h/2, (Math.random()-0.5)*1500);
+                if(Math.abs(b.position.x) < 25) b.position.x += 50;
                 scene.add(b);
             }
 
-            peer.on('open', id => document.getElementById('peer-id-text').innerText = id);
             peer.on('connection', conn => {
                 if(players.length >= 2) return;
                 const pID = players.length+1;
@@ -149,9 +115,9 @@
                 const p = {
                     conn, id: pID, nitro: false, tilt: 0, speed: 0, rot: 0,
                     car: createCarModel(color),
-                    cam: new THREE.PerspectiveCamera(75, window.innerWidth/(window.innerHeight/2), 0.1, 2000)
+                    cam: new THREE.PerspectiveCamera(75, window.innerWidth/(window.innerHeight/2), 0.1, 3000)
                 };
-                p.car.position.set(pID*10, 0, 0);
+                p.car.position.set(pID*12, 0, 0);
                 scene.add(p.car);
                 players.push(p);
                 conn.on('data', d => { p.tilt = d.tilt; p.nitro = d.nitro; });
@@ -166,20 +132,17 @@
             renderer.setScissorTest(true);
 
             players.forEach((p, i) => {
-                // Fisika
-                p.speed = THREE.MathUtils.lerp(p.speed, p.nitro?1.6:0.7, 0.05);
-                p.rot -= p.tilt * 0.0008 * (p.speed*2.2);
+                p.speed = THREE.MathUtils.lerp(p.speed, p.nitro?1.8:0.75, 0.05);
+                p.rot -= p.tilt * 0.00085 * (p.speed*2.2);
                 p.car.rotation.y = p.rot;
                 p.car.translateZ(-p.speed);
 
-                // Kamera
-                const offset = new THREE.Vector3(0, 3, 10).applyMatrix4(p.car.matrixWorld);
-                p.cam.position.lerp(offset, 0.1);
+                const offset = new THREE.Vector3(0, 3.5, 11).applyMatrix4(p.car.matrixWorld);
+                p.cam.position.lerp(offset, 0.12);
                 p.cam.lookAt(p.car.position);
                 p.cam.fov = THREE.MathUtils.lerp(p.cam.fov, p.nitro?95:75, 0.1);
                 p.cam.updateProjectionMatrix();
 
-                // Render Split Screen (Fixed Order)
                 const bottom = i === 0 ? h/2 : 0;
                 renderer.setViewport(0, bottom, w, h/2);
                 renderer.setScissor(0, bottom, w, h/2);
@@ -188,19 +151,26 @@
         }
 
         function connectToServer() {
-            const tid = document.getElementById('target-id').value.trim();
-            const conn = peer.connect(tid);
+            const val = document.getElementById('target-id').value.toUpperCase().trim();
+            if(!val) return alert("Masukkan kode dulu!");
+            
+            const conn = peer.connect(val);
             let nitro = false;
 
-            document.body.addEventListener('touchstart', () => { nitro=true; if(navigator.vibrate) navigator.vibrate(30); });
+            document.body.addEventListener('touchstart', (e) => { 
+                if(e.target.tagName !== 'INPUT') {
+                    nitro=true; 
+                    if(navigator.vibrate) navigator.vibrate(35);
+                }
+            });
             document.body.addEventListener('touchend', () => nitro=false);
 
             conn.on('open', () => {
-                document.getElementById('ctrl-view').innerHTML = `<div class="stier" id="w"></div><h2 style="color:var(--neon-green)">DRIVE ACTIVE</h2>`;
+                document.getElementById('ctrl-view').innerHTML = `<div class="stier" id="w"></div><h2 style="color:var(--neon-green); text-shadow:0 0 10px var(--neon-green);">CONNECTED</h2><p>Miringkan HP untuk menyetir</p>`;
                 window.addEventListener('deviceorientation', e => {
                     let tilt = Math.round(e.gamma || 0);
-                    if(Math.abs(tilt) < 2) tilt = 0; // Deadzone fix
-                    const w = document.getElementById('w');
+                    if(Math.abs(tilt) < 3) tilt = 0; // Deadzone lebih stabil
+                    const w = document.getElementById('wheel');
                     if(w) w.style.transform = `rotate(${tilt*2.5}deg)`;
                     conn.send({ tilt, nitro });
                 });
@@ -209,4 +179,3 @@
     </script>
 </body>
 </html>
-
