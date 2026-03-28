@@ -11,97 +11,132 @@
         * { -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box; touch-action: none; }
         body { margin: 0; padding: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; }
         
-        /* UI MENU */
-        #menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(45deg, #111, #222); color: #fff; text-align: center; position: relative; z-index: 10; }
-        .btn { padding: 20px; width: 280px; margin: 12px; font-weight: bold; cursor: pointer; border: 4px solid #fff; background: transparent; color: #fff; font-family: 'Orbitron'; text-transform: uppercase; transition: 0.1s; }
+        /* UI OVERLAY */
+        #menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: radial-gradient(circle, #1a1a1a 0%, #000 100%); color: #fff; text-align: center; position: relative; z-index: 100; }
+        .btn { padding: 20px; width: 280px; margin: 12px; font-weight: bold; cursor: pointer; border: 4px solid #fff; background: transparent; color: #fff; font-family: 'Orbitron'; text-transform: uppercase; transition: 0.1s; border-radius: 8px; }
         .btn:active { background: #fff; color: #000; transform: scale(0.95); }
 
-        /* HP CONTROLLER */
-        #ctrl-view { display: none; height: 100vh; width: 100vw; background: #050505; position: relative; }
-        #dash { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: #000; border: 5px solid #444; padding: 15px; text-align: center; border-radius: 20px; width: 220px; box-shadow: 0 10px 0 #222; }
-        #spd { color: #fff; font-size: 3.5rem; display: block; line-height: 1; }
-        #gear-ui { background: #00ff44; color: #000; font-size: 2rem; padding: 5px 25px; margin-top: 10px; display: inline-block; border-radius: 8px; font-weight: 900; }
-        .redline { background: #ff0000 !important; color: #fff !important; animation: blink 0.1s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        /* WAITING MSG */
+        #waiting-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 1.8rem; text-align: center; pointer-events: none; display: none; z-index: 5; text-shadow: 0 0 15px #00ff44; }
+        .blink { animation: blinker 1.5s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
 
-        /* BUTTONS POSITIONING */
+        /* CONTROLLER UI (HP) */
+        #ctrl-view { display: none; height: 100vh; width: 100vw; background: #050505; position: relative; }
+        #dash { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: #000; border: 4px solid #444; padding: 12px; text-align: center; border-radius: 20px; width: 220px; box-shadow: 0 8px 0 #222; }
+        #spd { color: #fff; font-size: 3.5rem; display: block; line-height: 1; }
+        #gear-ui { background: #00ff44; color: #000; font-size: 1.8rem; padding: 4px 25px; margin-top: 8px; display: inline-block; border-radius: 8px; font-weight: 900; }
+        .redline { background: #ff0000 !important; color: #fff !important; animation: blinker 0.1s infinite; }
+
+        /* INPUTS */
         .pedal-group { position: absolute; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 15px; }
-        .pedal { width: 115px; border: 5px solid #000; border-radius: 15px; font-weight: 900; color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 0 #000; }
-        .gas { height: 180px; background: #006400; font-size: 1.5rem; }
-        .rem { height: 100px; background: #8b0000; font-size: 1.2rem; }
+        .pedal { width: 120px; border: 4px solid #000; border-radius: 18px; font-weight: 900; color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 0 #000; }
+        .gas { height: 190px; background: #006400; font-size: 1.6rem; }
+        .rem { height: 100px; background: #8b0000; font-size: 1.3rem; }
         .steer-group { position: absolute; bottom: 30px; left: 30px; display: flex; gap: 20px; }
-        .btn-s { width: 105px; height: 105px; background: #222; color: #fff; border-radius: 50%; font-size: 2.5rem; display: flex; align-items: center; justify-content: center; border: 5px solid #444; box-shadow: 0 6px 0 #000; }
-        .gear-group { position: absolute; top: 55%; left: 30px; transform: translateY(-50%); display: flex; flex-direction: column; gap: 15px; }
-        .g-btn { width: 85px; height: 85px; background: #000; color: #fff; border: 4px solid #333; font-size: 2.2rem; display: flex; align-items: center; justify-content: center; font-weight: 900; border-radius: 12px; }
-        .active { filter: brightness(2.5); transform: translateY(6px); box-shadow: none !important; }
+        .btn-s { width: 110px; height: 110px; background: #222; color: #fff; border-radius: 50%; font-size: 2.5rem; display: flex; align-items: center; justify-content: center; border: 4px solid #444; box-shadow: 0 6px 0 #000; }
+        .gear-group { position: absolute; top: 50%; left: 30px; transform: translateY(-50%); display: flex; flex-direction: column; gap: 15px; }
+        .g-btn { width: 90px; height: 90px; background: #000; color: #fff; border: 4px solid #333; font-size: 2.2rem; display: flex; align-items: center; justify-content: center; font-weight: 900; border-radius: 15px; }
+        .active { filter: brightness(2.8); transform: translateY(6px); box-shadow: none !important; }
         
-        #host-id-box { position: absolute; top: 15px; right: 15px; background: #fff; color: #000; padding: 10px 20px; border-radius: 8px; font-weight: 900; display: none; border: 3px solid #000; }
+        /* TOOLS */
+        #host-info { position: absolute; top: 15px; right: 15px; background: #fff; color: #000; padding: 10px 20px; border-radius: 10px; font-weight: 900; display: none; z-index: 1000; border: 3px solid #000; }
+        #fs-btn { position: absolute; bottom: 15px; left: 15px; background: rgba(0,0,0,0.5); color: #fff; border: 2px solid #fff; padding: 10px 15px; cursor: pointer; display: none; z-index: 1000; border-radius: 5px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
 <div id="menu">
-    <h1 style="font-size: 3rem; margin: 0; letter-spacing: 5px;">BLOCK DRIFT</h1>
-    <p style="color: #00ff44; margin-bottom: 30px; letter-spacing: 2px;">V1.0 STABLE</p>
+    <h1 style="font-size: 3rem; margin: 0; letter-spacing: 4px;">BLOCK DRIFT</h1>
+    <p style="color: #00ff44; letter-spacing: 2px; margin-bottom: 30px;">V1.0 FINAL RELEASE</p>
     <button class="btn" onclick="start('host')">HOST (LAPTOP)</button>
     <button class="btn" onclick="start('ctrl')">JOIN (HP)</button>
 </div>
 
-<div id="host-id-box">KODE: <span id="id-val">...</span></div>
+<div id="waiting-msg" class="blink">WAITING FOR CONTROLLERS...<br><span style="font-size: 1rem; color: #aaa;">CONNECT YOUR PHONE TO START ENGINE</span></div>
+<div id="host-info">KODE: <span id="id-val">...</span></div>
+<button id="fs-btn" onclick="toggleFS()">ENTER FULLSCREEN</button>
 
 <div id="ctrl-view">
     <div id="setup" style="padding-top: 100px; text-align: center;">
-        <input type="text" id="target" placeholder="KODE HOST" maxlength="7" style="padding:18px; font-size:1.5rem; width:85%; max-width:320px; border:4px solid #fff; background:#000; color:#fff; font-family:'Orbitron'; border-radius:12px; text-align:center; text-transform:uppercase;"><br><br>
-        <button class="btn" onclick="connect()">START ENGINE</button>
+        <input type="text" id="target" placeholder="INPUT CODE" maxlength="7" style="padding:18px; font-size:1.6rem; width:85%; max-width:320px; border:4px solid #fff; background:#000; color:#fff; font-family:'Orbitron'; border-radius:15px; text-align:center; text-transform:uppercase;"><br><br>
+        <button class="btn" onclick="connect()">JOIN RACE</button>
     </div>
     <div id="pad" style="display:none; width:100%; height:100%;">
         <div id="dash"><span id="spd">0</span><div id="gear-ui">N</div></div>
         <div class="gear-group"><div class="g-btn" id="up-g">+</div><div class="g-btn" id="down-g">-</div></div>
         <div class="steer-group"><div class="btn-s" id="l">←</div><div class="btn-s" id="r">→</div></div>
-        <div class="pedal-group"><div class="pedal gas" id="u">GAS</div><div class="pedal rem" id="d">REM</div></div>
+        <div class="pedal-group"><div class="pedal gas" id="u">GAS</div><div class="pedal rem" id="d">BRAKE</div></div>
     </div>
 </div>
 
 <script>
-let players=[], scene, renderer, peer, keys={u:0,d:0,l:0,r:0,g:0};
+let players=[], scene, renderer, peer, keys={u:0,d:0,l:0,r:0,g:0}, isHost=false;
 const myId = 'HAM-' + Math.floor(100+Math.random()*899);
-const gearLimits = {"-1":-0.5, "0":0, "1":0.48, "2":0.85, "3":1.25, "4":1.7, "5":2.3};
+const gearLimits = {"-1":-0.55, "0":0, "1":0.5, "2":0.9, "3":1.3, "4":1.8, "5":2.5};
+
+function toggleFS() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(e => console.log(e));
+        document.getElementById('fs-btn').innerText = "EXIT FULLSCREEN";
+    } else {
+        document.exitFullscreen();
+        document.getElementById('fs-btn').innerText = "ENTER FULLSCREEN";
+    }
+}
 
 function start(mode) {
     document.getElementById('menu').style.display='none';
     peer = new Peer(myId);
     peer.on('open', id => {
         if(mode==='host') {
-            document.getElementById('host-id-box').style.display='block';
+            isHost = true;
+            document.getElementById('host-info').style.display='block';
+            document.getElementById('fs-btn').style.display='block';
+            document.getElementById('waiting-msg').style.display='block';
             document.getElementById('id-val').innerText = id;
             initGame();
         } else {
             document.getElementById('ctrl-view').style.display='block';
         }
     });
-    peer.on('error', err => alert("PeerJS Error: " + err.type));
 }
 
 function initGame() {
     scene = new THREE.Scene(); scene.background = new THREE.Color(0x87CEEB);
     renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
-    renderer.setPixelRatio(1); renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
-    scene.add(new THREE.AmbientLight(0xffffff, 1.3));
     
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(4000,4000), new THREE.MeshBasicMaterial({color:0x1a1a1a}));
+    scene.add(new THREE.AmbientLight(0xffffff, 1.3));
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(6000,6000), new THREE.MeshBasicMaterial({color:0x151515}));
     floor.rotation.x = -Math.PI/2; scene.add(floor);
 
+    window.addEventListener('resize', () => {
+        if(!isHost) return;
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        players.forEach(p => {
+            p.cam.aspect = window.innerWidth / (players.length > 1 ? window.innerHeight/2 : window.innerHeight);
+            p.cam.updateProjectionMatrix();
+        });
+    });
+
     peer.on('connection', conn => {
+        document.getElementById('waiting-msg').style.display='none';
         const p = {
             conn, speed:0, tick:0,
             car: new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.9, 3.2), new THREE.MeshBasicMaterial({color: Math.random()*0xffffff})),
-            cam: new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 2000),
+            cam: new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2500),
             input: {u:0,d:0,l:0,r:0,g:0}
         };
         scene.add(p.car); players.push(p);
         conn.on('data', d => p.input = d);
-        conn.on('close', () => { scene.remove(p.car); players = players.filter(pl => pl.conn.peer !== conn.peer); });
+        conn.on('close', () => { 
+            scene.remove(p.car); 
+            players = players.filter(pl => pl.conn.peer !== conn.peer);
+            if(players.length === 0) document.getElementById('waiting-msg').style.display='block';
+        });
         if(players.length === 1) loop();
     });
 }
@@ -110,24 +145,23 @@ function loop() {
     requestAnimationFrame(loop);
     players.forEach((p, idx) => {
         let max = gearLimits[p.input.g.toString()] || 0;
-        
         if(p.input.u && p.input.g !== 0) {
-            if(p.input.g > 0) p.speed = Math.min(p.speed + 0.02, max);
-            else p.speed = Math.max(p.speed - 0.02, max);
-        } else { p.speed *= 0.975; }
+            if(p.input.g > 0) p.speed = Math.min(p.speed + 0.022, max);
+            else p.speed = Math.max(p.speed - 0.022, max);
+        } else { p.speed *= 0.98; }
         
-        if(p.input.d) p.speed *= 0.82;
+        if(p.input.d) p.speed *= 0.84;
         p.car.translateZ(-p.speed);
 
         if(Math.abs(p.speed) > 0.05) {
             const tr = p.speed > 0 ? 1 : -1;
-            if(p.input.l) p.car.rotation.y += 0.046 * tr;
-            if(p.input.r) p.car.rotation.y -= 0.046 * tr;
+            if(p.input.l) p.car.rotation.y += 0.048 * tr;
+            if(p.input.r) p.car.rotation.y -= 0.048 * tr;
         }
 
         p.tick++;
         if(p.tick % 3 === 0 && p.conn.open) {
-            p.conn.send({ s: Math.floor(Math.abs(p.speed)*125), g: p.input.g, rl: (Math.abs(p.speed)/Math.abs(max||0.1)) > 0.93 });
+            p.conn.send({ s: Math.floor(Math.abs(p.speed)*130), g: p.input.g, rl: (Math.abs(p.speed)/Math.abs(max||0.1)) > 0.92 });
         }
 
         const h = window.innerHeight;
@@ -149,8 +183,7 @@ function loop() {
 function connect() {
     if(window.activeConn) return;
     const tid = document.getElementById('target').value.toUpperCase().trim();
-    if(!tid) return alert("MASUKKIN KODE DULU!");
-    
+    if(!tid) return alert("ENTER HOST CODE!");
     const conn = peer.connect(tid);
     conn.on('open', () => { 
         window.activeConn = conn; 
