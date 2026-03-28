@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>BLOCK DRIFT V1.0</title>
+    <title>BLOCK DRIFT V1.1</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
     <style>
@@ -11,59 +11,59 @@
         * { -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box; touch-action: none; }
         body { margin: 0; padding: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; }
         
-        /* MENU */
+        /* MENU & UI */
         #menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #000; color: #fff; text-align: center; position: relative; z-index: 100; }
-        .btn { padding: 20px; width: 280px; margin: 12px; font-weight: bold; cursor: pointer; border: 4px solid #fff; background: transparent; color: #fff; font-family: 'Orbitron'; text-transform: uppercase; border-radius: 8px; }
+        .btn { padding: 20px; width: 280px; margin: 12px; font-weight: bold; cursor: pointer; border: 4px solid #fff; background: transparent; color: #fff; font-family: 'Orbitron'; text-transform: uppercase; border-radius: 8px; transition: 0.1s; }
         .btn:active { background: #fff; color: #000; transform: scale(0.95); }
 
-        /* HOST UI */
-        #waiting-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 1.8rem; text-align: center; pointer-events: none; display: none; z-index: 5; }
+        /* HOST ELEMENTS */
+        #waiting-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 1.8rem; text-align: center; pointer-events: none; display: none; z-index: 5; text-shadow: 0 0 10px #00ff44; }
         .blink { animation: blinker 1.5s linear infinite; }
         @keyframes blinker { 50% { opacity: 0; } }
-        #host-info { position: absolute; top: 15px; right: 15px; background: #fff; color: #000; padding: 10px 20px; border-radius: 10px; font-weight: 900; display: none; z-index: 1000; }
+        #host-info { position: absolute; top: 15px; right: 15px; background: #fff; color: #000; padding: 10px 20px; border-radius: 10px; font-weight: 900; display: none; z-index: 1000; border: 3px solid #000; }
         #fs-btn { position: absolute; bottom: 15px; left: 15px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid #fff; padding: 10px; cursor: pointer; display: none; z-index: 1000; border-radius: 5px; font-size: 0.8rem; }
 
-        /* CONTROLLER HP */
+        /* CONTROLLER UI */
         #ctrl-view { display: none; height: 100vh; width: 100vw; background: #000; position: relative; }
-        #dash { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: #111; border: 4px solid #333; padding: 12px; text-align: center; border-radius: 20px; width: 220px; }
+        #dash { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: #111; border: 4px solid #333; padding: 12px; text-align: center; border-radius: 20px; width: 220px; box-shadow: 0 8px 0 #222; }
         #spd { color: #fff; font-size: 3.5rem; display: block; line-height: 1; }
         #gear-ui { background: #00ff44; color: #000; font-size: 1.8rem; padding: 4px 25px; margin-top: 8px; display: inline-block; border-radius: 8px; font-weight: 900; }
         .redline { background: #ff0000 !important; color: #fff !important; }
 
         .pedal-group { position: absolute; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 15px; }
-        .pedal { width: 120px; border: 4px solid #222; border-radius: 18px; font-weight: 900; color: #fff; display: flex; align-items: center; justify-content: center; }
+        .pedal { width: 120px; border: 4px solid #222; border-radius: 18px; font-weight: 900; color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 0 #000; }
         .gas { height: 190px; background: #004400; font-size: 1.6rem; }
         .rem { height: 100px; background: #440000; font-size: 1.3rem; }
         .steer-group { position: absolute; bottom: 30px; left: 30px; display: flex; gap: 20px; }
-        .btn-s { width: 110px; height: 110px; background: #111; color: #fff; border-radius: 50%; font-size: 2.5rem; display: flex; align-items: center; justify-content: center; border: 4px solid #333; }
+        .btn-s { width: 110px; height: 110px; background: #111; color: #fff; border-radius: 50%; font-size: 2.5rem; display: flex; align-items: center; justify-content: center; border: 4px solid #333; box-shadow: 0 6px 0 #000; }
         .gear-group { position: absolute; top: 50%; left: 30px; transform: translateY(-50%); display: flex; flex-direction: column; gap: 15px; }
         .g-btn { width: 90px; height: 90px; background: #111; color: #fff; border: 4px solid #333; font-size: 2.2rem; display: flex; align-items: center; justify-content: center; font-weight: 900; border-radius: 15px; }
-        .active { background: #fff !important; color: #000 !important; transform: translateY(6px); }
+        .active { background: #fff !important; color: #000 !important; transform: translateY(6px); box-shadow: none !important; }
     </style>
 </head>
 <body>
 
 <div id="menu">
     <h1 style="font-size: 3rem; margin: 0;">BLOCK DRIFT</h1>
-    <p style="color: #00ff44; margin-bottom: 30px;">STABLE V1.0</p>
+    <p style="color: #00ff44; margin-bottom: 30px;">V1.1 CITY - STABLE BUILD</p>
     <button class="btn" onclick="start('host')">HOST (LAPTOP)</button>
     <button class="btn" onclick="start('ctrl')">JOIN (HP)</button>
 </div>
 
-<div id="waiting-msg" class="blink">WAITING FOR CONTROLLERS...</div>
-<div id="host-info">CODE: <span id="id-val">...</span></div>
-<button id="fs-btn" onclick="toggleFS()">FULLSCREEN</button>
+<div id="waiting-msg" class="blink">WAITING FOR CONTROLLERS...<br><span style="font-size: 1rem; color: #aaa;">CONNECT VIA HP TO START ENGINE</span></div>
+<div id="host-info">KODE: <span id="id-val">...</span></div>
+<button id="fs-btn" onclick="toggleFS()">ENTER FULLSCREEN</button>
 
 <div id="ctrl-view">
     <div id="setup" style="padding-top: 100px; text-align: center;">
-        <input type="text" id="target" placeholder="INPUT CODE" maxlength="7" style="padding:18px; font-size:1.6rem; width:80%; max-width:300px; border:4px solid #fff; background:#000; color:#fff; font-family:'Orbitron'; text-align:center;"><br><br>
-        <button class="btn" onclick="connect()">START ENGINE</button>
+        <input type="text" id="target" placeholder="INPUT KODE" maxlength="7" style="padding:18px; font-size:1.6rem; width:80%; max-width:300px; border:4px solid #fff; background:#000; color:#fff; font-family:'Orbitron'; text-align:center; text-transform:uppercase;"><br><br>
+        <button class="btn" onclick="connect()">START RACE</button>
     </div>
     <div id="pad" style="display:none; width:100%; height:100%;">
         <div id="dash"><span id="spd">0</span><div id="gear-ui">N</div></div>
         <div class="gear-group"><div class="g-btn" id="up-g">+</div><div class="g-btn" id="down-g">-</div></div>
         <div class="steer-group"><div class="btn-s" id="l">←</div><div class="btn-s" id="r">→</div></div>
-        <div class="pedal-group"><div class="pedal gas" id="u">GAS</div><div class="pedal rem" id="d">REM</div></div>
+        <div class="pedal-group"><div class="pedal gas" id="u">GAS</div><div class="pedal rem" id="d">BRAKE</div></div>
     </div>
 </div>
 
@@ -75,6 +75,15 @@ const gearLimits = {"-1":-0.55, "0":0, "1":0.5, "2":0.9, "3":1.3, "4":1.8, "5":2
 function toggleFS() {
     if (!document.fullscreenElement) document.documentElement.requestFullscreen();
     else document.exitFullscreen();
+}
+
+function createRoadTexture() {
+    const canvas = document.createElement('canvas'); canvas.width = 128; canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0, 0, 128, 128); 
+    ctx.fillStyle = '#fff'; ctx.fillRect(62, 0, 4, 30); 
+    const tex = new THREE.CanvasTexture(canvas); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(15, 15);
+    return tex;
 }
 
 function start(mode) {
@@ -95,16 +104,30 @@ function start(mode) {
 }
 
 function initGame() {
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000);
+    scene = new THREE.Scene(); scene.background = new THREE.Color(0x050505);
     renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(1); // Lock pixel ratio biar enteng
     document.body.appendChild(renderer.domElement);
     
-    scene.add(new THREE.AmbientLight(0xffffff, 1.5));
-    const grid = new THREE.GridHelper(20000, 400, 0x333333, 0x111111);
-    scene.add(grid);
+    scene.add(new THREE.AmbientLight(0xffffff, 1.4));
+
+    const floorMat = new THREE.MeshBasicMaterial({ map: createRoadTexture() });
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(12000, 12000), floorMat);
+    floor.rotation.x = -Math.PI/2; scene.add(floor);
+
+    // Spawn Gedung (Minimalist)
+    for(let i=0; i<350; i++) {
+        const h = Math.random()*50 + 10;
+        const w = Math.random()*12 + 8;
+        const ged = new THREE.Mesh(
+            new THREE.BoxGeometry(w, h, w),
+            new THREE.MeshBasicMaterial({color: 0x222222 + Math.random()*0x111111})
+        );
+        let px = (Math.random()-0.5)*1800, pz = (Math.random()-0.5)*1800;
+        if(Math.abs(px) < 40) px += 60; 
+        ged.position.set(px, h/2, pz); scene.add(ged);
+    }
 
     window.addEventListener('resize', () => {
         if(!isHost) return;
@@ -120,13 +143,14 @@ function initGame() {
         const p = {
             conn, speed:0, tick:0,
             car: new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.9, 3.2), new THREE.MeshBasicMaterial({color: Math.random()*0xffffff})),
-            cam: new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 3000),
+            cam: new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 3500),
             input: {u:0,d:0,l:0,r:0,g:0}
         };
         scene.add(p.car); players.push(p);
-        conn.on('data', d => { if(d.heartbeat) return; p.input = d; });
+        conn.on('data', d => { if(!d.h) p.input = d; });
         conn.on('close', () => { 
-            scene.remove(p.car); 
+            scene.remove(p.car);
+            p.car.geometry.dispose(); p.car.material.dispose(); // Anti-Memory Leak
             players = players.filter(pl => pl.conn.peer !== conn.peer);
             if(players.length === 0) document.getElementById('waiting-msg').style.display='block';
         });
@@ -135,30 +159,35 @@ function initGame() {
 }
 
 function loop() {
+    if(players.length === 0) return;
     requestAnimationFrame(loop);
     players.forEach((p, idx) => {
         let max = gearLimits[p.input.g.toString()] || 0;
         if(p.input.u && p.input.g !== 0) {
-            if(p.input.g > 0) p.speed = Math.min(p.speed + 0.022, max);
-            else p.speed = Math.max(p.speed - 0.022, max);
-        } else { p.speed *= 0.982; }
-        if(p.input.d) p.speed *= 0.84;
+            if(p.input.g > 0) p.speed = Math.min(p.speed + 0.024, max);
+            else p.speed = Math.max(p.speed - 0.024, max);
+        } else { p.speed *= 0.985; }
+        if(p.input.d) p.speed *= 0.85;
         p.car.translateZ(-p.speed);
+
         if(Math.abs(p.speed) > 0.05) {
             const tr = p.speed > 0 ? 1 : -1;
             if(p.input.l) p.car.rotation.y += 0.048 * tr;
             if(p.input.r) p.car.rotation.y -= 0.048 * tr;
         }
+
         p.tick++;
-        if(p.tick % 3 === 0 && p.conn.open) {
-            p.conn.send({ s: Math.floor(Math.abs(p.speed)*130), g: p.input.g, rl: (Math.abs(p.speed)/Math.abs(max||0.1)) > 0.92 });
+        if(p.tick % 4 === 0 && p.conn.open) {
+            p.conn.send({ s: Math.floor(Math.abs(p.speed)*135), g: p.input.g, rl: (Math.abs(p.speed)/Math.abs(max||0.1)) > 0.91 });
         }
+
         const h = window.innerHeight;
         p.cam.aspect = window.innerWidth / (players.length > 1 ? h/2 : h);
         p.cam.updateProjectionMatrix();
         const cp = new THREE.Vector3(0, 6, 13).applyQuaternion(p.car.quaternion);
         p.cam.position.copy(p.car.position).add(cp);
         p.cam.lookAt(p.car.position);
+
         if(players.length > 1) {
             renderer.setScissorTest(true);
             const r = idx === 0 ? [0, h/2, window.innerWidth, h/2] : [0, 0, window.innerWidth, h/2];
@@ -177,7 +206,7 @@ function connect() {
         document.getElementById('setup').style.display='none'; 
         document.getElementById('pad').style.display='block'; 
         setupEvents();
-        setInterval(() => { if(conn.open) conn.send({heartbeat:true}); }, 5000); // Anti-Disconnect
+        setInterval(() => { if(conn.open) conn.send({h:1}); }, 3000); // Heartbeat lebih cepat
     });
     conn.on('data', d => {
         document.getElementById('spd').innerText = d.s;
@@ -203,10 +232,8 @@ function setupEvents() {
             if(window.activeConn) window.activeConn.send(keys); 
             el.classList.remove('active'); 
         };
-        el.addEventListener('touchstart', go, {passive: false});
-        el.addEventListener('touchend', stop);
-        el.addEventListener('mousedown', go);
-        el.addEventListener('mouseup', stop);
+        el.addEventListener('touchstart', go, {passive: false}); el.addEventListener('touchend', stop);
+        el.addEventListener('mousedown', go); el.addEventListener('mouseup', stop);
     };
     bind('u','u'); bind('d','d'); bind('l','l'); bind('r','r'); bind('up-g','ug'); bind('down-g','dg');
 }
