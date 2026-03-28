@@ -3,212 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>BLOCK DRIFT V1.5</title>
+    <title>HAM_CITY V2.0 - STABLE</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap');
-        * { -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box; touch-action: none; }
-        body { margin: 0; padding: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; }
+        :root { --city-sky: #87CEEB; --action-blue: #007bff; }
+        * { -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box; outline: none; }
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; overflow: hidden; touch-action: none; }
         
-        /* MENU */
-        #menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: radial-gradient(circle, #222 0%, #000 100%); color: #fff; text-align: center; z-index: 100; position: relative; }
-        .btn { padding: 20px; width: 300px; margin: 15px; font-weight: bold; cursor: pointer; border: 4px solid #fff; background: transparent; color: #fff; font-family: 'Orbitron'; text-transform: uppercase; border-radius: 12px; }
-
-        /* TV HOST UI */
-        #host-ui { position: absolute; width: 100%; height: 100%; pointer-events: none; display: none; z-index: 10; }
-        #host-info { position: absolute; top: 20px; right: 20px; background: #fff; color: #000; padding: 12px 25px; border-radius: 12px; font-weight: 900; pointer-events: auto; border: 3px solid #ff0055; }
-        #fps { position: absolute; bottom: 10px; left: 10px; color: #00ff00; font-size: 0.9rem; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 5px; }
-
-        /* HP CONTROLLER UI */
-        #ctrl-view { display: none; height: 100vh; width: 100vw; background: #050505; position: relative; }
-        #dash { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background: #111; border: 3px solid #444; padding: 10px; text-align: center; border-radius: 20px; width: 220px; }
-        #spd { color: #fff; font-size: 3.5rem; display: block; line-height: 1; }
+        /* MENU UTAMA */
+        #menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(to bottom, #1a1a1a, #000); color: white; z-index: 1000; position: relative; }
+        .btn { padding: 18px 45px; border: none; background: #fff; cursor: pointer; font-weight: 900; margin: 12px; width: 280px; border-radius: 15px; font-size: 1.1rem; text-transform: uppercase; transition: all 0.2s ease; box-shadow: 0 4px 0 #bbb; }
+        .btn-blue { background: var(--action-blue); color: white; box-shadow: 0 4px 0 #0056b3; }
+        .btn:active { transform: translateY(4px); box-shadow: none; opacity: 0.9; }
         
-        #nitro-btn { position: absolute; top: 20px; left: 20px; width: 90px; height: 90px; background: #ff0055; border: 4px solid #fff; border-radius: 50%; color: #fff; font-weight: 900; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; box-shadow: 0 6px 0 #80002b; }
-        #nitro-btn.active_n { background: #00f2ff; box-shadow: 0 0 30px #00f2ff; color: #000; transform: translateY(4px); box-shadow: none; }
+        /* HOST UI */
+        #ui-overlay { position: absolute; top: 20px; left: 20px; z-index: 100; display: none; }
+        .kode-box { background: rgba(0,0,0,0.85); color: #00ff00; padding: 15px 25px; border-radius: 12px; font-family: 'Courier New', monospace; font-size: 1.6rem; border: 2px solid #00ff00; }
 
-        /* CAMERA ANALOG - POSISI DI KIRI BRAKE */
-        #cam-joy { position: absolute; bottom: 35px; right: 160px; width: 130px; height: 130px; background: rgba(255,255,255,0.05); border: 3px dashed rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        #stick { width: 55px; height: 55px; background: #fff; border-radius: 50%; box-shadow: 0 0 20px rgba(255,255,255,0.4); position: absolute; }
-
-        .p-grp { position: absolute; bottom: 25px; right: 25px; display: flex; flex-direction: column; gap: 15px; }
-        .pedal { width: 120px; border-radius: 20px; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 4px solid #333; }
-        .gas { height: 240px; background: linear-gradient(to bottom, #008800, #004400); font-size: 1.5rem; }
-        .rem { height: 100px; background: linear-gradient(to bottom, #880000, #440000); font-size: 1.1rem; }
+        /* CONTROLLER HP */
+        #ctrl-view { display: none; height: 100vh; width: 100vw; background: #111; position: relative; }
+        .joystick-area { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); display: grid; grid-template-columns: repeat(3, 95px); gap: 15px; }
+        .joy-btn { width: 95px; height: 95px; background: rgba(255,255,255,0.08); border: 2px solid #444; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2.8rem; }
+        .active-btn { background: var(--action-blue) !important; border-color: #fff; transform: scale(0.92); }
         
-        .s-grp { position: absolute; bottom: 25px; left: 25px; display: flex; gap: 15px; }
-        .btn-s { width: 110px; height: 110px; background: #111; color: #fff; border-radius: 50%; border: 4px solid #444; display: flex; align-items: center; justify-content: center; font-size: 3rem; box-shadow: 0 8px 0 #000; }
-        .act { filter: brightness(2.2); transform: translateY(6px); box-shadow: none !important; }
+        #target-id { padding: 20px; text-align: center; border: 3px solid #444; background: #222; color: #fff; width: 280px; font-size: 1.6rem; border-radius: 15px; margin-bottom: 30px; text-transform: uppercase; }
+        
+        canvas { display: block; }
     </style>
 </head>
 <body>
 
-<div id="menu">
-    <h1 style="letter-spacing: 10px; font-size: 3rem; margin: 0;">BLOCK DRIFT</h1>
-    <p style="color: #ff0055;">V1.5 - REAL ENGINE & ANALOG</p>
-    <button class="btn" onclick="sys('host')">TV MODE (HOST)</button>
-    <button class="btn" onclick="sys('ctrl')">HP MODE (JOIN)</button>
-</div>
-
-<div id="host-ui">
-    <div id="host-info">CODE: <span id="id-val" style="color:#ff0055">...</span></div>
-    <div id="fps">FPS: --</div>
-</div>
-
-<div id="ctrl-view">
-    <div id="setup" style="padding-top: 100px; text-align: center;">
-        <input type="text" id="target" placeholder="KODE TV" maxlength="7" style="padding:20px; font-size:1.5rem; width:80%; text-align:center; border-radius:15px; border:3px solid #fff; background:#000; color:#fff; font-family:'Orbitron';"><br><br>
-        <button class="btn" onclick="join()">IGNITION</button>
+    <div id="menu">
+        <h1 style="margin:0; font-size: 4.5rem; letter-spacing: -2px; font-weight: 900;">HAM CITY</h1>
+        <p style="opacity: 0.5; letter-spacing: 8px; margin-bottom: 50px;">V2.0 STABLE ENGINE</p>
+        <button class="btn" onclick="preStart('screen')">HOST SERVER (PC)</button>
+        <button class="btn btn-blue" onclick="preStart('controller')">JOIN PLAYER (HP)</button>
     </div>
-    <div id="pad" style="display:none; width:100%; height:100%;">
-        <div id="dash"><span id="spd">0</span><small>KM/H</small></div>
-        <div id="nitro-btn">NITRO</div>
-        
-        <div id="cam-joy"><div id="stick"></div></div>
 
-        <div class="s-grp"><div class="btn-s" id="l">←</div><div class="btn-s" id="r">→</div></div>
-        <div class="p-grp"><div class="pedal gas" id="u">GAS</div><div class="pedal rem" id="d">BRAKE</div></div>
+    <div id="ui-overlay"><div class="kode-box">SERVER ID: <span id="peer-id-text">...</span></div></div>
+
+    <div id="ctrl-view">
+        <div id="setup-ui" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; width: 100%;">
+            <input type="text" id="target-id" placeholder="MASUKKAN KODE">
+            <button class="btn btn-blue" onclick="connectToServer()">CONNECT</button>
+        </div>
+        <div id="game-pad" style="display: none; width: 100%; height: 100%;">
+            <div class="joystick-area">
+                <div></div><div class="joy-btn" id="btn-up">↑</div><div></div>
+                <div class="joy-btn" id="btn-left">←</div><div class="joy-btn" id="btn-down">↓</div><div class="joy-btn" id="btn-right">→</div>
+            </div>
+        </div>
     </div>
-</div>
 
-<script>
-let players=[], scene, renderer, peer, audioCtx, keys={u:0,d:0,l:0,r:0,n:0,cx:0,cy:0};
-const myId = 'HAM-' + Math.floor(100+Math.random()*899);
+    <script>
+        let players = [], scene, renderer, peer;
+        let keys = { up: false, down: false, left: false, right: false };
+        const myCustomId = 'HAM-' + Math.floor(1000 + Math.random() * 8999);
 
-function sys(mode) {
-    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    document.getElementById('menu').style.display='none';
-    peer = new Peer(myId);
-    peer.on('open', id => {
-        if(mode==='host') {
-            document.getElementById('id-val').innerText=id;
-            document.getElementById('host-ui').style.display='block';
-            initHost();
-        } else document.getElementById('ctrl-view').style.display='block';
-    });
-}
+        function preStart(type) {
+            document.getElementById('menu').style.display = 'none';
+            peer = new Peer(myCustomId);
+            
+            peer.on('error', (err) => {
+                alert("PeerJS Error: " + err.type);
+                location.reload();
+            });
 
-function initHost() {
-    scene = new THREE.Scene(); scene.background = new THREE.Color(0x020202);
-    renderer = new THREE.WebGLRenderer({ antialias: false, precision: 'mediump' });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-    
-    scene.add(new THREE.AmbientLight(0xffffff, 1.5));
-    
-    const roadTex = new THREE.CanvasTexture(createRoadCanvas());
-    roadTex.wrapS = roadTex.wrapT = THREE.RepeatWrapping; roadTex.repeat.set(200, 200);
-    const road = new THREE.Mesh(new THREE.PlaneGeometry(10000, 10000), new THREE.MeshBasicMaterial({map: roadTex}));
-    road.rotation.x = -Math.PI/2; scene.add(road);
+            if(type === 'screen') {
+                document.getElementById('ui-overlay').style.display = 'block';
+                document.getElementById('peer-id-text').innerText = myCustomId;
+                initWorld();
+            } else {
+                document.getElementById('ctrl-view').style.display = 'block';
+                setupMobileControls();
+            }
+        }
 
-    let frames = 0;
-    peer.on('connection', cn => {
-        const p = { 
-            conn: cn, speed: 0, steer: 0, camRot: {x:0, y:0},
-            car: createCar(), 
-            cam: new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 3000), 
-            input: {u:0,d:0,l:0,r:0,n:0,cx:0,cy:0} 
-        };
+        function createCharacter(color) {
+            const group = new THREE.Group();
+            // Badan
+            const body = new THREE.Mesh(
+                new THREE.CapsuleGeometry(0.4, 0.9, 4, 12), 
+                new THREE.MeshStandardMaterial({ color, roughness: 0.7 })
+            );
+            body.position.y = 1.05; body.castShadow = true; group.add(body);
+            // Kepala
+            const head = new THREE.Mesh(
+                new THREE.SphereGeometry(0.32, 16, 16), 
+                new THREE.MeshStandardMaterial({ color: 0xffdbac })
+            );
+            head.position.y = 1.95; group.add(head);
+            // Arah Mata
+            const visor = new THREE.Mesh(
+                new THREE.BoxGeometry(0.45, 0.12, 0.15), 
+                new THREE.MeshStandardMaterial({ color: 0x222222 })
+            );
+            visor.position.set(0, 2.0, 0.28); group.add(visor);
+            return group;
+        }
 
-        // REALISTIC ENGINE SYNTH (Brown Noise + Low Pass)
-        const bufferSize = 2 * audioCtx.sampleRate, buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate), data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-        const noise = audioCtx.createBufferSource(); noise.buffer = buffer; noise.loop = true;
-        const filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.Q.value = 15;
-        const gn = audioCtx.createGain(); gn.gain.value = 0.1;
-        noise.connect(filter); filter.connect(gn); gn.connect(audioCtx.destination); noise.start();
-        
-        p.audio = {filter, gn}; scene.add(p.car); players.push(p);
-        cn.on('data', d => p.input = d);
-        if(players.length === 1) renderLoop();
-    });
-    setInterval(() => { document.getElementById('fps').innerText = "FPS: " + frames; frames = 0; }, 1000);
-}
+        function initWorld() {
+            scene = new THREE.Scene(); 
+            scene.background = new THREE.Color(0x87CEEB);
+            scene.fog = new THREE.Fog(0x87CEEB, 40, 300);
 
-function createRoadCanvas() {
-    const c = document.createElement('canvas'); c.width = 128; c.height = 128;
-    const ctx = c.getContext('2d'); ctx.fillStyle = '#151515'; ctx.fillRect(0,0,128,128);
-    ctx.fillStyle = '#444'; ctx.fillRect(60, 0, 8, 128); return c;
-}
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.body.appendChild(renderer.domElement);
 
-function createCar() {
-    const g = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.8, 4.5), new THREE.MeshStandardMaterial({color: 0xff0055}));
-    body.position.y = 0.6; g.add(body);
-    return g;
-}
+            const sun = new THREE.DirectionalLight(0xffffff, 1.3);
+            sun.position.set(40, 80, 40); sun.castShadow = true;
+            sun.shadow.camera.left = -100; sun.shadow.camera.right = 100;
+            sun.shadow.camera.top = 100; sun.shadow.camera.bottom = -100;
+            scene.add(sun);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
 
-function renderLoop() {
-    requestAnimationFrame(renderLoop);
-    players.forEach(p => {
-        let n = p.input.nitro_on ? 2.8 : 1.0;
-        if(p.input.u) p.speed = Math.min(p.speed + 0.025, 2.0 * n); else p.speed *= 0.985;
-        if(p.input.d) p.speed *= 0.85;
-        
-        let ts = 0; if(p.input.l) ts = 0.05; if(p.input.r) ts = -0.05;
-        p.steer += (ts - p.steer) * 0.12;
-        p.car.translateZ(-p.speed);
-        if(Math.abs(p.speed) > 0.05) p.car.rotation.y += p.steer * (p.speed/1.4);
+            // Lantai & Trotoar
+            const ground = new THREE.Mesh(new THREE.PlaneGeometry(3000, 3000), new THREE.MeshStandardMaterial({ color: 0x333333 }));
+            ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
+            
+            const grid = new THREE.GridHelper(3000, 150, 0x000000, 0x555555);
+            grid.position.y = 0.02; scene.add(grid);
 
-        // ENGINE SOUND FREQUENCY UPDATE
-        p.audio.filter.frequency.setTargetAtTime(100 + (p.speed * 400), audioCtx.currentTime, 0.05);
-        p.audio.gn.gain.setTargetAtTime(p.input.u ? 0.25 : 0.1, audioCtx.currentTime, 0.1);
+            // Bangunan Sederhana
+            for(let i=0; i<120; i++) {
+                const h = Math.random()*35 + 10;
+                const b = new THREE.Mesh(new THREE.BoxGeometry(10, h, 10), new THREE.MeshStandardMaterial({ color: 0x707070 }));
+                b.position.set((Math.random()-0.5)*400, h/2, (Math.random()-0.5)*400);
+                if(Math.abs(b.position.x) < 15 && Math.abs(b.position.z) < 15) b.position.x += 30;
+                b.castShadow = true; b.receiveShadow = true; scene.add(b);
+            }
 
-        // CAMERA ANALOG
-        p.camRot.y += (p.input.cx * 0.06); p.camRot.x += (p.input.cy * 0.04);
-        p.camRot.y *= 0.94; p.camRot.x *= 0.94;
+            peer.on('connection', conn => {
+                if(players.length >= 2) return; // Maksimal 2 player untuk split screen
+                const pID = players.length + 1;
+                const char = createCharacter(pID === 1 ? 0x007bff : 0xff3333);
+                const p = { 
+                    conn, id: pID, input: {up:0,down:0,left:0,right:0}, 
+                    mesh: char, 
+                    cam: new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000),
+                    walkCycle: 0
+                };
+                char.position.set(pID === 1 ? 4 : -4, 0, 0);
+                scene.add(char); players.push(p);
+                
+                conn.on('data', d => p.input = d);
+                conn.on('close', () => location.reload()); // Refresh jika player diskonek
+                
+                if(players.length === 1) animate();
+            });
+        }
 
-        let cO = new THREE.Vector3(0, 5, 14);
-        cO.applyAxisAngle(new THREE.Vector3(0,1,0), p.camRot.y);
-        cO.applyAxisAngle(new THREE.Vector3(1,0,0), p.camRot.x);
-        cO.applyQuaternion(p.car.quaternion);
-        p.cam.position.copy(p.car.position).add(cO); p.cam.lookAt(p.car.position);
-        
-        if(Math.floor(performance.now()) % 10 < 2) p.conn.send({type:'spd', val: Math.round(p.speed * 120)});
-        renderer.render(scene, p.cam);
-    });
-}
+        function animate() {
+            requestAnimationFrame(animate);
+            const w = window.innerWidth, h = window.innerHeight;
+            const isSplit = players.length > 1;
 
-function join() {
-    const tid = document.getElementById('target').value.toUpperCase().trim();
-    if(!tid) return;
-    peer.connect(tid).on('open', function() {
-        window.activeConn = this;
-        document.getElementById('setup').style.display='none'; document.getElementById('pad').style.display='block';
-        initCtrl();
-        this.on('data', d => { if(d.type==='spd') document.getElementById('spd').innerText = d.val; });
-    });
-}
+            players.forEach((p, i) => {
+                // Logika Gerak GTA Style
+                if(p.input.up) { p.mesh.translateZ(0.2); p.walkCycle += 0.28; }
+                if(p.input.down) { p.mesh.translateZ(-0.12); p.walkCycle += 0.18; }
+                if(p.input.left) p.mesh.rotation.y += 0.085;
+                if(p.input.right) p.mesh.rotation.y -= 0.085;
 
-function initCtrl() {
-    const joy = document.getElementById('cam-joy'), stick = document.getElementById('stick');
-    const sync = () => window.activeConn.send({...keys});
-    
-    joy.addEventListener('touchmove', (e) => {
-        e.preventDefault(); const rect = joy.getBoundingClientRect(); const touch = e.touches[0];
-        let x = touch.clientX - (rect.left + rect.width/2), y = touch.clientY - (rect.top + rect.height/2);
-        const dist = Math.min(Math.sqrt(x*x + y*y), 50); const angle = Math.atan2(y, x);
-        x = Math.cos(angle) * dist; y = Math.sin(angle) * dist;
-        stick.style.transform = `translate(${x}px, ${y}px)`;
-        keys.cx = x / 50; keys.cy = y / 50; sync();
-    }, {passive: false});
-    
-    joy.addEventListener('touchend', () => { stick.style.transform = `translate(0px, 0px)`; keys.cx = 0; keys.cy = 0; sync(); });
+                // Animasi Jalan
+                p.mesh.position.y = (p.input.up || p.input.down) ? Math.abs(Math.sin(p.walkCycle)) * 0.18 : 0;
 
-    const bnd = (id, k) => {
-        const el = document.getElementById(id);
-        el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[k]=1; sync(); el.classList.add('act'); });
-        el.addEventListener('touchend', () => { keys[k]=0; sync(); el.classList.remove('act'); });
-    };
-    bnd('u','u'); bnd('d','d'); bnd('l','l'); bnd('r','r');
-    
-    document.getElementById('nitro-btn').addEventListener('touchstart', (e) => {
-        e.preventDefault(); keys.nitro_on = true; sync();
-        document.getElementById('nitro-btn').classList.add('active_n');
-        setTimeout(() => { keys.nitro_on = false; sync(); document.getElementById('nitro-btn').classList.remove('active_n'); }, 3000);
-    });
-}
-</script>
+                // Kamera Follow Smooth
+                const idealOffset = new THREE.Vector3(0, 4.5, -9).applyMatrix4(p.mesh.matrixWorld);
+                p.cam.position.lerp(idealOffset, 0.15);
+                p.cam.lookAt(p.mesh.position.x, p.mesh.position.y + 1.6, p.mesh.position.z);
+
+                // Render Logic (Fixing Split Screen Aspect)
+                if(isSplit) {
+                    p.cam.aspect = w / (h / 2);
+                    p.cam.updateProjectionMatrix();
+                    renderer.setScissorTest(true);
+                    const rect = i === 0 ? [0, h/2, w, h/2] : [0, 0, w, h/2];
+                    renderer.setViewport(...rect); 
+                    renderer.setScissor(...rect);
+                } else {
+                    p.cam.aspect = w / h;
+                    p.cam.updateProjectionMatrix();
+                    renderer.setScissorTest(false);
+                    renderer.setViewport(0, 0, w, h);
+                }
+                renderer.render(scene, p.cam);
+            });
+        }
+
+        function setupMobileControls() {
+            const bind = (id, k) => {
+                const el = document.getElementById(id);
+                const handle = (val) => { 
+                    keys[k] = val; 
+                    if(window.currentConn) window.currentConn.send(keys); 
+                    el.classList.toggle('active-btn', val); 
+                };
+                el.addEventListener('touchstart', (e) => { e.preventDefault(); handle(true); if(navigator.vibrate) navigator.vibrate(20); }, {passive: false});
+                el.addEventListener('touchend', (e) => { e.preventDefault(); handle(false); }, {passive: false});
+            };
+            bind('btn-up', 'up'); bind('btn-down', 'down');
+            bind('btn-left', 'left'); bind('btn-right', 'right');
+        }
+
+        function connectToServer() {
+            const id = document.getElementById('target-id').value.toUpperCase().trim();
+            if(!id) return;
+            const conn = peer.connect(id);
+            conn.on('open', () => { 
+                window.currentConn = conn; 
+                document.getElementById('setup-ui').style.display='none'; 
+                document.getElementById('game-pad').style.display='block'; 
+                if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+            });
+            conn.on('error', () => alert('Server Tidak Ditemukan!'));
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if(renderer) renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
 </body>
 </html>
