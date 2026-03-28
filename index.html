@@ -3,88 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>HAM_CITY V2.4 - GESTURE LOCKED</title>
+    <title>HAM_CITY V3.1 - URBAN STABLE</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
     <style>
-        :root { --neon-blue: #00f3ff; --neon-pink: #ff00ea; --neon-green: #39ff14; }
+        :root { --city-grey: #444; --city-sky: #87CEEB; --action-red: #d32f2f; --action-green: #388e3c; }
+        * { -webkit-tap-highlight-color: transparent; user-select: none; outline: none; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--city-sky); overflow: hidden; touch-action: none; }
         
-        /* Mencegah scroll dan seleksi teks agar tidak mengganggu kontrol */
-        * { -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; user-select: none; }
-        
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #000; color: white; overflow: hidden; touch-action: none; }
-        
-        #menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #000; z-index: 50; position: relative; }
-        .btn { padding: 15px 35px; border: 2px solid var(--neon-blue); color: white; background: none; cursor: pointer; font-weight: bold; margin: 10px; width: 240px; text-transform: uppercase; border-radius: 6px; font-size: 1rem; }
+        #menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #f0f0f0; z-index: 50; position: relative; }
+        .btn { padding: 15px 35px; border: 2px solid #222; background: white; cursor: pointer; font-weight: bold; margin: 10px; width: 240px; border-radius: 8px; text-transform: uppercase; }
+        .btn-join { border-color: var(--action-red); color: var(--action-red); }
         
         #ui-overlay { position: absolute; top: 20px; right: 20px; z-index: 1000; display: none; }
-        .kode-box { background: rgba(0,0,0,0.9); padding: 12px 25px; border: 2px solid var(--neon-blue); border-radius: 12px; font-family: monospace; font-size: 1.4rem; box-shadow: 0 0 20px rgba(0,243,255,0.3); }
+        .kode-box { background: white; padding: 12px 25px; border: 2px solid #222; border-radius: 12px; font-family: monospace; font-size: 1.4rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-        #ctrl-view { display: none; height: 100vh; width: 100vw; background: #050505; position: relative; overflow: hidden; }
-        
-        /* Tombol Belok - Pojok Kiri */
-        .steer-group { position: absolute; bottom: 40px; left: 40px; display: flex; gap: 30px; z-index: 100; }
-        .arrow-btn { width: 120px; height: 120px; background: rgba(40,40,40,0.6); border: 3px solid #444; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; }
-        
-        /* Tombol Pedal - Pojok Kanan */
-        .pedal-group { position: absolute; bottom: 40px; right: 40px; display: flex; flex-direction: column; gap: 25px; align-items: center; z-index: 100; }
-        .pedal { width: 110px; background: rgba(50,50,50,0.6); border: 4px solid #555; border-radius: 25px; display: flex; align-items: center; justify-content: center; font-weight: 1000; font-size: 1.2rem; }
-        .pedal-gas { height: 200px; border-color: var(--neon-green); color: var(--neon-green); }
-        .pedal-brake { height: 120px; border-color: #f00; color: #f00; }
+        #ctrl-view { display: none; height: 100vh; width: 100vw; background: #eee; position: relative; }
+        .steer-group { position: absolute; bottom: 40px; left: 40px; display: flex; gap: 25px; }
+        .arrow-btn { width: 115px; height: 115px; background: white; border: 3px solid #ccc; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; box-shadow: 0 4px 0 #bbb; }
+        .pedal-group { position: absolute; bottom: 40px; right: 40px; display: flex; flex-direction: column; gap: 20px; }
+        .pedal { width: 105px; background: white; border: 4px solid #ccc; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-weight: 900; }
+        .pedal-gas { height: 190px; border-color: var(--action-green); color: var(--action-green); }
+        .pedal-brake { height: 115px; border-color: var(--action-red); color: var(--action-red); }
+        .active-btn { background: #ddd !important; transform: translateY(4px); box-shadow: none !important; }
 
-        .nitro-btn { position: absolute; bottom: 45px; left: 50%; transform: translateX(-50%); width: 180px; height: 80px; background: linear-gradient(to top, #800075, var(--neon-pink)); border: none; border-radius: 40px; color: white; font-weight: bold; font-size: 1.4rem; box-shadow: 0 0 15px var(--neon-pink); z-index: 100; }
-
-        .active-btn { background: var(--neon-blue) !important; color: #000 !important; transform: scale(0.9); box-shadow: 0 0 30px var(--neon-blue); border-color: #fff !important; }
-        #target-id { padding: 20px; text-align: center; background: #111; border: 2px solid #555; color: var(--neon-blue); width: 280px; font-size: 1.8rem; border-radius: 15px; margin-bottom: 30px; outline: none; }
+        #target-id { padding: 15px; text-align: center; border: 2px solid #ccc; width: 250px; font-size: 1.5rem; border-radius: 10px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
     <div id="menu">
-        <h1 style="color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); margin:0; font-size: 4rem;">HAM_CITY</h1>
-        <p style="opacity:0.5; letter-spacing: 8px; margin-bottom: 40px;">V2.4 ULTIMATE</p>
+        <h1 style="margin:0; font-size: 3.5rem;">HAM_CITY</h1>
+        <p style="color:#666; letter-spacing: 5px;">V3.1 URBAN STABLE</p>
         <button class="btn" onclick="preStart('screen')">HOST CITY (PC)</button>
-        <button class="btn" onclick="preStart('controller')" style="border-color: var(--neon-pink);">JOIN DRIVE (HP)</button>
+        <button class="btn btn-join" onclick="preStart('controller')">JOIN DRIVE (HP)</button>
     </div>
 
-    <div id="ui-overlay"><div class="kode-box">CODE: <span id="peer-id-text" style="color:var(--neon-blue)">...</span></div></div>
+    <div id="ui-overlay"><div class="kode-box">CODE: <span id="peer-id-text">...</span></div></div>
 
     <div id="ctrl-view">
-        <div id="setup-ui" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; z-index: 200;">
-            <input type="text" id="target-id" placeholder="KODE HOST" spellcheck="false" autocomplete="off">
-            <button class="btn" style="width: 280px; border-color: var(--neon-green);" onclick="connectToServer()">START ENGINE</button>
+        <div id="setup-ui" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center;">
+            <input type="text" id="target-id" placeholder="KODE HOST">
+            <button class="btn" style="border-color: var(--action-green); color: var(--action-green);" onclick="connectToServer()">START ENGINE</button>
         </div>
-
         <div id="game-pad" style="display: none; width: 100%; height: 100%;">
-            <div class="steer-group">
-                <div class="arrow-btn" id="btn-left">←</div>
-                <div class="arrow-btn" id="btn-right">→</div>
-            </div>
-            <div class="pedal-group">
-                <div class="pedal pedal-gas" id="btn-up">GAS</div>
-                <div class="pedal pedal-brake" id="btn-down">BRAKE</div>
-            </div>
-            <button class="nitro-btn" id="btn-nitro">NITRO</button>
+            <div class="steer-group"><div class="arrow-btn" id="btn-left">←</div><div class="arrow-btn" id="btn-right">→</div></div>
+            <div class="pedal-group"><div class="pedal pedal-gas" id="btn-up">GAS</div><div class="pedal pedal-brake" id="btn-down">BRAKE</div></div>
         </div>
     </div>
 
     <script>
         let players = [], scene, renderer, clock, peer;
-        let keys = { up: false, down: false, left: false, right: false, nitro: false };
-        let prevKeysStr = "";
+        let keys = { up: false, down: false, left: false, right: false };
         const myCustomId = 'HAM-' + Math.floor(10000 + Math.random() * 90000);
 
-        // --- FULLSCREEN LOGIC ---
         function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.warn(`Fullscreen error: ${err.message}`);
-                });
-            }
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
         }
 
         function preStart(type) {
-            toggleFullScreen(); // Trigger pas klik tombol menu
+            toggleFullScreen();
             document.getElementById('menu').style.display = 'none';
             peer = new Peer(myCustomId);
             if(type === 'screen') {
@@ -97,114 +75,115 @@
             }
         }
 
-        // --- WORLD LOGIC ---
         function createCar(color) {
             const g = new THREE.Group();
-            const b = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.5, 3), new THREE.MeshPhongMaterial({ color, shininess: 100 }));
-            b.position.y = 0.3; g.add(b);
-            const c = new THREE.Mesh(new THREE.SphereGeometry(0.65, 12, 12, 0, 6.3, 0, 1.6), new THREE.MeshPhongMaterial({ color: 0x000, transparent: true, opacity: 0.85 }));
-            c.scale.set(1, 0.75, 1.6); c.position.set(0, 0.5, 0.2); g.add(c);
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.6, 3), new THREE.MeshStandardMaterial({ color }));
+            body.position.y = 0.6; body.castShadow = true; g.add(body);
+            const glass = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.5, 1.5), new THREE.MeshStandardMaterial({ color: 0x222222 }));
+            glass.position.set(0, 1.1, 0.2); g.add(glass);
             [[-0.8, 1], [0.8, 1], [-0.8, -1], [0.8, -1]].forEach(p => {
-                const w = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.35, 12), new THREE.MeshPhongMaterial({color:0x111}));
-                w.rotation.z = Math.PI/2; w.position.set(p[0], 0.1, p[1]);
-                const pk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.37, 6), new THREE.MeshPhongMaterial({color, emissive: color, emissiveIntensity: 3}));
-                pk.rotation.z = Math.PI/2; pk.position.copy(w.position);
-                g.add(w, pk);
+                const w = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.3, 12), new THREE.MeshStandardMaterial({color: 0x111}));
+                w.rotation.z = Math.PI/2; w.position.set(p[0], 0.4, p[1]); g.add(w);
             });
             return g;
         }
 
         function initWorld() {
-            scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(0, 0.005);
-            clock = new THREE.Clock();
+            scene = new THREE.Scene(); scene.background = new THREE.Color(0x87CEEB);
+            scene.fog = new THREE.Fog(0x87CEEB, 50, 400);
+            
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimasi performa
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.BasicShadowMap; // Lebih ringan untuk mobile/web
             document.body.appendChild(renderer.domElement);
-            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-            scene.add(new THREE.GridHelper(5000, 100, 0x00f3ff, 0x111111));
-            for(let i=0; i<400; i++) {
-                const h = Math.random()*50+15;
-                const b = new THREE.Mesh(new THREE.BoxGeometry(8, h, 8), new THREE.MeshPhongMaterial({color: 0x111, emissive: 0x001122}));
-                b.position.set((Math.random()-0.5)*2500, h/2, (Math.random()-0.5)*2500);
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            const sun = new THREE.DirectionalLight(0xffffff, 1);
+            sun.position.set(50, 100, 50); sun.castShadow = true;
+            sun.shadow.camera.left = -100; sun.shadow.camera.right = 100;
+            sun.shadow.camera.top = 100; sun.shadow.camera.bottom = -100;
+            scene.add(sun);
+
+            // ASPAL (Fix Z-Fighting)
+            const ground = new THREE.Mesh(new THREE.PlaneGeometry(5000, 5000), new THREE.MeshStandardMaterial({ color: 0x333333 }));
+            ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
+            
+            const grid = new THREE.GridHelper(5000, 150, 0x444444, 0xffffff);
+            grid.position.y = 0.05; // Fix: naikkan sedikit agar tidak kedap-kedip
+            scene.add(grid);
+
+            // GEDUNG (Optimized: Instance-like loop)
+            const bGeo = new THREE.BoxBufferGeometry(1, 1, 1);
+            for(let i=0; i<600; i++) {
+                const h = Math.random()*50 + 10;
+                const w = Math.random()*5 + 7;
+                const b = new THREE.Mesh(bGeo, new THREE.MeshStandardMaterial({ color: 0x888888 + (Math.random()*0x444444) }));
+                b.scale.set(w, h, w);
+                let px = (Math.random()-0.5)*1200;
+                let pz = (Math.random()-0.5)*1200;
+                if(Math.abs(px) < 20) px += 30; // Sisakan jalan tengah
+                b.position.set(px, h/2, pz);
+                b.castShadow = true; b.receiveShadow = true;
                 scene.add(b);
             }
+
             peer.on('connection', conn => {
                 if(players.length >= 2) return;
                 const pID = players.length + 1;
-                const p = { conn, id: pID, input: { up:0, down:0, left:0, right:0, nitro:0 }, car: createCar(pID===1?0xff00ea:0x39ff14), cam: new THREE.PerspectiveCamera(75, 1, 0.1, 5000), speed: 0, rot: 0 };
-                p.car.position.set(pID*18, 0, 0); scene.add(p.car); players.push(p);
-                conn.on('data', d => { p.input = d; });
-                if(players.length === 1) loop();
+                const p = { conn, id: pID, input: { up:0, down:0, left:0, right:0 }, car: createCar(pID===1?0xd32f2f:0xffffff), cam: new THREE.PerspectiveCamera(75, 1, 0.1, 1000), speed: 0, rot: 0 };
+                p.car.position.set(pID*15, 0, 0); scene.add(p.car); players.push(p);
+                conn.on('data', d => p.input = d);
+                const close = () => { scene.remove(p.car); players = players.filter(x => x.id !== p.id); };
+                conn.on('close', close); conn.on('error', close);
+                if(players.length === 1) animate();
             });
         }
 
-        function loop() {
-            requestAnimationFrame(loop);
+        function animate() {
+            requestAnimationFrame(animate);
             const w = window.innerWidth, h = window.innerHeight;
-            const isSplit = players.length > 1;
-            renderer.setScissorTest(isSplit);
             players.forEach((p, i) => {
-                let targetSpeed = 0;
-                if(p.input.up) targetSpeed = p.input.nitro ? 2.4 : 1.0;
-                if(p.input.down) targetSpeed = -0.6;
-                p.speed = THREE.MathUtils.lerp(p.speed, targetSpeed, 0.08);
-                const turnMod = (p.speed > 0 ? 1 : -1) * (Math.abs(p.speed) > 0.1 ? 1 : 0);
-                if(p.input.left) p.rot += 0.048 * turnMod;
-                if(p.input.right) p.rot -= 0.048 * turnMod;
+                let target = p.input.up ? 1.2 : (p.input.down ? -0.5 : 0);
+                p.speed = THREE.MathUtils.lerp(p.speed, target, 0.1);
+                if(p.input.left) p.rot += 0.04; if(p.input.right) p.rot -= 0.04;
                 p.car.rotation.y = p.rot; p.car.translateZ(-p.speed);
-                p.cam.aspect = isSplit ? w / (h / 2) : w / h; p.cam.updateProjectionMatrix();
-                const off = new THREE.Vector3(0, 4.8, 14).applyMatrix4(p.car.matrixWorld);
-                p.cam.position.lerp(off, 0.12); p.cam.lookAt(p.car.position);
+                
+                const isSplit = players.length > 1;
+                p.cam.aspect = isSplit ? w/(h/2) : w/h; p.cam.updateProjectionMatrix();
+                const camPos = new THREE.Vector3(0, 5, 13).applyMatrix4(p.car.matrixWorld);
+                p.cam.position.lerp(camPos, 0.1); p.cam.lookAt(p.car.position);
+
                 if(isSplit) {
-                    const bottom = i === 0 ? h/2 : 0;
-                    renderer.setViewport(0, bottom, w, h/2); renderer.setScissor(0, bottom, w, h/2);
-                } else { renderer.setViewport(0, 0, w, h); }
+                    renderer.setScissorTest(true);
+                    const rect = i === 0 ? [0, h/2, w, h/2] : [0, 0, w, h/2];
+                    renderer.setViewport(...rect); renderer.setScissor(...rect);
+                } else {
+                    renderer.setScissorTest(false);
+                    renderer.setViewport(0, 0, w, h);
+                }
                 renderer.render(scene, p.cam);
             });
         }
 
         function setupMobileControls() {
-            const bind = (id, key) => {
+            const bind = (id, k) => {
                 const el = document.getElementById(id);
-                const update = (val) => { 
-                    keys[key] = val; 
-                    if(val) el.classList.add('active-btn'); else el.classList.remove('active-btn');
-                    const currentKeysStr = JSON.stringify(keys);
-                    if(window.currentConn && currentKeysStr !== prevKeysStr) {
-                        window.currentConn.send(keys);
-                        prevKeysStr = currentKeysStr;
-                    }
-                };
-                el.addEventListener('touchstart', (e) => { 
-                    e.preventDefault(); // Mencegah navigasi browser
-                    update(true); 
-                    if(navigator.vibrate) navigator.vibrate(25); 
-                }, { passive: false });
-                el.addEventListener('touchend', (e) => { e.preventDefault(); update(false); }, { passive: false });
-                el.addEventListener('touchcancel', (e) => { e.preventDefault(); update(false); }, { passive: false });
+                const up = (v) => { keys[k] = v; el.classList.toggle('active-btn', v); if(window.currentConn) window.currentConn.send(keys); };
+                el.addEventListener('touchstart', (e) => { e.preventDefault(); up(true); if(navigator.vibrate) navigator.vibrate(15); });
+                el.addEventListener('touchend', (e) => { e.preventDefault(); up(false); });
             };
             bind('btn-up', 'up'); bind('btn-down', 'down');
             bind('btn-left', 'left'); bind('btn-right', 'right');
-            bind('btn-nitro', 'nitro');
-            window.addEventListener('blur', () => { Object.keys(keys).forEach(k => keys[k] = false); });
         }
 
         function connectToServer() {
-            toggleFullScreen(); // Re-trigger pas user mau main
-            const val = document.getElementById('target-id').value.toUpperCase().trim();
-            if(!val) return;
-            const conn = peer.connect(val);
-            conn.on('open', () => {
-                window.currentConn = conn;
-                document.getElementById('setup-ui').style.display = 'none';
-                document.getElementById('game-pad').style.display = 'block';
-                if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
-            });
+            toggleFullScreen();
+            const id = document.getElementById('target-id').value.toUpperCase().trim();
+            if(!id) return;
+            const conn = peer.connect(id);
+            conn.on('open', () => { window.currentConn = conn; document.getElementById('setup-ui').style.display='none'; document.getElementById('game-pad').style.display='block'; });
         }
-        
-        // Klik di mana saja di awal untuk Full Screen
-        document.body.addEventListener('click', toggleFullScreen, { once: true });
     </script>
 </body>
 </html>
