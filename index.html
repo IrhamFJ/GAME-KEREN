@@ -7,43 +7,40 @@
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
     <style>
-        :root { --red-btn: #a00000; --red-active: #ff0000; }
-        * { -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box; outline: none; margin: 0; padding: 0; }
+        :root { --red: #b30000; --red-glow: #ff4d4d; }
+        * { -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Arial Black', sans-serif; background: #000; overflow: hidden; touch-action: none; color: #fff; }
         
-        /* MENU UTAMA */
-        #menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(45deg, #1a1a1a, #000); }
-        .btn { padding: 20px 50px; border: none; background: #fff; color: #000; cursor: pointer; font-weight: 900; margin: 15px; width: 320px; border-radius: 50px; font-size: 1.2rem; text-transform: uppercase; transition: 0.2s; box-shadow: 0 5px 15px rgba(255,255,255,0.2); }
-        .btn-red { background: var(--red-btn); color: white; }
-        .btn:active { transform: scale(0.95); }
+        /* MENU */
+        #menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #000; }
+        .title { font-size: 4rem; color: #ff0000; text-shadow: 4px 4px #fff; font-style: italic; margin-bottom: 40px; }
+        .btn-main { padding: 20px 60px; border: 4px solid #fff; background: transparent; color: #fff; font-weight: 900; border-radius: 15px; cursor: pointer; font-size: 1.5rem; text-transform: uppercase; }
         
         #ui-overlay { position: absolute; top: 20px; left: 20px; z-index: 100; display: none; }
-        .kode-box { background: rgba(0,0,0,0.8); color: #00ff00; padding: 15px 25px; border-radius: 10px; font-family: monospace; font-size: 1.8rem; border: 2px solid #00ff00; }
+        .kode-box { background: rgba(0,0,0,0.8); color: #00ff00; padding: 15px; border: 2px solid #00ff00; font-family: monospace; font-size: 2rem; }
 
-        /* --- CONTROLLER LAYOUT (HP) --- */
-        #ctrl-view { display: none; height: 100vh; width: 100vw; background: #111; position: relative; }
-        #setup-ui { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; width: 100%; z-index: 10; }
-        #target-id { padding: 20px; text-align: center; border: 2px solid #444; background: #222; color: #fff; width: 280px; font-size: 1.8rem; border-radius: 15px; margin-bottom: 20px; text-transform: uppercase; }
+        /* --- CONTROLLER (HP) --- */
+        #ctrl-view { display: none; height: 100vh; width: 100vw; background: #0a0a0a; position: relative; }
+        #setup-ui { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; width: 100%; }
+        #target-id { padding: 20px; text-align: center; background: #222; color: #fff; border: 2px solid #444; width: 300px; font-size: 2rem; border-radius: 15px; margin-bottom: 20px; }
 
-        #game-pad { display: none; width: 100%; height: 100%; position: relative; }
-        .gp-btn { position: absolute; background: var(--red-btn); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #500; font-size: 0.9rem; }
-        .active-btn { background: var(--red-active) !important; box-shadow: 0 0 15px var(--red-active); }
+        #game-pad { display: none; width: 100%; height: 100%; }
+        .gp-btn { position: absolute; background: var(--red); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 3px solid #500; }
+        .active-btn { background: #ff0000 !important; box-shadow: 0 0 30px #ff0000; transform: scale(0.95); }
 
-        /* Left Side */
-        #btn-lt { width: 60px; height: 40px; top: 10px; left: 10px; border-radius: 10px; }
-        #btn-lb { width: 60px; height: 40px; top: 60px; left: 10px; border-radius: 10px; }
-        #l-stick-ctn { position: absolute; bottom: 20px; left: 40px; width: 140px; height: 140px; background: #222; border-radius: 50%; border: 2px solid #333; }
+        /* Layout Kiri */
+        #btn-lt { width: 100px; height: 60px; top: 10px; left: 10px; border-radius: 10px; }
+        #btn-lb { width: 100px; height: 60px; top: 80px; left: 10px; border-radius: 10px; }
+        #l-stick { position: absolute; bottom: 30px; left: 30px; width: 180px; height: 180px; background: #1a1a1a; border-radius: 50%; border: 4px solid #333; }
         
-        /* Right Side */
-        #btn-rt { width: 60px; height: 40px; top: 10px; right: 10px; border-radius: 10px; }
-        #btn-rb { width: 60px; height: 40px; top: 60px; right: 10px; border-radius: 10px; }
-        #r-stick-ctn { position: absolute; bottom: 20px; right: 40px; width: 140px; height: 140px; background: #222; border-radius: 50%; border: 2px solid #333; }
+        /* Layout Kanan */
+        #btn-rt { width: 100px; height: 60px; top: 10px; right: 10px; border-radius: 10px; }
+        #btn-rb { width: 100px; height: 60px; top: 80px; right: 10px; border-radius: 10px; }
+        .face-grid { position: absolute; top: 40px; right: 130px; display: grid; grid-template-areas: ". Y ." "X . B" ". A ."; gap: 15px; }
+        .f-btn { width: 65px; height: 65px; position: static; font-size: 1.5rem; }
+        #r-stick { position: absolute; bottom: 30px; right: 30px; width: 180px; height: 180px; background: #1a1a1a; border-radius: 50%; border: 4px solid #333; }
         
-        /* Face Buttons */
-        .face-grid { position: absolute; top: 40px; right: 80px; display: grid; grid-template-areas: ". Y ." "X . B" ". A ."; gap: 10px; }
-        .f-btn { width: 45px; height: 45px; position: static; }
-        
-        .stick-head { position: absolute; top: 25%; left: 25%; width: 50%; height: 50%; background: #eee; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 5px 10px rgba(0,0,0,0.5); }
+        .stick-head { position: absolute; top: 25%; left: 25%; width: 50%; height: 50%; background: #eee; border-radius: 50%; border: 5px solid #fff; box-shadow: 0 10px 20px #000; }
         
         canvas { display: block; }
     </style>
@@ -51,51 +48,46 @@
 <body>
 
     <div id="menu">
-        <h1 style="font-size: 3.5rem; font-style: italic; color: #ff0000; text-shadow: 3px 3px #fff;">IRHAM FAJRI GTA</h1>
-        <p style="letter-spacing: 10px; margin-bottom: 40px; font-size: 0.8rem;">V2.0 PREMIUM STABLE</p>
-        <button class="btn" onclick="preStart('screen')">HOST TV / PC</button>
-        <button class="btn btn-red" onclick="preStart('controller')">JOIN PLAYER (HP)</button>
+        <h1 class="title">IRHAM FAJRI GTA</h1>
+        <button class="btn-main" onclick="preStart('screen')">HOST TV</button>
+        <button class="btn-main" style="margin-top:20px; color:#ff0000; border-color:#ff0000;" onclick="preStart('controller')">JOIN HP</button>
     </div>
 
-    <div id="ui-overlay"><div class="kode-box">ID: <span id="peer-id-text">...</span></div></div>
+    <div id="ui-overlay"><div class="kode-box">TV ID: <span id="peer-id-text">...</span></div></div>
 
     <div id="ctrl-view">
         <div id="setup-ui">
             <input type="text" id="target-id" placeholder="KODE TV">
-            <button class="btn btn-red" onclick="connectToServer()">CONNECT GAME</button>
+            <button class="btn-main" onclick="connectToServer()">CONNECT</button>
         </div>
         <div id="game-pad">
             <div class="gp-btn" id="btn-lt">LT</div><div class="gp-btn" id="btn-lb">LB</div>
             <div class="gp-btn" id="btn-rt">RT</div><div class="gp-btn" id="btn-rb">RB</div>
             <div class="face-grid">
-                <div class="gp-btn f-btn" id="btn-y" style="grid-area:Y">Y</div>
-                <div class="gp-btn f-btn" id="btn-x" style="grid-area:X">X</div>
-                <div class="gp-btn f-btn" id="btn-b" style="grid-area:B">B</div>
-                <div class="gp-btn f-btn" id="btn-a" style="grid-area:A">A</div>
+                <div class="gp-btn f-btn" id="btn-y" style="color:#ffeb3b; grid-area:Y">Y</div>
+                <div class="gp-btn f-btn" id="btn-x" style="color:#2196f3; grid-area:X">X</div>
+                <div class="gp-btn f-btn" id="btn-b" style="color:#f44336; grid-area:B">B</div>
+                <div class="gp-btn f-btn" id="btn-a" style="color:#4caf50; grid-area:A">A</div>
             </div>
-            <div id="l-stick-ctn"><div class="stick-head" id="l-head"></div></div>
-            <div id="r-stick-ctn"><div class="stick-head" id="r-head"></div></div>
+            <div id="l-stick"><div class="stick-head" id="l-head"></div></div>
+            <div id="r-stick"><div class="stick-head" id="r-head"></div></div>
         </div>
     </div>
 
     <script>
-        let players = [], scene, renderer, peer, clock;
-        let currentState = { lX:0, lY:0, rX:0, rY:0, A:0, B:0, X:0, Y:0 };
-        const myCustomId = 'IRHAM-' + Math.floor(1000 + Math.random() * 9000);
+        let players = [], vehicles = [], scene, renderer, peer, clock;
+        let cState = { lX:0, lY:0, rX:0, rY:0, A:0, B:0, X:0, Y:0, RT:0, LT:0 };
+        const myID = 'GTA-' + Math.floor(1000 + Math.random() * 9000);
 
-        function goFull() {
-            const doc = document.documentElement;
-            if (doc.requestFullscreen) doc.requestFullscreen();
-            else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
-        }
+        function full() { const d = document.documentElement; if (d.requestFullscreen) d.requestFullscreen(); else if (d.webkitRequestFullscreen) d.webkitRequestFullscreen(); }
 
         function preStart(type) {
             document.getElementById('menu').style.display = 'none';
-            goFull(); 
-            peer = new Peer(myCustomId);
+            full();
+            peer = new Peer(myID);
             if(type === 'screen') {
                 document.getElementById('ui-overlay').style.display = 'block';
-                document.getElementById('peer-id-text').innerText = myCustomId;
+                document.getElementById('peer-id-text').innerText = myID;
                 initWorld();
             } else {
                 document.getElementById('ctrl-view').style.display = 'block';
@@ -103,41 +95,50 @@
             }
         }
 
-        function initWorld() {
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x87CEEB);
-            scene.fog = new THREE.Fog(0x87CEEB, 20, 160);
+        function createCar(color) {
+            const g = new THREE.Group();
+            const b = new THREE.Mesh(new THREE.BoxGeometry(2, 0.8, 4), new THREE.MeshLambertMaterial({color}));
+            b.position.y = 0.6; g.add(b);
+            const w = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.6, 1.8), new THREE.MeshLambertMaterial({color: 0x111111}));
+            w.position.set(0, 1.2, -0.2); g.add(w);
+            return { mesh: g, driver: null, speed: 0 };
+        }
 
+        function initWorld() {
+            scene = new THREE.Scene(); scene.background = new THREE.Color(0x87CEEB);
+            scene.fog = new THREE.Fog(0x87CEEB, 20, 150);
             renderer = new THREE.WebGLRenderer({ antialias: false, precision: "lowp" });
-            renderer.setPixelRatio(1);
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
-
-            const amb = new THREE.AmbientLight(0xffffff, 0.8); scene.add(amb);
-            const dir = new THREE.DirectionalLight(0xffffff, 1); dir.position.set(5, 10, 5); scene.add(dir);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+            const d = new THREE.DirectionalLight(0xffffff, 0.8); d.position.set(5, 10, 5); scene.add(d);
 
             const ground = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshLambertMaterial({color: 0x333333}));
             ground.rotation.x = -Math.PI/2; scene.add(ground);
-            scene.add(new THREE.GridHelper(1000, 60, 0x000000, 0x444444));
+            scene.add(new THREE.GridHelper(1000, 50, 0, 0x444444));
 
-            for(let i=0; i<70; i++) {
-                const h = Math.random()*25 + 5;
-                const b = new THREE.Mesh(new THREE.BoxGeometry(8, h, 8), new THREE.MeshLambertMaterial({color: 0x555555}));
-                b.position.set((Math.random()-0.5)*300, h/2, (Math.random()-0.5)*300);
-                scene.add(b);
+            for(let i=0; i<60; i++) {
+                const h = Math.random()*25+5;
+                const b = new THREE.Mesh(new THREE.BoxGeometry(10, h, 10), new THREE.MeshLambertMaterial({color: 0x666666}));
+                b.position.set((Math.random()-0.5)*300, h/2, (Math.random()-0.5)*300); scene.add(b);
+            }
+
+            for(let i=0; i<6; i++) {
+                const c = createCar(Math.random()*0xffffff);
+                c.mesh.position.set((Math.random()-0.5)*80, 0, (Math.random()-0.5)*80);
+                scene.add(c.mesh); vehicles.push(c);
             }
 
             peer.on('connection', conn => {
                 const pID = players.length + 1;
-                const group = new THREE.Group();
-                const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.4, 0.8, 2, 8), new THREE.MeshLambertMaterial({color: pID==1?0x007bff:0xff3333}));
-                body.position.y = 1; group.add(body);
-                const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshLambertMaterial({color: 0xffdbac}));
-                head.position.y = 1.8; group.add(head);
+                const g = new THREE.Group();
+                const b = new THREE.Mesh(new THREE.CapsuleGeometry(0.4, 0.8, 2, 8), new THREE.MeshLambertMaterial({color: pID==1?0x007bff:0xff3333}));
+                b.position.y = 1; g.add(b);
+                const h = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshLambertMaterial({color: 0xffdbac}));
+                h.position.y = 1.8; g.add(h);
                 
-                const p = { conn, mesh: group, cam: new THREE.PerspectiveCamera(70, 1, 0.1, 200), input: {...currentState}, walk: 0 };
-                group.position.set(pID==1?3:-3, 0, 0);
-                scene.add(group); players.push(p);
+                const p = { conn, mesh: g, cam: new THREE.PerspectiveCamera(70, 1, 0.1, 200), input: {...cState}, v: null, walk: 0 };
+                g.position.set(pID==1?5:-5, 0, 10); scene.add(g); players.push(p);
                 conn.on('data', d => p.input = d);
                 if(players.length === 1) { clock = new THREE.Clock(); animate(); }
             });
@@ -146,60 +147,70 @@
         function animate() {
             requestAnimationFrame(animate);
             const dt = clock.getDelta();
-            const isSplit = players.length > 1;
+            const split = players.length > 1;
+
+            vehicles.forEach(v => {
+                if(v.driver) {
+                    const inp = v.driver.input;
+                    v.speed += (inp.RT - inp.LT*1.5) * 18 * dt;
+                    v.speed = THREE.MathUtils.clamp(v.speed, -10, 45);
+                    v.speed *= 0.98;
+                    if(Math.abs(v.speed) > 1) v.mesh.rotation.y -= inp.lX * 2 * dt * (v.speed > 0 ? 1 : -1);
+                    v.mesh.translateZ(v.speed * dt);
+                } else { v.speed *= 0.95; v.mesh.translateZ(v.speed * dt); }
+            });
 
             players.forEach((p, i) => {
-                const {lX, lY, rX, rY} = p.input;
-                // Move
-                const move = new THREE.Vector3(lX, 0, -lY).applyEuler(p.mesh.rotation);
-                p.mesh.position.add(move.multiplyScalar(7 * dt));
-                // Rotate
-                p.mesh.rotation.y -= rX * 2 * dt;
-                // Anim
-                if(lX || lY) { p.walk += dt * 12; p.mesh.position.y = Math.abs(Math.sin(p.walk)) * 0.15; }
-
-                const offset = new THREE.Vector3(0, 4, -8).applyMatrix4(p.mesh.matrixWorld);
-                p.cam.position.lerp(offset, 0.2);
-                p.cam.lookAt(p.mesh.position.x, p.mesh.position.y + 1.5, p.mesh.position.z);
-
+                const inp = p.input;
+                if(!p.v) {
+                    const move = new THREE.Vector3(inp.lX, 0, -inp.lY).applyEuler(p.mesh.rotation);
+                    p.mesh.position.add(move.multiplyScalar(8 * dt));
+                    p.mesh.rotation.y -= inp.rX * 2.5 * dt;
+                    if(inp.lX || inp.lY) { p.walk += dt*12; p.mesh.position.y = Math.abs(Math.sin(p.walk))*0.15; }
+                    const off = new THREE.Vector3(0, 4.5, -9).applyMatrix4(p.mesh.matrixWorld);
+                    p.cam.position.lerp(off, 0.2);
+                    p.cam.lookAt(p.mesh.position.x, p.mesh.position.y + 1.5, p.mesh.position.z);
+                    if(inp.Y) {
+                        inp.Y = 0;
+                        vehicles.forEach(v => { if(!v.driver && p.mesh.position.distanceTo(v.mesh.position) < 5) { p.v = v; v.driver = p; p.mesh.visible = false; }});
+                    }
+                } else {
+                    p.mesh.position.copy(p.v.mesh.position);
+                    p.cam.position.copy(p.v.mesh.position).add(new THREE.Vector3(0, 1.5, 0));
+                    p.cam.lookAt(p.v.mesh.position.clone().add(new THREE.Vector3(0, 0, 10).applyEuler(p.v.mesh.rotation)));
+                    if(inp.Y) { inp.Y = 0; p.mesh.position.add(new THREE.Vector3(-3,0,0).applyEuler(p.v.mesh.rotation)); p.mesh.visible = true; p.v.driver = null; p.v = null; }
+                }
                 const w = window.innerWidth, h = window.innerHeight;
-                if(isSplit) {
-                    p.cam.aspect = w/(h/2); p.cam.updateProjectionMatrix();
+                p.cam.aspect = split ? w/(h/2) : w/h; p.cam.updateProjectionMatrix();
+                if(split) {
                     renderer.setScissorTest(true);
                     const rect = i==0 ? [0, h/2, w, h/2] : [0, 0, w, h/2];
                     renderer.setViewport(...rect); renderer.setScissor(...rect);
-                } else {
-                    p.cam.aspect = w/h; p.cam.updateProjectionMatrix();
-                    renderer.setScissorTest(false);
-                    renderer.setViewport(0, 0, w, h);
-                }
+                } else { renderer.setScissorTest(false); renderer.setViewport(0,0,w,h); }
                 renderer.render(scene, p.cam);
             });
         }
 
         function setupControls() {
-            const send = () => { if(window.conn) window.conn.send(currentState); };
-            const bindAnalog = (id, headId, prefix) => {
+            const send = () => { if(window.conn) window.conn.send(cState); };
+            const bindStick = (id, headId, prefix) => {
                 const el = document.getElementById(id), head = document.getElementById(headId);
                 const move = (e) => {
                     const t = e.touches[0], r = el.getBoundingClientRect(), rad = el.offsetWidth/2;
                     let dx = t.clientX - (r.left + rad), dy = t.clientY - (r.top + rad);
-                    const dist = Math.sqrt(dx*dx + dy*dy);
-                    if(dist > rad) { dx *= rad/dist; dy *= rad/dist; }
+                    const d = Math.sqrt(dx*dx + dy*dy);
+                    if(d > rad) { dx *= rad/d; dy *= rad/d; }
                     head.style.transform = `translate(${dx}px, ${dy}px)`;
-                    currentState[prefix+'X'] = dx/rad; currentState[prefix+'Y'] = dy/rad;
-                    send();
+                    cState[prefix+'X'] = dx/rad; cState[prefix+'Y'] = dy/rad; send();
                 };
-                el.addEventListener('touchmove', e => { e.preventDefault(); move(e); });
-                el.addEventListener('touchend', () => { head.style.transform = 'translate(0,0)'; currentState[prefix+'X']=0; currentState[prefix+'Y']=0; send(); });
+                el.addEventListener('touchmove', e => { e.preventDefault(); move(e); }, {passive:false});
+                el.addEventListener('touchend', () => { head.style.transform = 'translate(0,0)'; cState[prefix+'X']=0; cState[prefix+'Y']=0; send(); });
             };
-            bindAnalog('l-stick-ctn', 'l-head', 'l');
-            bindAnalog('r-stick-ctn', 'r-head', 'r');
-            
+            bindStick('l-stick', 'l-head', 'l'); bindStick('r-stick', 'r-head', 'r');
             ['a','b','x','y','lt','lb','rt','rb'].forEach(id => {
                 const el = document.getElementById('btn-'+id);
-                el.addEventListener('touchstart', (e) => { e.preventDefault(); el.classList.add('active-btn'); currentState[id.toUpperCase()]=1; send(); if(navigator.vibrate) navigator.vibrate(15); });
-                el.addEventListener('touchend', () => { el.classList.remove('active-btn'); currentState[id.toUpperCase()]=0; send(); });
+                el.addEventListener('touchstart', (e) => { e.preventDefault(); el.classList.add('active-btn'); cState[id.toUpperCase()]=1; send(); if(navigator.vibrate) navigator.vibrate(20); });
+                el.addEventListener('touchend', () => { el.classList.remove('active-btn'); cState[id.toUpperCase()]=0; send(); });
             });
         }
 
@@ -207,11 +218,7 @@
             const id = document.getElementById('target-id').value.toUpperCase().trim();
             if(!id) return;
             window.conn = peer.connect(id);
-            window.conn.on('open', () => { 
-                goFull();
-                document.getElementById('setup-ui').style.display='none'; 
-                document.getElementById('game-pad').style.display='block'; 
-            });
+            window.conn.on('open', () => { full(); document.getElementById('setup-ui').style.display='none'; document.getElementById('game-pad').style.display='block'; });
         }
     </script>
 </body>
