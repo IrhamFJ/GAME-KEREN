@@ -1,11 +1,9 @@
-</body>
-</html>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>BLOCK DRIFT V1.4 PRO</title>
+    <title>BLOCK DRIFT V1.5 - PRO</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
     <style>
@@ -13,61 +11,61 @@
         * { -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box; touch-action: none; }
         body { margin: 0; padding: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; }
         
-        /* MENU SYSTEM */
-        #menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: radial-gradient(circle, #111 0%, #000 100%); color: #fff; text-align: center; z-index: 100; position: relative; }
+        /* UI MENU */
+        #menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: radial-gradient(circle, #1a1a1a 0%, #000 100%); color: #fff; text-align: center; z-index: 100; position: relative; }
         .btn { padding: 20px; width: 280px; margin: 12px; font-weight: bold; cursor: pointer; border: 4px solid #fff; background: transparent; color: #fff; font-family: 'Orbitron'; text-transform: uppercase; border-radius: 12px; transition: 0.2s; }
-        .btn:active { background: #fff; color: #000; transform: scale(0.92); }
+        .btn:hover { background: rgba(255,255,255,0.1); }
+        .btn:active { background: #fff; color: #000; transform: scale(0.95); }
 
-        /* HOST OVERLAY */
+        /* TV HOST UI */
         #host-ui { position: absolute; width: 100%; height: 100%; pointer-events: none; display: none; }
-        #waiting-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 1.8rem; text-align: center; text-shadow: 0 0 20px #00f2ff; }
-        #host-info { position: absolute; top: 20px; right: 20px; background: #fff; color: #000; padding: 12px 25px; border-radius: 15px; font-weight: 900; pointer-events: auto; }
-        .blink { animation: blinker 1.5s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0.2; } }
+        #waiting-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 2.2rem; text-align: center; text-shadow: 0 0 20px #ff0055; animation: blink 1.5s infinite; }
+        #host-info { position: absolute; top: 25px; right: 25px; background: #fff; color: #000; padding: 15px 30px; border-radius: 15px; font-weight: 900; pointer-events: auto; border: 4px solid #ff0055; font-size: 1.2rem; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-        /* CONTROLLER UI */
-        #ctrl-view { display: none; height: 100vh; width: 100vw; background: #050505; position: relative; }
-        #dash { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: #111; border: 3px solid #333; padding: 15px; text-align: center; border-radius: 25px; width: 220px; box-shadow: 0 10px 0 #000; }
-        #spd { color: #fff; font-size: 3.5rem; display: block; line-height: 1; }
+        /* HP CONTROLLER UI */
+        #ctrl-view { display: none; height: 100vh; width: 100vw; background: #000; position: relative; }
+        #dash { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: #111; border: 2px solid #444; padding: 12px; text-align: center; border-radius: 20px; width: 200px; box-shadow: 0 6px 0 #000; }
+        #spd { color: #fff; font-size: 3.2rem; display: block; line-height: 1; }
         
-        #nitro-btn { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 110px; height: 110px; background: #00f2ff; border: 5px solid #fff; border-radius: 50%; color: #000; font-weight: 900; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 0 30px rgba(0,242,255,0.6); }
-        #nitro-btn:active { transform: translateX(-50%) scale(0.9); box-shadow: none; background: #fff; }
-        
-        .pedal-group { position: absolute; bottom: 30px; right: 25px; display: flex; flex-direction: column; gap: 15px; }
-        .pedal { width: 110px; border-radius: 20px; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 4px solid rgba(255,255,255,0.1); }
-        .gas { height: 200px; background: linear-gradient(to bottom, #006600, #003300); }
-        .rem { height: 100px; background: linear-gradient(to bottom, #660000, #330000); }
-        
-        .steer-group { position: absolute; bottom: 30px; left: 25px; display: flex; gap: 20px; }
-        .btn-s { width: 100px; height: 100px; background: #1a1a1a; color: #fff; border-radius: 50%; border: 4px solid #333; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; box-shadow: 0 8px 0 #000; }
-        
-        .active { filter: brightness(1.5); transform: translateY(5px); box-shadow: none !important; }
+        #nitro-btn { position: absolute; bottom: 45px; left: 50%; transform: translateX(-50%); width: 115px; height: 115px; background: #ff0055; border: 5px solid #fff; border-radius: 50%; color: #fff; font-weight: 900; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; transition: 0.2s; box-shadow: 0 8px 0 #80002b; }
+        #nitro-btn.active_n { background: #00f2ff; box-shadow: 0 0 40px #00f2ff; color: #000; transform: translateX(-50%) translateY(5px); box-shadow: none; }
+        #nitro-btn.cd { background: #222 !important; border-color: #444 !important; color: #555 !important; box-shadow: none !important; transform: translateX(-50%) translateY(5px); }
+
+        .p-grp { position: absolute; bottom: 35px; right: 25px; display: flex; flex-direction: column; gap: 15px; }
+        .pedal { width: 110px; border-radius: 20px; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 3px solid #333; }
+        .gas { height: 210px; background: linear-gradient(to bottom, #008800, #004400); }
+        .rem { height: 95px; background: linear-gradient(to bottom, #880000, #440000); }
+        .s-grp { position: absolute; bottom: 35px; left: 25px; display: flex; gap: 20px; }
+        .btn-s { width: 100px; height: 100px; background: #111; color: #fff; border-radius: 50%; border: 4px solid #333; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; box-shadow: 0 8px 0 #000; }
+        .act { filter: brightness(1.8); transform: translateY(6px); box-shadow: none !important; }
     </style>
 </head>
 <body>
 
 <div id="menu">
-    <h1 style="font-size: 3.5rem; margin: 0; letter-spacing: 5px;">BLOCK DRIFT</h1>
-    <p style="color: #00f2ff; font-size: 1.2rem; margin-bottom: 40px;">PRO EDITION V1.4</p>
-    <button class="btn" onclick="setupPeer('host')">CREATE LOBBY (TV)</button>
-    <button class="btn" onclick="setupPeer('ctrl')">JOIN RACE (HP)</button>
+    <h1 style="letter-spacing: 12px; margin: 0; font-size: 4rem;">BLOCK DRIFT</h1>
+    <p style="color: #ff0055; font-size: 1.2rem; margin-bottom: 40px;">V1.5 - STABLE PRO</p>
+    <button class="btn" onclick="init('host')">CREATE LOBBY (TV)</button>
+    <button class="btn" onclick="init('ctrl')">JOIN RACE (HP)</button>
+    <p style="color: #444; margin-top: 20px;">[ TIP: PRESS 5 ON REMOTE TO HOST ]</p>
 </div>
 
 <div id="host-ui">
-    <div id="waiting-msg" class="blink">WAITING FOR DRIVERS...<br><span style="font-size: 1rem; color: #666;">READY UP ON YOUR MOBILE DEVICE</span></div>
-    <div id="host-info">LOBBY CODE: <span id="id-val" style="color:#0088ff">...</span></div>
+    <div id="waiting-msg">WAITING FOR DRIVERS...</div>
+    <div id="host-info">LOBBY CODE: <span id="id-val" style="color:#ff0055">...</span></div>
 </div>
 
 <div id="ctrl-view">
-    <div id="setup-screen" style="padding-top: 100px; text-align: center;">
-        <input type="text" id="target-id" placeholder="ENTER CODE" maxlength="7" style="padding:20px; font-size:1.8rem; width:85%; max-width:350px; border:4px solid #fff; background:#000; color:#fff; font-family:'Orbitron'; text-align:center; border-radius:15px; text-transform:uppercase;"><br><br>
-        <button class="btn" onclick="connectToHost()">IGNITION</button>
+    <div id="setup-scr" style="padding-top: 120px; text-align: center;">
+        <input type="text" id="target" placeholder="ENTER CODE" maxlength="7" style="padding:22px; font-size:1.8rem; width:85%; max-width:400px; text-align:center; border-radius:15px; background:#000; color:#fff; border:4px solid #fff; font-family:'Orbitron';"><br><br>
+        <button class="btn" onclick="join()">IGNITION</button>
     </div>
     <div id="pad" style="display:none; width:100%; height:100%;">
         <div id="dash"><span id="spd">0</span><small style="color:#555">KM/H</small></div>
         <div id="nitro-btn">NITRO</div>
-        <div class="steer-group"><div class="btn-s" id="l">←</div><div class="btn-s" id="r">→</div></div>
-        <div class="pedal-group"><div class="pedal gas" id="u">GAS</div><div class="pedal rem" id="d">BRAKE</div></div>
+        <div class="s-grp"><div class="btn-s" id="l">←</div><div class="btn-s" id="r">→</div></div>
+        <div class="p-grp"><div class="pedal gas" id="u">GAS</div><div class="pedal rem" id="d">BRAKE</div></div>
     </div>
 </div>
 
@@ -75,145 +73,152 @@
 let players=[], scene, renderer, peer, audioCtx, keys={u:0,d:0,l:0,r:0,n:0}, isHost=false;
 const myId = 'HAM-' + Math.floor(100+Math.random()*899);
 
-// --- PEER & CONNECTIVITY ---
-function setupPeer(mode) {
-    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    document.getElementById('menu').style.display='none';
-    peer = new Peer(myId, { debug: 1 });
-    
-    peer.on('open', id => {
-        if(mode==='host') {
-            isHost=true; 
-            document.getElementById('id-val').innerText=id;
-            document.getElementById('host-ui').style.display='block';
-            initThreeJS();
-        } else {
-            document.getElementById('ctrl-view').style.display='block';
+// --- REMOTE HOTKEY 5 DETECTION ---
+window.addEventListener('keydown', (e) => {
+    if (e.keyCode === 53 || e.key === "5") {
+        if (document.getElementById('menu').style.display !== 'none') {
+            init('host');
         }
-    });
-}
+    }
+});
 
-function connectToHost() {
-    const tid = document.getElementById('target-id').value.toUpperCase().trim();
-    if(!tid) return;
-    const conn = peer.connect(tid);
-    conn.on('open', () => {
-        window.activeConn = conn;
-        document.getElementById('setup-screen').style.display='none';
-        document.getElementById('pad').style.display='block';
-        if(audioCtx.state === 'suspended') audioCtx.resume();
-        setupControllerEvents();
-    });
-}
-
-// --- ENGINE THREE.JS ---
-function initThreeJS() {
-    scene = new THREE.Scene(); scene.background = new THREE.Color(0x020202);
-    renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(1); // Anti-lag for 4K TVs
-    document.body.appendChild(renderer.domElement);
+function init(mode) {
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
     
-    scene.add(new THREE.AmbientLight(0xffffff, 1.5));
-    const grid = new THREE.GridHelper(10000, 300, 0x333333, 0x111111);
-    scene.add(grid);
-
-    // City Decoration
-    for(let i=0; i<250; i++){
-        const h = 15+Math.random()*70;
-        const box = new THREE.Mesh(new THREE.BoxGeometry(12, h, 12), new THREE.MeshBasicMaterial({color: 0x151515 + Math.random()*0x111111}));
-        box.position.set((Math.random()-0.5)*1500, h/2, (Math.random()-0.5)*1500);
-        scene.add(box);
+    document.getElementById('menu').style.display='none';
+    if(mode==='host' && document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(()=>{});
     }
 
-    window.addEventListener('resize', () => {
-        renderer.setSize(window.innerWidth, window.innerHeight);
+    peer = new Peer(myId);
+    peer.on('open', id => {
+        if(mode==='host') {
+            isHost=true; document.getElementById('id-val').innerText=id;
+            document.getElementById('host-ui').style.display='block';
+            startHost();
+        } else document.getElementById('ctrl-view').style.display='block';
     });
+}
+
+function createCarModel() {
+    const group = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.8, 4.4), new THREE.MeshStandardMaterial({color: Math.random()*0xffffff}));
+    body.position.y = 0.7; group.add(body);
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.7, 2), new THREE.MeshStandardMaterial({color: 0x0a0a0a}));
+    roof.position.set(0, 1.4, -0.2); group.add(roof);
+    const wGeo = new THREE.BoxGeometry(0.55, 0.75, 0.75);
+    const wMat = new THREE.MeshBasicMaterial({color: 0x000000});
+    const wPos = [[-1.2, 0.38, 1.3], [1.2, 0.38, 1.3], [-1.2, 0.38, -1.3], [1.2, 0.38, -1.3]];
+    wPos.forEach(p => { const w = new THREE.Mesh(wGeo, wMat); w.position.set(...p); group.add(w); });
+    return group;
+}
+
+function startHost() {
+    scene = new THREE.Scene(); scene.background = new THREE.Color(0x010101);
+    renderer = new THREE.WebGLRenderer({ antialias: false, precision: 'mediump', powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(1);
+    document.body.appendChild(renderer.domElement);
+    
+    scene.add(new THREE.AmbientLight(0xffffff, 1.3));
+    const dL = new THREE.DirectionalLight(0xffffff, 0.7); dL.position.set(10,25,10); scene.add(dL);
+    scene.add(new THREE.GridHelper(10000, 200, 0x222222, 0x111111));
 
     peer.on('connection', conn => {
         document.getElementById('waiting-msg').style.display='none';
         const p = {
             conn, speed:0, 
-            car: new THREE.Mesh(new THREE.BoxGeometry(2, 1, 4), new THREE.MeshBasicMaterial({color: Math.random()*0xffffff})),
-            cam: new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 3000),
+            car: createCarModel(),
+            cam: new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 3000),
             input: {u:0,d:0,l:0,r:0,n:0}
         };
         
-        // Sound System
-        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-        osc.type = 'sawtooth'; gain.gain.value = 0.05;
-        osc.connect(gain); gain.connect(audioCtx.destination); osc.start();
-        p.audio = { osc, gain };
+        const osc = audioCtx.createOscillator();
+        const lpf = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+        lpf.type = 'lowpass'; lpf.frequency.value = 320; 
+        osc.type = 'sawtooth'; gain.gain.value = 0.06;
+        osc.connect(lpf); lpf.connect(gain); gain.connect(audioCtx.destination); osc.start();
+        p.audio = { osc, gain, lpf };
 
         scene.add(p.car); players.push(p);
         conn.on('data', d => p.input = d);
-        conn.on('close', () => { scene.remove(p.car); players = players.filter(it => it.conn !== conn); });
-        if(players.length === 1) gameLoop();
+        conn.on('close', () => { scene.remove(p.car); players = players.filter(pl => pl.conn !== conn); });
+        if(players.length === 1) loop();
     });
 }
 
-function gameLoop() {
-    if(players.length === 0) return;
-    requestAnimationFrame(gameLoop);
-    
-    players.forEach((p, idx) => {
-        let nMult = p.input.n ? 2.5 : 1; 
-        let acc = p.input.n ? 0.08 : 0.03;
+function loop() {
+    requestAnimationFrame(loop);
+    players.forEach(p => {
+        let nMult = p.input.nitro_on ? 2.5 : 1.0;
+        let acc = p.input.nitro_on ? 0.08 : 0.028;
 
-        if(p.input.u) p.speed = Math.min(p.speed + acc, 2.0 * nMult);
-        else p.speed *= 0.985;
-        if(p.input.d) p.speed *= 0.85;
+        if(p.input.u) p.speed = Math.min(p.speed + acc, 1.9 * nMult);
+        else p.speed *= 0.983;
+        if(p.input.d) p.speed *= 0.83;
 
         p.car.translateZ(-p.speed);
         if(Math.abs(p.speed) > 0.1) {
-            let turn = 0.045 * (p.speed > 0 ? 1 : -1);
-            if(p.input.l) p.car.rotation.y += turn;
-            if(p.input.r) p.car.rotation.y -= turn;
+            let trn = 0.048 * (p.speed > 0 ? 1 : -1);
+            if(p.input.l) p.car.rotation.y += trn;
+            if(p.input.r) p.car.rotation.y -= trn;
         }
 
-        // Engine Audio Logic
-        let freq = 45 + (p.speed * 80) + (p.input.n ? 120 : 0);
-        p.audio.osc.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
-        p.audio.gain.gain.setTargetAtTime(p.input.u ? 0.12 : 0.04, audioCtx.currentTime, 0.1);
+        // Bass Engine Audio
+        let f = 35 + (p.speed * 62) + (p.input.nitro_on ? 95 : 0);
+        p.audio.osc.frequency.setTargetAtTime(f, audioCtx.currentTime, 0.1);
+        p.audio.gain.gain.setTargetAtTime(p.input.u ? 0.15 : 0.06, audioCtx.currentTime, 0.1);
+        p.audio.lpf.frequency.setTargetAtTime(320 + (p.speed * 380), audioCtx.currentTime, 0.1);
 
-        // Camera Logic & Shake
-        let camPos = new THREE.Vector3(0, 6, 14).applyQuaternion(p.car.quaternion);
-        if(p.input.n) camPos.add(new THREE.Vector3((Math.random()-0.5)*0.4, (Math.random()-0.5)*0.4, 0));
-        p.cam.position.copy(p.car.position).add(camPos);
+        // Cam Tracking with Nitro Shake
+        let offset = new THREE.Vector3(0, 5.5, 13).applyQuaternion(p.car.quaternion);
+        if(p.input.nitro_on) offset.add(new THREE.Vector3((Math.random()-0.5)*0.35, (Math.random()-0.5)*0.35, 0));
+        p.cam.position.copy(p.car.position).add(offset);
         p.cam.lookAt(p.car.position);
-        
-        // Split Screen Logic
-        const h = window.innerHeight;
-        p.cam.aspect = window.innerWidth / (players.length > 1 ? h/2 : h);
-        p.cam.updateProjectionMatrix();
-        
-        if(players.length > 1) {
-            renderer.setScissorTest(true);
-            const rect = idx === 0 ? [0, h/2, window.innerWidth, h/2] : [0, 0, window.innerWidth, h/2];
-            renderer.setViewport(...rect); renderer.setScissor(...rect);
-        }
+
         renderer.render(scene, p.cam);
     });
 }
 
-// --- INPUT HANDLER ---
-function setupControllerEvents() {
+function join() {
+    const tid = document.getElementById('target').value.toUpperCase().trim();
+    if(!tid) return;
+    const conn = peer.connect(tid);
+    conn.on('open', () => {
+        window.activeConn = conn;
+        document.getElementById('setup-scr').style.display='none';
+        document.getElementById('pad').style.display='block';
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        startController();
+    });
+}
+
+function startController() {
+    const nBtn = document.getElementById('nitro-btn');
+    let isCD = false, isN = false;
+    const sync = () => window.activeConn.send({...keys, nitro_on: isN});
+
+    const trigN = (e) => {
+        e.preventDefault(); if(isCD || isN) return;
+        isN = true; nBtn.classList.add('active_n'); nBtn.innerText = "POWER"; sync();
+        setTimeout(() => {
+            isN = false; isCD = true; nBtn.classList.remove('active_n'); nBtn.classList.add('cd'); nBtn.innerText = "WAIT"; sync();
+            setTimeout(() => { isCD = false; nBtn.classList.remove('cd'); nBtn.innerText = "NITRO"; }, 5000);
+        }, 3000);
+    };
+
     const bind = (id, k) => {
         const el = document.getElementById(id);
-        const startEv = (e) => { 
-            e.preventDefault(); keys[k]=1; 
-            window.activeConn.send(keys); el.classList.add('active'); 
-        };
-        const endEv = (e) => { 
-            keys[k]=0; window.activeConn.send(keys); 
-            el.classList.remove('active'); 
-        };
-        el.addEventListener('touchstart', startEv, {passive: false});
-        el.addEventListener('touchend', endEv);
-        el.addEventListener('mousedown', startEv);
-        el.addEventListener('mouseup', endEv);
+        const st = (e) => { e.preventDefault(); keys[k]=1; sync(); el.classList.add('act'); };
+        const en = (e) => { e.preventDefault(); keys[k]=0; sync(); el.classList.remove('act'); };
+        el.addEventListener('touchstart', st, {passive: false}); el.addEventListener('touchend', en);
+        el.addEventListener('mousedown', st); el.addEventListener('mouseup', en);
     };
-    bind('u','u'); bind('d','d'); bind('l','l'); bind('r','r'); bind('nitro-btn','n');
+
+    bind('u','u'); bind('d','d'); bind('l','l'); bind('r','r');
+    nBtn.addEventListener('touchstart', trigN, {passive: false}); nBtn.addEventListener('mousedown', trigN);
 }
 </script>
 </body>
