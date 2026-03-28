@@ -16,16 +16,16 @@
         .btn { padding: 20px; width: 300px; margin: 15px; font-weight: bold; cursor: pointer; border: 4px solid #fff; background: transparent; color: #fff; font-family: 'Orbitron'; text-transform: uppercase; border-radius: 12px; }
         .btn:active { background: #fff; color: #000; transform: scale(0.95); }
 
-        /* TV HOST */
+        /* TV HOST UI */
         #host-ui { position: absolute; width: 100%; height: 100%; pointer-events: none; display: none; z-index: 10; }
         #waiting-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 2rem; text-shadow: 0 0 15px #ff0055; animation: blk 1.5s infinite; }
         #host-info { position: absolute; top: 20px; right: 20px; background: #fff; color: #000; padding: 12px 25px; border-radius: 12px; font-weight: 900; pointer-events: auto; border: 3px solid #ff0055; }
         #fps { position: absolute; bottom: 10px; left: 10px; color: #00ff00; font-size: 0.9rem; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 5px; }
         @keyframes blk { 50% { opacity: 0.2; } }
 
-        /* HP CONTROLLER (JUMBO) */
+        /* HP CONTROLLER UI (JUMBO) */
         #ctrl-view { display: none; height: 100vh; width: 100vw; background: #050505; position: relative; }
-        #dash { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background: #111; border: 3px solid #444; padding: 10px; text-align: center; border-radius: 20px; width: 220px; }
+        #dash { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background: #111; border: 3px solid #444; padding: 10px; text-align: center; border-radius: 20px; width: 220px; box-shadow: 0 8px 0 #000; }
         #spd { color: #fff; font-size: 3.5rem; display: block; line-height: 1; }
         
         #nitro-btn { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 140px; height: 140px; background: #ff0055; border: 6px solid #fff; border-radius: 50%; color: #fff; font-weight: 900; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; transition: 0.2s; box-shadow: 0 10px 0 #80002b; }
@@ -39,17 +39,17 @@
         
         .s-grp { position: absolute; bottom: 25px; left: 25px; display: flex; gap: 25px; }
         .btn-s { width: 130px; height: 130px; background: #111; color: #fff; border-radius: 50%; border: 4px solid #444; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; box-shadow: 0 10px 0 #000; }
-        .act { filter: brightness(2); transform: translateY(8px); box-shadow: none !important; }
+        .act { filter: brightness(2.2); transform: translateY(8px); box-shadow: none !important; }
     </style>
 </head>
 <body>
 
 <div id="menu">
     <h1 style="letter-spacing: 12px; font-size: 3.5rem; margin: 0;">BLOCK DRIFT</h1>
-    <p style="color: #ff0055; margin-bottom: 40px;">VERSION 1.5 - URBAN PRO</p>
+    <p style="color: #ff0055; margin-bottom: 40px;">V1.5 FINAL STABLE</p>
     <button class="btn" onclick="sys('host')">CREATE LOBBY (TV)</button>
     <button class="btn" onclick="sys('ctrl')">JOIN RACE (HP)</button>
-    <p style="color: #444; font-size: 0.9rem;">[ Hotkey: Press 5 on Remote ]</p>
+    <p style="color: #444; font-size: 0.9rem;">[ Hotkey: Pencet 5 di Remote ]</p>
 </div>
 
 <div id="host-ui">
@@ -72,7 +72,7 @@
 </div>
 
 <script>
-let players=[], scene, renderer, peer, audioCtx, keys={u:0,d:0,l:0,r:0,n:0}, isHost=false;
+let players=[], scene, renderer, peer, audioCtx, keys={u:0,d:0,l:0,r:0,n:0};
 const myId = 'HAM-' + Math.floor(100+Math.random()*899);
 
 // REMOTE HOTKEY 5
@@ -91,7 +91,7 @@ function sys(mode) {
     peer = new Peer(myId);
     peer.on('open', id => {
         if(mode==='host') {
-            isHost=true; document.getElementById('id-val').innerText=id;
+            document.getElementById('id-val').innerText=id;
             document.getElementById('host-ui').style.display='block';
             initHost();
         } else document.getElementById('ctrl-view').style.display='block';
@@ -106,83 +106,95 @@ function initHost() {
     document.body.appendChild(renderer.domElement);
     
     scene.add(new THREE.AmbientLight(0xffffff, 1.4));
-    const sun = new THREE.DirectionalLight(0xffffff, 0.6); sun.position.set(10,20,10); scene.add(sun);
+    const sun = new THREE.DirectionalLight(0xffffff, 0.6); sun.position.set(10,25,10); scene.add(sun);
 
-    // ROAD & URBAN (Lightweight)
+    // ROAD TEXTURE
     const cv = document.createElement('canvas'); cv.width = 128; cv.height = 128;
     const cx = cv.getContext('2d');
-    cx.fillStyle = '#1a1a1a'; cx.fillRect(0,0,128,128);
-    cx.fillStyle = '#ffffff'; cx.fillRect(60, 10, 8, 40); cx.fillRect(60, 70, 8, 40);
-    const roadTex = new THREE.CanvasTexture(cv); roadTex.wrapS = roadTex.wrapT = THREE.RepeatWrapping; roadTex.repeat.set(200, 200);
+    cx.fillStyle = '#111'; cx.fillRect(0,0,128,128);
+    cx.fillStyle = '#fff'; cx.fillRect(60, 10, 8, 40); cx.fillRect(60, 70, 8, 40);
+    const roadTex = new THREE.CanvasTexture(cv); roadTex.wrapS = roadTex.wrapT = THREE.RepeatWrapping; roadTex.repeat.set(250, 250);
     const road = new THREE.Mesh(new THREE.PlaneGeometry(10000, 10000), new THREE.MeshBasicMaterial({map: roadTex}));
     road.rotation.x = -Math.PI/2; scene.add(road);
 
-    const bGeo = new THREE.BoxGeometry(10, 1, 10); bGeo.translate(0, 0.5, 0);
-    const bMat = new THREE.MeshStandardMaterial({color: 0x111111});
-    const inst = new THREE.InstancedMesh(bGeo, bMat, 600);
+    // INSTANCED CITY (SUPER FAST)
+    const inst = new THREE.InstancedMesh(new THREE.BoxGeometry(10, 1, 10), new THREE.MeshStandardMaterial({color: 0x0a0a0a}), 600);
     const dmy = new THREE.Object3D();
     for(let i=0; i<600; i++){
-        let x = (Math.random()-0.5)*2500, z = (Math.random()-0.5)*2500;
-        if(Math.abs(x) < 50) x += 70 * (x>0?1:-1);
+        let x = (Math.random()-0.5)*3000, z = (Math.random()-0.5)*3000;
+        if(Math.abs(x) < 55) x += 80 * (x>0?1:-1);
         dmy.position.set(x, 0, z);
-        dmy.scale.set(1+Math.random()*2, 15+Math.random()*60, 1+Math.random()*2);
+        dmy.scale.set(1+Math.random()*3, 20+Math.random()*80, 1+Math.random()*3);
         dmy.updateMatrix(); inst.setMatrixAt(i, dmy.matrix);
     }
     scene.add(inst);
 
-    let frames = 0, last = performance.now();
+    let frames = 0;
     peer.on('connection', cn => {
         document.getElementById('waiting-msg').style.display='none';
-        const p = { conn: cn, speed: 0, car: createCar(), cam: new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 3000), input: {u:0,d:0,l:0,r:0,n:0} };
+        const p = { 
+            conn: cn, speed: 0, steer: 0, 
+            car: createCar(), 
+            cam: new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 3500), 
+            input: {u:0,d:0,l:0,r:0,n:0} 
+        };
+        // HEAVY ENGINE AUDIO (BASS FOCUS)
         const osc = audioCtx.createOscillator(); const lpf = audioCtx.createBiquadFilter(); const gn = audioCtx.createGain();
-        lpf.type = 'lowpass'; lpf.frequency.value = 350; osc.type = 'sawtooth'; gn.gain.value = 0.06;
+        lpf.type = 'lowpass'; lpf.frequency.value = 220; 
+        osc.type = 'square'; gn.gain.value = 0.05;
         osc.connect(lpf); lpf.connect(gn); gn.connect(audioCtx.destination); osc.start();
         p.audio = {osc, lpf, gn}; scene.add(p.car); players.push(p);
         cn.on('data', d => p.input = d);
-        if(players.length === 1) render();
+        if(players.length === 1) renderLoop();
     });
 
     setInterval(() => {
-        const now = performance.now();
-        const f = Math.round(frames * 1000 / (now - last));
-        document.getElementById('fps').innerText = "FPS: " + f;
-        frames = 0; last = now;
+        document.getElementById('fps').innerText = "FPS: " + frames; frames = 0;
     }, 1000);
-    const oldLoop = render;
-    render = () => { frames++; oldLoop(); };
 }
 
 function createCar() {
     const g = new THREE.Group();
     const b = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.8, 4.3), new THREE.MeshStandardMaterial({color: Math.random()*0xffffff}));
     b.position.y = 0.7; g.add(b);
-    const r = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.6, 1.8), new THREE.MeshStandardMaterial({color: 0x0a0a0a}));
-    r.position.set(0, 1.4, -0.2); g.add(r);
-    const wG = new THREE.BoxGeometry(0.5, 0.7, 0.7), wM = new THREE.MeshBasicMaterial({color: 0x000000});
-    [[-1.2, 0.35, 1.3], [1.2, 0.35, 1.3], [-1.2, 0.35, -1.3], [1.2, 0.35, -1.3]].forEach(p => {
+    const wG = new THREE.BoxGeometry(0.55, 0.75, 0.75), wM = new THREE.MeshBasicMaterial({color: 0x000000});
+    [[-1.2, 0.38, 1.3], [1.2, 0.38, 1.3], [-1.2, 0.38, -1.3], [1.2, 0.38, -1.3]].forEach(p => {
         const w = new THREE.Mesh(wG, wM); w.position.set(...p); g.add(w);
     });
     return g;
 }
 
-function render() {
-    requestAnimationFrame(render);
+function renderLoop() {
+    requestAnimationFrame(renderLoop);
     players.forEach(p => {
-        let n = p.input.nitro_on ? 2.6 : 1.0, a = p.input.nitro_on ? 0.08 : 0.026;
-        if(p.input.u) p.speed = Math.min(p.speed + a, 1.8 * n); else p.speed *= 0.983;
+        // SMOOTH HANDLING PHYSICS
+        let n = p.input.nitro_on ? 2.6 : 1.0, a = p.input.nitro_on ? 0.08 : 0.024;
+        if(p.input.u) p.speed = Math.min(p.speed + a, 1.9 * n); else p.speed *= 0.983;
         if(p.input.d) p.speed *= 0.82;
+        
+        let targetSteer = 0;
+        if(p.input.l) targetSteer = 0.048;
+        if(p.input.r) targetSteer = -0.048;
+        p.steer += (targetSteer - p.steer) * 0.14; // Lerp Steering
+        
         p.car.translateZ(-p.speed);
-        if(Math.abs(p.speed) > 0.1){
-            let t = 0.047 * (p.speed > 0 ? 1 : -1);
-            if(p.input.l) p.car.rotation.y += t; if(p.input.r) p.car.rotation.y -= t;
-        }
-        let f = 35 + (p.speed * 65) + (p.input.nitro_on ? 90 : 0);
+        if(Math.abs(p.speed) > 0.05) p.car.rotation.y += p.steer * (Math.min(p.speed, 1.2));
+
+        // HEAVY ENGINE FREQUENCY
+        let f = 28 + (p.speed * 42) + (p.input.nitro_on ? 25 : 0);
         p.audio.osc.frequency.setTargetAtTime(f, audioCtx.currentTime, 0.1);
-        p.audio.gn.gain.setTargetAtTime(p.input.u ? 0.14 : 0.06, audioCtx.currentTime, 0.1);
-        p.audio.lpf.frequency.setTargetAtTime(350 + (p.speed * 400), audioCtx.currentTime, 0.1);
+        p.audio.gn.gain.setTargetAtTime(p.input.u ? 0.12 : 0.04, audioCtx.currentTime, 0.1);
+
+        // CAM TRACKING
         let cO = new THREE.Vector3(0, 5, 13).applyQuaternion(p.car.quaternion);
         if(p.input.nitro_on) cO.add(new THREE.Vector3((Math.random()-0.5)*0.3, (Math.random()-0.5)*0.3, 0));
         p.cam.position.copy(p.car.position).add(cO); p.cam.lookAt(p.car.position);
+        
+        // SPEED SYNC TO CONTROLLER (10Hz)
+        if(Math.floor(performance.now()) % 10 < 2) {
+            p.conn.send({type: 'spd', val: Math.round(p.speed * 115)});
+        }
+        
         renderer.render(scene, p.cam);
     });
 }
@@ -197,6 +209,8 @@ function join() {
         if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
         initCtrl();
     });
+    // DATA FEEDBACK FROM TV
+    cn.on('data', d => { if(d.type === 'spd') document.getElementById('spd').innerText = d.val; });
 }
 
 function initCtrl() {
@@ -204,16 +218,16 @@ function initCtrl() {
     const sync = () => window.activeConn.send({...keys, nitro_on: isN});
     const trigN = (e) => {
         e.preventDefault(); if(isCD || isN) return;
-        isN = true; nB.classList.add('active_n'); nB.innerText = "BURNING"; sync();
+        isN = true; nB.classList.add('active_n'); nB.innerText = "POWER"; sync();
         setTimeout(() => {
-            isN = false; isCD = true; nB.classList.remove('active_n'); nB.classList.add('cd'); nB.innerText = "COOLDOWN"; sync();
+            isN = false; isCD = true; nB.classList.remove('active_n'); nB.classList.add('cd'); nB.innerText = "WAIT"; sync();
             setTimeout(() => { isCD = false; nB.classList.remove('cd'); nB.innerText = "NITRO"; }, 5000);
         }, 3000);
     };
     const bnd = (id, k) => {
         const el = document.getElementById(id);
         const s = (e) => { e.preventDefault(); keys[k]=1; sync(); el.classList.add('act'); };
-        const n = (e) => { keys[k]=0; sync(); el.classList.remove('act'); };
+        const n = (e) => { e.preventDefault(); keys[k]=0; sync(); el.classList.remove('act'); };
         el.addEventListener('touchstart', s, {passive: false}); el.addEventListener('touchend', n);
         el.addEventListener('mousedown', s); el.addEventListener('mouseup', n);
     };
