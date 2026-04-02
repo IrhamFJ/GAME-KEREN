@@ -29,7 +29,7 @@
         .btn-purple { background: #a855f7; color: white; box-shadow: 0 4px 0 #7e22ce; }
         .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 transparent; }
         .btn:disabled { background: #475569; color: #94a3b8; box-shadow: none; cursor: not-allowed; }
-
+        
         input {
             width: 100%; padding: 18px; background: var(--log-bg); border: 3px solid #334155; border-radius: 15px;
             color: var(--white); font-size: 1.5rem; text-align: center; margin-bottom: 15px; outline: none; transition: 0.3s;
@@ -40,10 +40,10 @@
         .log-panel {
             width: 100%; height: 130px; background: var(--log-bg); border-radius: 15px; padding: 15px;
             font-size: 0.85rem; color: #94a3b8; text-align: left; overflow-y: auto; border: 1px solid #334155;
-            margin-bottom: 15px; font-family: 'monospace'; line-height: 1.5;
+            margin-bottom: 15px; font-family: 'monospace'; line-height: 1.4;
         }
-        .stats-bar { display: flex; justify-content: space-between; width: 100%; margin-bottom: 15px; font-size: 0.9rem; font-weight: 700; gap: 5px; }
-        .stat-item { background: rgba(255,255,255,0.08); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); white-space: nowrap; }
+        .stats-bar { display: flex; justify-content: space-between; width: 100%; margin-bottom: 15px; font-size: 0.9rem; font-weight: 700; }
+        .stat-item { background: rgba(255,255,255,0.08); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
 
         .finger-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 15px 0; width: 100%; }
         .f-box {
@@ -52,11 +52,11 @@
         }
         .f-box.selected { border-color: var(--primary); background: rgba(56, 189, 248, 0.2); color: var(--primary); transform: scale(1.1); box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
 
-        .progress-track { width: 100%; height: 12px; background: #334155; border-radius: 10px; margin: 20px 0; overflow: hidden; position: relative; }
-        #t-fill { width: 100%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--success)); border-radius: 10px; transition: 0.1s linear; }
+        .progress-track { width: 100%; height: 12px; background: #334155; border-radius: 10px; margin: 20px 0; overflow: hidden; }
+        #t-fill { width: 100%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--success)); transition: 0.1s linear; }
 
-        .char-hero { font-size: 9rem; font-weight: 800; color: var(--white); margin: -5px 0; text-shadow: 0 0 30px rgba(255,255,255,0.3); z-index: 5; position: relative; }
-        .combo-badge { position: absolute; top: -15px; right: -5px; background: var(--danger); color: white; padding: 6px 18px; border-radius: 25px; font-weight: 900; display: none; transform: rotate(12deg); z-index: 20; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4); }
+        .char-hero { font-size: 9rem; font-weight: 800; color: var(--white); margin: -5px 0; text-shadow: 0 0 30px rgba(255,255,255,0.3); }
+        .combo-badge { position: absolute; top: -15px; right: -5px; background: var(--danger); color: white; padding: 6px 18px; border-radius: 25px; font-weight: 900; display: none; transform: rotate(12deg); z-index: 20; }
     </style>
 </head>
 <body>
@@ -66,16 +66,19 @@
             <h1>ABC 5 DASAR <span style="color:var(--accent)">PRO</span></h1>
             <button class="btn btn-blue" onclick="setup('MONITOR')">🖥️ Host Game (TV)</button>
             <button class="btn btn-gold" onclick="setup('CONTROL')">📱 Join Battle (HP)</button>
-            <button class="btn btn-purple" onclick="setup('BOT')">🤖 Solo vs Bot</button>
         </div>
 
         <div id="scr-lobby" class="screen">
             <div class="stats-bar">
                 <div class="stat-item">ROOM: <span id="room-id-txt" style="color:var(--accent)">---</span></div>
-                <div class="stat-item">STATUS: <span id="p-count">IDLE</span></div>
+                <div class="stat-item">BOT: <span id="bot-status" style="color:var(--danger)">OFF</span></div>
             </div>
             <div class="log-panel" id="log-box">SYSTEM: Awaiting players...</div>
-            <button class="btn btn-blue" id="btn-start-init" disabled onclick="nav('scr-jari')">INITIALIZE BATTLE</button>
+            <div id="host-controls" style="width:100%; display:none;">
+                <button class="btn btn-purple" id="btn-toggle-bot" onclick="toggleBot()">🤖 Add Bot Competitor</button>
+                <button class="btn btn-blue" id="btn-start-init" disabled onclick="nav('scr-jari')">INITIALIZE BATTLE</button>
+            </div>
+            <div id="client-wait" style="display:none; color:var(--accent); font-weight:bold; margin-top:10px;">WAITING FOR HOST TO START...</div>
         </div>
 
         <div id="scr-jari" class="screen">
@@ -101,26 +104,12 @@
 
     <script>
         let state = { 
-            mode: "", room: "", players: [], nick: "", fingers: new Set(), 
-            char: "", timer: null, botTimer: null, lvl: 1, exp: 0, combo: 0, baseTime: 30,
-            validating: false 
+            mode: "", room: "", nick: "", fingers: new Set(), 
+            char: "", timer: null, botTimer: null, botActive: false,
+            lvl: 1, exp: 0, combo: 0, validating: false, baseTime: 30
         };
 
-        const botWords = {
-            "A": ["AMBON", "ACEH", "AMERIKA"], "B": ["BANDUNG", "BALI", "BEKASI"],
-            "C": ["CIANJUR", "CINA", "CHILE"], "D": ["DEPOK", "DUKU", "DENMARK"],
-            "E": ["ETHIOPIA", "EROPA", "ELANG"], "F": ["FILIPINA", "FOTO", "FINLANDIA"],
-            "G": ["GARUT", "GERMAN", "GAMBIR"], "H": ["HAWAII", "HIU", "HONGKONG"],
-            "I": ["INDONESIA", "INDIA", "ITALIA"], "J": ["JAKARTA", "JEPANG", "JERUK"],
-            "K": ["KENDARI", "KOREA", "KUWAIT"], "L": ["LAMPUNG", "LAOS", "LEMON"],
-            "M": ["MEDAN", "MESIR", "MALAYSIA"], "N": ["NGANJUK", "NORWEGIA", "NANAS"],
-            "O": ["OMAN", "OREGON", "ORANGE"], "P": ["PALU", "PERANCIS", "PAPUA"],
-            "Q": ["QATAR", "QUEBEC", "QUITO"], "R": ["RIAU", "RUSIA", "ROMA"],
-            "S": ["SOLO", "SURABAYA", "SPANYOL"], "T": ["TEGAL", "TURKI", "THAILAND"],
-            "U": ["UGANDA", "UKRAINA", "URUGUAY"], "V": ["VIETNAM", "VENEZUELA", "VATICAN"],
-            "W": ["WONOGIRI", "WALES", "WORTEL"], "X": ["XIAMEN", "XINJIANG", "X-RAY"],
-            "Y": ["YOGYAKARTA", "YUNANI", "YAMAN"], "Z": ["ZAMBIA", "ZURICH", "ZONA"]
-        };
+        const botWords = {"A":["APEL"],"B":["BANDUNG"],"C":["CINA"],"D":["DUKU"],"E":["ELANG"],"F":["FOTO"],"G":["GAJAH"],"H":["HIU"],"I":["IKAN"],"J":["JERUK"],"K":["KERA"],"L":["LEMON"],"M":["MADU"],"N":["NANAS"],"O":["OBAT"],"P":["PANDA"],"Q":["QATAR"],"R":["RUSA"],"S":["SAPI"],"T":["TIGA"],"U":["ULAR"],"V":["VAS"],"W":["WORTEL"],"X":["XRAY"],"Y":["YOYO"],"Z":["ZEBRA"]};
 
         const grid = document.getElementById('f-grid');
         for(let i=1; i<=10; i++){
@@ -142,26 +131,28 @@
             if(m === 'MONITOR') {
                 state.room = Math.floor(100000 + Math.random() * 899999);
                 document.getElementById('room-id-txt').innerText = state.room;
-                nav('scr-lobby');
-                log("ROOM CREATED. WAITING FOR CONTROLLER...");
-            } else if (m === 'CONTROL') {
-                let rInput = prompt("ENTER ROOM ID:");
-                if(!rInput) return;
-                state.room = rInput;
-                state.nick = (prompt("YOUR NICKNAME:") || "PLAYER").toUpperCase();
-                document.getElementById('p-count').innerText = "ONLINE";
-                document.getElementById('btn-start-init').disabled = false;
-                nav('scr-lobby'); 
-                log(`CONNECTED AS ${state.nick}`, "#22c55e");
-            } else if (m === 'BOT') {
-                state.nick = "PLAYER";
-                state.room = "SOLO";
-                document.getElementById('room-id-txt').innerText = "SOLO";
-                document.getElementById('p-count').innerText = "BOT ACTIVE";
+                document.getElementById('host-controls').style.display = 'block';
                 document.getElementById('btn-start-init').disabled = false;
                 nav('scr-lobby');
-                log("BOT 'ALGORITMA' HAS JOINED.", "#a855f7");
+            } else {
+                state.room = prompt("ROOM ID:");
+                if(!state.room) return;
+                state.nick = (prompt("NICKNAME:") || "PLAYER").toUpperCase();
+                document.getElementById('client-wait').style.display = 'block';
+                document.getElementById('room-id-txt').innerText = state.room;
+                nav('scr-lobby');
+                log(`CONNECTED TO ROOM ${state.room}`, "#22c55e");
             }
+        }
+
+        function toggleBot() {
+            state.botActive = !state.botActive;
+            const btn = document.getElementById('btn-toggle-bot');
+            const status = document.getElementById('bot-status');
+            btn.innerText = state.botActive ? "🤖 Remove Bot" : "🤖 Add Bot Competitor";
+            status.innerText = state.botActive ? "ON" : "OFF";
+            status.style.color = state.botActive ? "var(--success)" : "var(--danger)";
+            log(`BOT COMPETITOR: ${state.botActive ? 'ENABLED' : 'DISABLED'}`);
         }
 
         function log(m, c="#94a3b8") {
@@ -186,13 +177,12 @@
             
             document.getElementById('target-char').innerText = state.char;
             const input = document.getElementById('ans-in');
-            input.value = "";
-            input.disabled = false;
-            document.getElementById('msg-box').innerText = state.mode === 'BOT' ? "BEAT THE BOT!" : "TYPE NOW!";
+            input.value = ""; input.disabled = false;
+            document.getElementById('msg-box').innerText = "TYPE NOW!";
             document.getElementById('msg-box').style.color = "var(--white)";
             document.getElementById('main-card').style.borderColor = "rgba(255,255,255,0.1)";
             
-            let timeLimit = Math.max(5, state.baseTime - (state.lvl * 1.5));
+            let timeLimit = Math.max(5, state.baseTime - (state.lvl * 2));
             let current = timeLimit;
             const bar = document.getElementById('t-fill');
             bar.style.width = "100%";
@@ -203,44 +193,43 @@
                 if(current <= 0) { clearInterval(state.timer); finish(false, "TIME OUT"); }
             }, 100);
 
-            if(state.mode === 'BOT') {
-                let botSpeed = Math.max(1200, 4500 - (state.lvl * 450)); 
-                state.botTimer = setTimeout(() => {
-                    if(!state.validating) {
-                        let botAns = botWords[state.char][Math.floor(Math.random() * botWords[state.char].length)];
-                        finish(false, "BOT WON WITH: " + botAns);
-                    }
-                }, botSpeed);
-            }
-
             if(state.mode === 'MONITOR') {
                 document.getElementById('input-zone').style.display = 'none';
-                log(`ROUND START: ${state.char}`, "#fbbf24");
+                if(state.botActive) {
+                    let botSpeed = Math.max(1200, 5000 - (state.lvl * 600));
+                    state.botTimer = setTimeout(() => {
+                        if(!state.validating) {
+                            let ans = botWords[state.char][0];
+                            finish(false, "BOT WON: " + ans);
+                        }
+                    }, botSpeed);
+                }
             }
             setTimeout(() => input.focus(), 50);
         }
 
         async function finish(win, ans) {
-            if(state.validating && win) return; 
+            if(state.validating) return;
             state.validating = true;
             clearInterval(state.timer);
             clearTimeout(state.botTimer);
             
+            const input = document.getElementById('ans-in');
+            input.disabled = true;
+            input.blur();
             const msg = document.getElementById('msg-box');
-            document.getElementById('ans-in').disabled = true;
 
             if(win) {
                 state.combo++;
                 let gain = Math.floor(10 * state.lvl * (state.combo > 1 ? 1.5 : 1));
                 state.exp += gain;
-                msg.innerText = "VERIFIED! +" + gain + " EXP";
+                msg.innerText = "SUCCESS! +" + gain + " EXP";
                 msg.style.color = "var(--success)";
-                if(state.exp >= state.lvl * 50) { state.lvl++; state.exp = 0; log(`LVL UP TO ${state.lvl}!`, "#38bdf8"); }
                 if(state.combo > 1) { 
                     const cb = document.getElementById('c-badge');
                     cb.innerText = `x${state.combo} COMBO 🔥`; cb.style.display = 'block'; 
                 }
-                log(`${state.nick}: ${ans} (SUCCESS)`, "#22c55e");
+                log(`${state.nick}: ${ans}`, "#22c55e");
             } else {
                 state.combo = 0;
                 document.getElementById('c-badge').style.display = 'none';
@@ -250,30 +239,22 @@
                 log(ans.includes("BOT") ? ans : `${state.nick} FAILED`, "#ef4444");
             }
             
+            if(state.exp >= 50) { state.lvl++; state.exp = 0; log(`LVL UP TO ${state.lvl}!`, "#38bdf8"); }
             document.getElementById('lvl').innerText = state.lvl;
             document.getElementById('exp').innerText = state.exp;
             setTimeout(startRound, 3000);
         }
 
-        const inputField = document.getElementById('ans-in');
-        inputField.addEventListener('input', function() {
-            let val = this.value.toUpperCase();
-            if(val.length > 0 && val[0] !== state.char) {
-                this.classList.add('error');
-                setTimeout(() => this.classList.remove('error'), 300);
-                this.value = ""; 
-            }
-        });
-
-        inputField.addEventListener('keypress', async function(e) {
+        document.getElementById('ans-in').addEventListener('keypress', async (e) => {
             if(e.key === 'Enter') {
-                let ans = this.value.trim().toUpperCase();
+                let ans = e.target.value.trim().toUpperCase();
                 if(!ans || ans[0] !== state.char || state.validating) return;
                 
-                clearTimeout(state.botTimer);
                 document.getElementById('msg-box').innerText = "VALIDATING...";
                 try {
-                    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${ans}&format=json&limit=1`, { signal: AbortSignal.timeout(3500) });
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${ans}&format=json&limit=1`, { 
+                        signal: AbortSignal.timeout(3500) 
+                    });
                     const data = await res.json();
                     data.length > 0 ? finish(true, ans) : finish(false, "NOT FOUND");
                 } catch(err) { finish(true, ans); }
