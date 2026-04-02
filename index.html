@@ -2,245 +2,305 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>IRHAM FAJRI GTA V2.0</title>
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ABC 5 DASAR - 2 MODE</title>
     <style>
-        :root { --red: #b30000; --active: #ff0000; }
-        * { -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Arial Black', sans-serif; background: #000; overflow: hidden; touch-action: none; color: #fff; width: 100vw; height: 100vh; }
-        
-        /* MENU & UI */
-        #menu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; z-index: 100; position: relative; background: #000; }
-        .title { font-size: 3.5rem; color: #ff0000; text-shadow: 4px 4px #fff; font-style: italic; margin-bottom: 30px; text-align: center; }
-        .btn-main { padding: 15px 50px; border: 4px solid #fff; background: transparent; color: #fff; font-weight: 900; border-radius: 15px; cursor: pointer; font-size: 1.2rem; text-transform: uppercase; margin: 10px; }
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
 
-        #ui-overlay { position: absolute; top: 10px; left: 10px; z-index: 50; display: none; }
-        .kode-box { background: rgba(0,0,0,0.8); color: #00ff00; padding: 10px; border: 2px solid #00ff00; font-family: monospace; font-size: 1.5rem; }
+        :root {
+            --bg-main: #f0f4f8;
+            --primary: #4a90e2;
+            --accent: #ffcc00;
+            --text-dark: #2c3e50;
+            --white: #ffffff;
+            --success: #4cd137;
+            --danger: #e84118;
+        }
 
-        /* --- CONTROLLER (HP) --- */
-        #ctrl-view { display: none; width: 100vw; height: 100vh; background: #050505; position: fixed; top: 0; left: 0; z-index: 9999; }
-        #setup-ui { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; width: 100%; z-index: 10001; }
-        #target-id { padding: 15px; text-align: center; background: #222; color: #fff; border: 2px solid #444; width: 250px; font-size: 1.5rem; border-radius: 10px; margin-bottom: 15px; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; padding: 0;
+            font-family: 'Fredoka', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-        #game-pad { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 10000; }
-        
-        /* Tombol Gede Sesuai Gambar */
-        .gp-btn { position: absolute; background: var(--red); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 3px solid #500; z-index: 10002; font-size: 1.2rem; box-shadow: 0 4px 0 #300; }
-        .active-btn { background: var(--active) !important; box-shadow: none; transform: translateY(4px) scale(0.95); }
+        body {
+            background-color: var(--bg-main);
+            background-image: radial-gradient(#d1d9e6 1.5px, transparent 1.5px);
+            background-size: 30px 30px;
+            height: 100vh; width: 100vw;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
 
-        /* L-Side */
-        #btn-lt { width: 110px; height: 65px; top: 15px; left: 15px; border-radius: 15px; }
-        #btn-lb { width: 90px; height: 55px; top: 90px; left: 15px; border-radius: 12px; }
-        #l-stick { position: absolute; bottom: 25px; left: 35px; width: 170px; height: 170px; background: #1a1a1a; border-radius: 50%; border: 4px solid #333; }
+        .game-card {
+            width: 90%; max-width: 550px;
+            background: var(--white);
+            border-radius: 40px; padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08), inset 0 -8px 0 rgba(0,0,0,0.05);
+            border: 4px solid var(--white);
+            position: relative; text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .screen { display: none; flex-direction: column; align-items: center; width: 100%; }
+        .active { display: flex; animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        @keyframes bounceIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h1 { font-weight: 700; font-size: 2rem; color: var(--primary); margin-bottom: 20px; }
+
+        .btn {
+            width: 100%; padding: 18px; margin-bottom: 15px;
+            border-radius: 25px; border: none; font-size: 1.1rem;
+            font-weight: 600; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+        }
+
+        .btn-primary { background: var(--primary); color: var(--white); }
+        .btn-primary:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(0,0,0,0.1); }
+        .btn-primary:disabled { background: #dcdde1; color: #7f8c8d; box-shadow: none; transform: none; cursor: not-allowed; }
+
+        .btn-yellow { background: var(--accent); color: #856404; }
+        .btn-yellow:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(0,0,0,0.1); }
         
-        /* R-Side */
-        #btn-rt { width: 110px; height: 65px; top: 15px; right: 15px; border-radius: 15px; }
-        #btn-rb { width: 90px; height: 55px; top: 90px; right: 15px; border-radius: 12px; }
-        .face-grid { position: absolute; top: 45px; right: 135px; display: grid; grid-template-areas: ". Y ." "X . B" ". A ."; gap: 12px; }
-        .f-btn { width: 60px; height: 60px; position: static; font-size: 1.4rem; box-shadow: 0 4px 0 #300; }
-        #r-stick { position: absolute; bottom: 25px; right: 35px; width: 170px; height: 170px; background: #1a1a1a; border-radius: 50%; border: 4px solid #333; }
-        
-        .stick-head { position: absolute; top: 25%; left: 25%; width: 50%; height: 50%; background: #ddd; border-radius: 50%; border: 5px solid #fff; box-shadow: 0 8px 15px #000; pointer-events: none; }
-        
-        canvas { display: block; width: 100vw; height: 100vh; }
+        input {
+            width: 100%; padding: 18px; background: #f8f9fa;
+            border: 3px solid #e9ecef; border-radius: 20px;
+            color: var(--text-dark); font-size: 1.1rem;
+            text-align: center; margin-bottom: 20px; outline: none;
+        }
+
+        .log-panel {
+            width: 100%; height: 110px; background: #f1f2f6;
+            border-radius: 20px; padding: 15px; font-size: 0.85rem;
+            color: #57606f; text-align: left; overflow-y: auto;
+            margin-bottom: 15px; border: 2px solid #dfe4ea;
+        }
+
+        .finger-grid { 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 10px; 
+            margin: 15px 0; 
+            width: 100%;
+        }
+
+        .f-box {
+            aspect-ratio: 1/1; background: #f1f2f6;
+            border-radius: 15px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border: 3px solid transparent; transition: 0.2s;
+            font-weight: 700; color: #a4b0be; font-size: 1.2rem;
+        }
+        .f-box.selected { 
+            border-color: var(--primary); 
+            background: var(--primary); 
+            color: var(--white); 
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        .progress-track { width: 100%; height: 12px; background: #f1f2f6; border-radius: 10px; margin: 25px 0; overflow: hidden; }
+        #t-fill { width: 100%; height: 100%; background: var(--primary); border-radius: 10px; transition: 1s linear; }
+
+        .char-hero { font-size: 8rem; font-weight: 700; color: var(--primary); margin: 5px 0; }
+        .badge { display: inline-block; padding: 5px 15px; border-radius: 10px; background: #eaf2ff; color: var(--primary); font-size: 0.8rem; font-weight: 600; margin-bottom: 10px; }
+
+        .sentil-alert { background: #ffdada !important; border-color: #e84118 !important; }
     </style>
 </head>
 <body>
 
-    <div id="menu">
-        <h1 class="title">IRHAM FAJRI<br>GTA V2.0</h1>
-        <button class="btn-main" onclick="preStart('screen')">HOST TV</button>
-        <button class="btn-main" style="color:#ff0000; border-color:#ff0000;" onclick="preStart('controller')">JOIN HP</button>
-    </div>
-
-    <div id="ui-overlay"><div class="kode-box">TV ID: <span id="peer-id-text">...</span></div></div>
-
-    <div id="ctrl-view">
-        <div id="setup-ui">
-            <input type="text" id="target-id" placeholder="KODE TV">
-            <button class="btn-main" onclick="connectToServer()">CONNECT</button>
+    <div class="game-card" id="card-wrap">
+        <div id="scr-start" class="screen active">
+            <div class="badge">CLASSIC BATTLE</div>
+            <h1>ABC 5 Dasar</h1>
+            <button class="btn btn-primary" onclick="initGame('MONITOR')">🖥️ Monitor (TV)</button>
+            <button class="btn btn-yellow" onclick="initGame('CONTROL')">📱 Controller (HP)</button>
         </div>
-        <div id="game-pad">
-            <div class="gp-btn" id="btn-lt">LT</div><div class="gp-btn" id="btn-lb">LB</div>
-            <div class="gp-btn" id="btn-rt">RT</div><div class="gp-btn" id="btn-rb">RB</div>
-            <div class="face-grid">
-                <div class="gp-btn f-btn" id="btn-y" style="color:#ffeb3b; grid-area:Y">Y</div>
-                <div class="gp-btn f-btn" id="btn-x" style="color:#2196f3; grid-area:X">X</div>
-                <div class="gp-btn f-btn" id="btn-b" style="color:#f44336; grid-area:B">B</div>
-                <div class="gp-btn f-btn" id="btn-a" style="color:#4caf50; grid-area:A">A</div>
+
+        <div id="scr-mon-room" class="screen">
+            <div class="badge" style="background:var(--accent); color:#856404;">GAME LOBBY</div>
+            <h1>ROOM ID: <span id="id-teks" style="color:var(--primary)">--------</span></h1>
+            <div class="log-panel" id="log-list">System Ready... Waiting for players.</div>
+            <p style="margin-bottom: 15px; font-weight: 600;" id="txt-count">PLAYERS: 0/2</p>
+            <button class="btn btn-primary" id="btn-gas" disabled onclick="startFlow()">START BATTLE</button>
+        </div>
+
+        <div id="scr-con-masuk" class="screen">
+            <h1>Nickname?</h1>
+            <input type="text" id="nama-input" placeholder="Enter nickname..." maxlength="12" spellcheck="false">
+            <button class="btn btn-primary" onclick="joinGame()">Ready to Play!</button>
+        </div>
+
+        <div id="scr-jari" class="screen">
+            <div class="badge">ROUND 1</div>
+            <h1>Set Your Fingers!</h1>
+            <div class="finger-grid" id="f-container"></div>
+            <button class="btn btn-primary" onclick="submitJari()">Confirm!</button>
+        </div>
+
+        <div id="scr-tebak" class="screen">
+            <div class="char-hero" id="huruf-hero">?</div>
+            <div id="wrap-input" style="width:100%">
+                <input type="text" id="jawaban-in" placeholder="Type fast..." autocomplete="off" spellcheck="false">
             </div>
-            <div id="l-stick"><div class="stick-head" id="l-head"></div></div>
-            <div id="r-stick"><div class="stick-head" id="r-head"></div></div>
+            <div class="progress-track"><div id="t-fill"></div></div>
+            <p id="info-teks" style="font-weight: 600;">HURRY UP!</p>
         </div>
     </div>
 
     <script>
-        let players = [], vehicles = [], scene, renderer, peer, clock;
-        let cState = { lX:0, lY:0, rX:0, rY:0, A:0, B:0, X:0, Y:0, RT:0, LT:0 };
-        const myID = 'GTA-' + Math.floor(1000 + Math.random() * 9000);
+        let mode = ""; let roomID = ""; let playerList = []; 
+        let nickName = ""; let fingerData = new Set(); let targetChar = ""; let gameTimer = null;
 
-        function full() {
-            const d = document.documentElement;
-            if (d.requestFullscreen) d.requestFullscreen();
-            else if (d.webkitRequestFullscreen) d.webkitRequestFullscreen();
-            if (screen.orientation && screen.orientation.lock) screen.orientation.lock("landscape").catch(()=>{});
+        const fCont = document.getElementById('f-container');
+        for(let i=1; i<=10; i++) {
+            const div = document.createElement('div');
+            div.className = 'f-box';
+            div.id = 'x' + i;
+            div.innerText = i;
+            div.onclick = () => tapJari('x'+i);
+            fCont.appendChild(div);
         }
 
-        function preStart(type) {
-            document.getElementById('menu').style.display = 'none';
-            if(type === 'screen') {
-                full();
-                peer = new Peer(myID);
-                document.getElementById('ui-overlay').style.display = 'block';
-                document.getElementById('peer-id-text').innerText = myID;
-                initWorld();
+        function nav(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function initGame(m) {
+            mode = m;
+            if(m === 'MONITOR') {
+                roomID = Math.floor(10000000 + Math.random() * 90000000);
+                document.getElementById('id-teks').innerText = roomID;
+                nav('scr-mon-room');
             } else {
-                document.getElementById('ctrl-view').style.display = 'block';
-                peer = new Peer();
+                let checkID = prompt("ENTER 8-DIGIT ROOM ID:");
+                if(checkID && checkID.length === 8) { roomID = checkID; nav('scr-con-masuk'); }
+                else { alert("INVALID ROOM ID!"); }
             }
         }
 
-        // --- WORLD LOGIC (TV) ---
-        function initWorld() {
-            scene = new THREE.Scene(); 
-            scene.background = new THREE.Color(0x87CEEB);
-            scene.fog = new THREE.Fog(0x87CEEB, 20, 150);
-            
-            renderer = new THREE.WebGLRenderer({ antialias: false, precision: "lowp" });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
-            
-            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-            const light = new THREE.DirectionalLight(0xffffff, 0.8);
-            light.position.set(5, 10, 5); scene.add(light);
+        function writeLog(msg) {
+            const l = document.getElementById('log-list');
+            if(l) { l.innerHTML += `<br>> ${msg}`; l.scrollTop = l.scrollHeight; }
+        }
 
-            const ground = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshLambertMaterial({color: 0x333333}));
-            ground.rotation.x = -Math.PI/2; scene.add(ground);
-            scene.add(new THREE.GridHelper(1000, 50, 0, 0x444444));
+        function joinGame() {
+            let n = document.getElementById('nama-input').value.trim().toUpperCase();
+            if(!n) return;
+            nickName = n;
+            if(mode === 'CONTROL') {
+                playerList.push(nickName);
+                nav('scr-jari');
+                refreshLobby(); // Simulasi local
+            }
+        }
 
-            // Spawn Mobil
-            for(let i=0; i<6; i++) {
-                const g = new THREE.Group();
-                const b = new THREE.Mesh(new THREE.BoxGeometry(2, 0.8, 4), new THREE.MeshLambertMaterial({color: Math.random()*0xffffff}));
-                b.position.y = 0.6; g.add(b);
-                const car = { mesh: g, driver: null, speed: 0 };
-                g.position.set((Math.random()-0.5)*80, 0, (Math.random()-0.5)*80);
-                scene.add(g); vehicles.push(car);
+        function refreshLobby() {
+            const c = document.getElementById('txt-count');
+            const b = document.getElementById('btn-gas');
+            if(c) c.innerText = `PLAYERS: ${playerList.length}/2`;
+            writeLog(`Player ${nickName} connected.`);
+            if(playerList.length >= 1 && b) { 
+                b.disabled = false; 
+                writeLog("Ready to Battle?"); 
+            }
+        }
+
+        function tapJari(id) {
+            const el = document.getElementById(id);
+            if(fingerData.has(id)) { fingerData.delete(id); el.classList.remove('selected'); }
+            else { fingerData.add(id); el.classList.add('selected'); }
+        }
+
+        function startFlow() {
+            nav('scr-tebak'); 
+            goBattle();
+        }
+
+        function submitJari() {
+            if(fingerData.size === 0) return alert("Pick fingers!");
+            nav('scr-tebak');
+            goBattle();
+        }
+
+        function goBattle() {
+            if(gameTimer) clearInterval(gameTimer);
+            const bank = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            targetChar = bank[Math.floor(Math.random() * 26)];
+            document.getElementById('huruf-hero').innerText = targetChar;
+            
+            if(mode === 'MONITOR') {
+                document.getElementById('wrap-input').style.display = 'none';
+                writeLog(`Battle Start! Key: ${targetChar}`);
             }
 
-            peer.on('connection', conn => {
-                const pID = players.length + 1;
-                const g = new THREE.Group();
-                const b = new THREE.Mesh(new THREE.CapsuleGeometry(0.4, 0.8, 2, 8), new THREE.MeshLambertMaterial({color: pID==1?0x007bff:0xff3333}));
-                b.position.y = 1; g.add(b);
+            let tick = 30;
+            const bar = document.getElementById('t-fill');
+            bar.style.transition = 'none';
+            bar.style.width = "100%";
+            
+            // Fix: Double RAF to ensure transition reset
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    bar.style.transition = '1s linear';
+                    gameTimer = setInterval(() => {
+                        tick--;
+                        bar.style.width = (tick/30)*100 + "%";
+                        if(tick <= 0) { clearInterval(gameTimer); resolve(false); }
+                    }, 1000);
+                });
+            });
+        }
+
+        function resolve(win) {
+            if(gameTimer) clearInterval(gameTimer);
+            const status = document.getElementById('info-teks');
+            if(!win) {
+                document.getElementById('card-wrap').classList.add('sentil-alert');
+                status.innerText = "TIME OUT! SENTIL TIME!! 💀";
+                status.style.color = "#e84118";
+            } else {
+                status.innerText = "NICE! YOU ARE SAFE! ✨";
+                status.style.color = "#4cd137";
+            }
+        }
+
+        document.getElementById('jawaban-in').addEventListener('keypress', async function(e) {
+            if(e.key === 'Enter') {
+                e.preventDefault(); // Fix: Prevent form submission/refresh
+                const ans = this.value.trim().toUpperCase();
+                if(!ans || ans[0] !== targetChar) { alert("Wrong Initial!"); return; }
                 
-                const p = { conn, mesh: g, cam: new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 200), input: {...cState}, v: null, walk: 0 };
-                g.position.set(pID==1?5:-5, 0, 10); scene.add(g); players.push(p);
-                conn.on('data', d => p.input = d);
-                if(players.length === 1) { clock = new THREE.Clock(); animate(); }
-            });
-        }
+                if(gameTimer) clearInterval(gameTimer);
+                this.disabled = true;
+                document.getElementById('info-teks').innerText = "Analyzing... 🧐";
 
-        function animate() {
-            requestAnimationFrame(animate);
-            const dt = clock.getDelta();
-            const split = players.length > 1;
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3500);
 
-            vehicles.forEach(v => {
-                if(v.driver) {
-                    const inp = v.driver.input;
-                    v.speed += (inp.RT - inp.LT*1.5) * 18 * dt;
-                    v.speed = THREE.MathUtils.clamp(v.speed, -10, 45);
-                    v.speed *= 0.98;
-                    if(Math.abs(v.speed) > 1) v.mesh.rotation.y -= inp.lX * 2 * dt * (v.speed > 0 ? 1 : -1);
-                    v.mesh.translateZ(v.speed * dt);
-                } else { v.speed *= 0.95; v.mesh.translateZ(v.speed * dt); }
-            });
-
-            players.forEach((p, i) => {
-                const inp = p.input;
-                if(!p.v) {
-                    const move = new THREE.Vector3(inp.lX, 0, -inp.lY).applyEuler(p.mesh.rotation);
-                    p.mesh.position.add(move.multiplyScalar(8 * dt));
-                    p.mesh.rotation.y -= inp.rX * 2.5 * dt;
-                    if(inp.lX || inp.lY) { p.walk += dt*12; p.mesh.position.y = Math.abs(Math.sin(p.walk))*0.15; }
-                    const off = new THREE.Vector3(0, 4.5, -9).applyMatrix4(p.mesh.matrixWorld);
-                    p.cam.position.lerp(off, 0.2);
-                    p.cam.lookAt(p.mesh.position.x, p.mesh.position.y + 1.5, p.mesh.position.z);
-                    if(inp.Y) {
-                        inp.Y = 0;
-                        vehicles.forEach(v => { if(!v.driver && p.mesh.position.distanceTo(v.mesh.position) < 5) { p.v = v; v.driver = p; p.mesh.visible = false; }});
+                try {
+                    const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${ans}&format=json&limit=1`, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    const d = await r.json();
+                    if(d.length > 0) { resolve(true); } 
+                    else { 
+                        document.getElementById('info-teks').innerText = "NOT FOUND! ❌";
+                        this.disabled = false;
+                        resolve(false); 
                     }
-                } else {
-                    p.mesh.position.copy(p.v.mesh.position);
-                    p.cam.position.copy(p.v.mesh.position).add(new THREE.Vector3(0, 1.5, 0));
-                    p.cam.lookAt(p.v.mesh.position.clone().add(new THREE.Vector3(0, 0, 10).applyEuler(p.v.mesh.rotation)));
-                    if(inp.Y) { inp.Y = 0; p.mesh.position.add(new THREE.Vector3(-3,0,0).applyEuler(p.v.mesh.rotation)); p.mesh.visible = true; p.v.driver = null; p.v = null; }
+                } catch(err) {
+                    resolve(true); 
                 }
-                const w = window.innerWidth, h = window.innerHeight;
-                p.cam.aspect = split ? w/(h/2) : w/h; p.cam.updateProjectionMatrix();
-                if(split) {
-                    renderer.setScissorTest(true);
-                    const rect = i==0 ? [0, h/2, w, h/2] : [0, 0, w, h/2];
-                    renderer.setViewport(...rect); renderer.setScissor(...rect);
-                } else { renderer.setScissorTest(false); renderer.setViewport(0,0,w,h); }
-                renderer.render(scene, p.cam);
-            });
-        }
-
-        // --- CONTROLLER LOGIC (HP) ---
-        function setupControls() {
-            const send = () => { if(window.conn) window.conn.send(cState); };
-            
-            const bindStick = (id, headId, prefix) => {
-                const el = document.getElementById(id), head = document.getElementById(headId);
-                const move = (e) => {
-                    const t = e.touches[0], r = el.getBoundingClientRect(), rad = el.offsetWidth/2;
-                    let dx = t.clientX - (r.left + rad), dy = t.clientY - (r.top + rad);
-                    const d = Math.sqrt(dx*dx + dy*dy);
-                    if(d > rad) { dx *= rad/d; dy *= rad/d; }
-                    head.style.transform = `translate(${dx}px, ${dy}px)`;
-                    cState[prefix+'X'] = dx/rad; cState[prefix+'Y'] = dy/rad; send();
-                };
-                el.addEventListener('touchstart', e => { e.preventDefault(); move(e); }, {passive:false});
-                el.addEventListener('touchmove', e => { e.preventDefault(); move(e); }, {passive:false});
-                el.addEventListener('touchend', () => { head.style.transform = 'translate(0,0)'; cState[prefix+'X']=0; cState[prefix+'Y']=0; send(); });
-            };
-
-            bindStick('l-stick', 'l-head', 'l');
-            bindStick('r-stick', 'r-head', 'r');
-
-            ['a','b','x','y','lt','lb','rt','rb'].forEach(id => {
-                const el = document.getElementById('btn-'+id);
-                el.addEventListener('touchstart', (e) => {
-                    e.preventDefault(); 
-                    el.classList.add('active-btn'); 
-                    cState[id.toUpperCase()]=1; 
-                    send(); 
-                    if(navigator.vibrate) navigator.vibrate(25);
-                }, {passive:false});
-                el.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    el.classList.remove('active-btn'); 
-                    cState[id.toUpperCase()]=0; 
-                    send();
-                }, {passive:false});
-            });
-        }
-
-        function connectToServer() {
-            const id = document.getElementById('target-id').value.toUpperCase().trim();
-            if(!id) return;
-            full();
-            window.conn = peer.connect(id);
-            window.conn.on('open', () => { 
-                document.getElementById('setup-ui').style.display='none'; 
-                document.getElementById('game-pad').style.display='block'; 
-                setupControls(); // Panggil setup setelah game-pad muncul
-            });
-        }
+            }
+        });
     </script>
 </body>
 </html>
