@@ -49,7 +49,6 @@
 
         .tap-area { width: 100%; height: 100%; position: absolute; top: 0; left: 0; border: none; font-size: 5rem; font-weight: 900; color: white; user-select: none; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-        .shaking { animation: shake 0.1s infinite; }
     </style>
 </head>
 <body class="skin-classic">
@@ -80,9 +79,9 @@
 
     <div id="monitor-screen" class="screen">
         <div id="round-info">ROUND 1 | 0-0</div>
-        <div id="room-id-display">.....</div>
-        <h3 id="status-text">WAITING...</h3>
-        <button id="btn-add-bot" onclick="addBot()" style="margin-bottom: 10px; background: #9b59b6; color: white;">ADD BOT</button>
+        <div id="room-id-display">GENERATING...</div>
+        <h3 id="status-text">CONNECTING...</h3>
+        <button id="btn-add-bot" onclick="addBot()" style="margin-bottom: 10px; background: #9b59b6; color: white; display: none;">ADD BOT</button>
         <div id="track">
             <div id="bar-p1" class="bar" style="width: 50%; background: var(--p1);">
                 <div id="ping-p1" class="ping-dot"></div>
@@ -101,10 +100,15 @@
     </div>
 
     <script>
+        const peerConfig = {
+            config: { 'iceServers': [{ url: 'stun:stun.l.google.com:19302' }, { url: 'stun:stun1.l.google.com:19302' }] },
+            debug: 1
+        };
+
         let peer = null, players = { p1: null, p2: null }, playerNames = { p1: "P1", p2: "P2" };
         let score = 50, gameActive = false, currentSkin = 'classic', p1Wins = 0, p2Wins = 0, currentRound = 1;
         let isBotMode = false, botInterval = null, botTapsInRound = 0;
-        let commentaryLock = false, tapHistory = { p1: [], p2: [] }, audioCtx = null;
+        let tapHistory = { p1: [], p2: [] }, audioCtx = null;
         const menuAudio = document.getElementById('bgm-menu'), battleAudio = document.getElementById('bgm-battle');
 
         async function lockOrientation() {
@@ -124,6 +128,7 @@
         async function startMonitorMode() {
             if (peer) return;
             document.getElementById('btn-monitor').disabled = true;
+            document.getElementById('btn-monitor').innerText = "GENERATING...";
             initAudio(); await lockOrientation();
             menuAudio.play().catch(()=>{});
             initMonitor();
@@ -134,23 +139,29 @@
             let roomID = "";
             for(let i=0; i<5; i++) roomID += chars.charAt(Math.floor(Math.random() * chars.length));
             showScreen('monitor-screen');
-            peer = new Peer(roomID);
-            peer.on('open', id => document.getElementById('room-id-display').innerText = id);
+            peer = new Peer(roomID, peerConfig);
+            
+            peer.on('open', id => {
+                document.getElementById('room-id-display').innerText = id;
+                document.getElementById('status-text').innerText = "WAITING...";
+                document.getElementById('btn-add-bot').style.display = 'block';
+            });
+
             peer.on('connection', conn => {
-                if (isBotMode) return;
+                if (isBotMode && players.p1 && players.p2) return;
                 conn.on('open', () => {
                     let role = !players.p1 ? "p1" : (!players.p2 ? "p2" : null);
                     if (role) { 
                         players[role] = conn; 
                         conn.send({ type: 'init', role, skin: currentSkin }); 
-                        document.getElementById('btn-add-bot').style.display = 'none';
+                        if(players.p1 && (players.p2 || isBotMode)) document.getElementById('btn-add-bot').style.display = 'none';
                     }
                 });
                 conn.on('data', data => {
                     if (data.type === 'join_name') {
                         playerNames[data.role] = data.name || data.role.toUpperCase();
                         document.getElementById('name-' + data.role).innerText = playerNames[data.role].toUpperCase();
-                        if (players.p1 && players.p2) startRoundSequence();
+                        if (players.p1 && (players.p2 || isBotMode)) startRoundSequence();
                         else document.getElementById('status-text').innerText = "1 MORE PLAYER...";
                     }
                     if (data.type === 'tap' && gameActive) handleTap(data.role, data.t);
@@ -167,6 +178,7 @@
             document.getElementById('name-p2').innerText = "BOT-LEGO";
             document.getElementById('ping-p2').style.background = '#2ecc71'; 
             if (players.p1) startRoundSequence();
+            else document.getElementById('status-text').innerText = "WAITING P1...";
         }
 
         function botLogic() {
@@ -174,7 +186,7 @@
             let staminaPenalty = Math.floor(botTapsInRound / 10) * 8; 
             let baseInterval = Math.floor(Math.random() * 100) + 120;
             let finalDelay = baseInterval + staminaPenalty;
-            if (Math.random() > 0.9) finalDelay -= 50;
+            if (Math.random() > 0.92) finalDelay -= 60; // Random Burst
 
             botInterval = setTimeout(() => {
                 if (gameActive) {
@@ -195,8 +207,7 @@
         }
 
         function startRoundSequence() {
-            gameActive = false; score = 50; commentaryLock = false; 
-            botTapsInRound = 0; // RESET STAMINA BOT DISINI
+            gameActive = false; score = 50; botTapsInRound = 0;
             if (botInterval) clearTimeout(botInterval);
             document.getElementById('room-id-display').style.display = 'none';
             document.getElementById('track').style.display = 'none';
@@ -271,10 +282,11 @@
             const id = document.getElementById('join-id').value.trim().toUpperCase();
             const name = document.getElementById('user-name').value.trim();
             document.getElementById('btn-join').disabled = true;
+            document.getElementById('btn-join').innerText = "CONNECTING...";
             showScreen('controller-screen');
-            peer = new Peer();
+            peer = new Peer(null, peerConfig);
             peer.on('open', () => {
-                const conn = peer.connect(id);
+                const conn = peer.connect(id, { reliable: false });
                 conn.on('open', () => {
                     initAudio();
                     conn.on('data', d => {
@@ -293,6 +305,8 @@
                     });
                 });
                 conn.on('error', () => { alert("ROOM NOT FOUND!"); location.reload(); });
+                // Fallback timeout
+                setTimeout(() => { if(!document.getElementById('btn-tap').innerText.includes("TAP")) { alert("CONNECTION TIMEOUT!"); location.reload(); } }, 5000);
             });
         }
 
