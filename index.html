@@ -53,12 +53,8 @@
 </head>
 <body class="skin-classic">
 
-    <audio id="bgm-menu" loop preload="auto">
-        <source src="https://image2url.com/r2/default/audio/1775290560696-3795209f-6e46-433c-a94c-18ac02c047a4.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="bgm-battle" loop preload="auto">
-        <source src="https://image2url.com/r2/default/audio/1775290622313-a7846eca-967a-4dcc-88dd-cb8e330cf6a6.mp3" type="audio/mpeg">
-    </audio>
+    <audio id="bgm-menu" loop preload="auto"><source src="https://image2url.com/r2/default/audio/1775290560696-3795209f-6e46-433c-a94c-18ac02c047a4.mp3" type="audio/mpeg"></audio>
+    <audio id="bgm-battle" loop preload="auto"><source src="https://image2url.com/r2/default/audio/1775290622313-a7846eca-967a-4dcc-88dd-cb8e330cf6a6.mp3" type="audio/mpeg"></audio>
 
     <div id="menu-screen" class="screen active">
         <h1 style="font-size: 2.5rem; margin-bottom: 5px;">TAPTAP 1V1</h1>
@@ -71,17 +67,17 @@
                 <button class="skin-btn" onclick="setSkin('forest')">Forest</button>
             </div>
         </div>
-        <button id="btn-monitor" onclick="startMonitorMode()">START MONITOR</button>
+        <button id="btn-monitor" onclick="startMonitorMode()">START MONITOR (TV)</button>
         <div style="margin: 10px 0; font-weight: bold; opacity: 0.6;">━━━━ OR ━━━━</div>
         <input type="text" id="join-id" placeholder="ROOM CODE" maxlength="5">
-        <button id="btn-join" onclick="checkNameBefore(initController)">JOIN BATTLE</button>
+        <button id="btn-join" onclick="checkNameBefore(initController)">JOIN BATTLE (HP)</button>
     </div>
 
     <div id="monitor-screen" class="screen">
         <div id="round-info">ROUND 1 | 0-0</div>
         <div id="room-id-display">GENERATING...</div>
         <h3 id="status-text">CONNECTING...</h3>
-        <button id="btn-add-bot" onclick="addBot()" style="margin-bottom: 10px; background: #9b59b6; color: white;">ADD BOT</button>
+        <button id="btn-add-bot" onclick="enableBotMode()" style="margin-bottom: 10px; background: #9b59b6; color: white;">ADD BOT (P2)</button>
         <div id="track">
             <div id="bar-p1" class="bar" style="width: 50%; background: var(--p1);">
                 <div id="ping-p1" class="ping-dot"></div>
@@ -89,7 +85,7 @@
             </div>
             <div id="bar-p2" class="bar" style="width: 50%; background: var(--p2);">
                 <div id="ping-p2" class="ping-dot"></div>
-                <b id="name-p2">P2</b>
+                <b id="name-p2">BOT</b>
             </div>
         </div>
         <div id="speed-alert">SO FAST!!</div>
@@ -100,110 +96,78 @@
     </div>
 
     <script>
-        const peerConfig = {
-            config: { 'iceServers': [{ url: 'stun:stun.l.google.com:19302' }, { url: 'stun:stun1.l.google.com:19302' }] },
-            debug: 1
-        };
-
-        let peer = null, players = { p1: null, p2: null }, playerNames = { p1: "P1", p2: "P2" };
+        const peerConfig = { config: { 'iceServers': [{ url: 'stun:stun.l.google.com:19302' }] } };
+        let peer = null, players = { p1: null, p2: null }, playerNames = { p1: "P1", p2: "BOT" };
         let score = 50, gameActive = false, currentSkin = 'classic', p1Wins = 0, p2Wins = 0, currentRound = 1;
-        let isBotMode = false, botInterval = null, botTapsInRound = 0;
-        let tapHistory = { p1: [], p2: [] }, audioCtx = null;
+        let isBotMode = false, botInterval = null;
+        let tapHistory = { p1: [], p2: [] };
         const menuAudio = document.getElementById('bgm-menu'), battleAudio = document.getElementById('bgm-battle');
 
-        async function startMonitorMode() {
+        function startMonitorMode() {
             if (peer) return;
             document.getElementById('btn-monitor').disabled = true;
-            initAudio(); 
-            try { 
-                if(document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
-                if(screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape');
-            } catch(e){}
             menuAudio.play().catch(()=>{});
-            initMonitor();
-        }
-
-        function initMonitor() {
             const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
             let roomID = "";
             for(let i=0; i<5; i++) roomID += chars.charAt(Math.floor(Math.random() * chars.length));
             showScreen('monitor-screen');
             peer = new Peer(roomID, peerConfig);
             
-            setTimeout(() => {
-                if(document.getElementById('room-id-display').innerText === "GENERATING...") {
-                    document.getElementById('room-id-display').innerText = "OFFLINE";
-                    document.getElementById('status-text').innerHTML = 'OFFLINE <button onclick="location.reload()" style="padding:5px 10px; font-size:0.6rem;">RETRY</button>';
-                }
-            }, 6000);
-
             peer.on('open', id => {
                 document.getElementById('room-id-display').innerText = id;
-                document.getElementById('status-text').innerText = "WAITING FOR P1...";
+                document.getElementById('status-text').innerText = isBotMode ? "JOIN FROM HP!" : "WAITING FOR P1...";
             });
 
             peer.on('connection', conn => {
                 conn.on('open', () => {
-                    let role = !players.p1 ? "p1" : (!players.p2 ? "p2" : null);
+                    // Jika Bot aktif, maka HP yang masuk OTOMATIS jadi P1
+                    let role = isBotMode ? "p1" : (!players.p1 ? "p1" : (!players.p2 ? "p2" : null));
                     if (role) { 
                         players[role] = conn; 
                         conn.send({ type: 'init', role, skin: currentSkin }); 
-                        if(players.p1 && (players.p2 || isBotMode)) document.getElementById('btn-add-bot').style.display = 'none';
+                        if(players.p1 && (players.p2 || isBotMode)) startRoundSequence();
                     }
                 });
                 conn.on('data', data => {
                     if (data.type === 'join_name') {
                         playerNames[data.role] = data.name || data.role.toUpperCase();
                         document.getElementById('name-' + data.role).innerText = playerNames[data.role].toUpperCase();
-                        if (players.p1 && (players.p2 || isBotMode)) startRoundSequence();
-                        else document.getElementById('status-text').innerText = "1 MORE PLAYER...";
                     }
                     if (data.type === 'tap' && gameActive) handleTap(data.role, data.t);
                 });
             });
         }
 
-        function addBot() {
+        function enableBotMode() {
             isBotMode = true;
             document.getElementById('btn-add-bot').style.display = 'none';
-            playerNames.p2 = "BOT-LEGO";
             document.getElementById('name-p2').innerText = "BOT-LEGO";
-            document.getElementById('ping-p2').style.background = '#2ecc71'; 
-            if (!players.p1) {
-                document.getElementById('status-text').innerText = "P1 MISSING (LOCAL MODE)";
-                playerNames.p1 = "PLAYER 1";
-                document.getElementById('name-p1').innerText = "PLAYER 1";
-                startRoundSequence();
-            } else {
-                startRoundSequence();
-            }
+            playerNames.p2 = "BOT-LEGO";
+            document.getElementById('status-text').innerText = "BOT READY. JOIN FROM HP!";
         }
 
-        function botLogic() {
+        function botProcess() {
             if (!gameActive || !isBotMode) return;
-            let staminaPenalty = Math.floor(botTapsInRound / 10) * 8; 
-            let baseInterval = Math.floor(Math.random() * 110) + 130;
-            let finalDelay = baseInterval + staminaPenalty;
+            let speed = 150 + (score < 40 ? -40 : 0);
             botInterval = setTimeout(() => {
                 if (gameActive) {
-                    botTapsInRound++;
                     handleTap('p2', Date.now());
-                    botLogic();
+                    botProcess();
                 }
-            }, finalDelay);
+            }, speed + Math.random() * 100);
         }
 
         function handleTap(role, time) {
             const lat = Date.now() - time;
             const dot = document.getElementById('ping-' + role);
-            if (dot) dot.style.background = lat < 60 ? '#2ecc71' : (lat < 160 ? '#f1c40f' : '#e74c3c');
+            if (dot) dot.style.background = lat < 100 ? '#2ecc71' : '#e74c3c';
             score += (role === 'p1' ? 2 : -2); 
-            updateDisplay(); 
+            updateDisplay();
             checkSpeed(role);
         }
 
         function startRoundSequence() {
-            gameActive = false; score = 50; botTapsInRound = 0;
+            gameActive = false; score = 50; // RESET SCORE DISINI (FIX BUG 1)
             if (botInterval) clearTimeout(botInterval);
             document.getElementById('room-id-display').style.display = 'none';
             document.getElementById('track').style.display = 'none';
@@ -219,7 +183,7 @@
                         document.getElementById('track').style.display = 'flex';
                         gameActive = true; 
                         menuAudio.pause(); battleAudio.currentTime = 0; battleAudio.play().catch(()=>{});
-                        if (isBotMode) setTimeout(botLogic, 450);
+                        if (isBotMode) botProcess();
                     }, 800);
                 }), 800);
             });
@@ -230,7 +194,6 @@
             document.getElementById('bar-p2').style.width = (100 - score) + '%';
             if (score >= 100 || score <= 0) {
                 gameActive = false; battleAudio.pause();
-                if (botInterval) clearTimeout(botInterval);
                 let win = score >= 100 ? "p1" : "p2";
                 win === "p1" ? p1Wins++ : p2Wins++;
                 if (win === 'p2' && players.p1) players.p1.send({ type: 'punish' });
@@ -242,21 +205,16 @@
         }
 
         function speak(t, main, cb) {
-            if (main) window.speechSynthesis.cancel();
             const m = new SpeechSynthesisUtterance(t);
-            let called = false;
-            const safeCb = () => { if(!called) { called = true; if(cb) cb(); } };
-            m.onend = safeCb;
-            m.onerror = safeCb;
+            m.onend = () => cb && cb();
             window.speechSynthesis.speak(m);
-            // SAFETY TIMER: Jika 2.5 detik suara belum selesai/eror, paksa lanjut.
-            setTimeout(safeCb, 2500);
+            setTimeout(() => { if(cb) cb(); }, 2000); // Safety fallback
         }
 
         function checkSpeed(role) {
             const now = Date.now(); tapHistory[role].push(now);
             tapHistory[role] = tapHistory[role].filter(t => now - t < 1000);
-            if (tapHistory[role].length >= 8) {
+            if (tapHistory[role].length >= 9) {
                 const a = document.getElementById('speed-alert'); a.innerText = playerNames[role] + " SO FAST!";
                 a.classList.add('show'); setTimeout(() => a.classList.remove('show'), 1200);
                 tapHistory[role] = [];
@@ -268,7 +226,6 @@
             const themes = { classic: ['#ff4757', '#2e86de'], space: ['#9b59b6', '#1abc9c'], forest: ['#e67e22', '#2ecc71'] };
             document.documentElement.style.setProperty('--p1', themes[s][0]);
             document.documentElement.style.setProperty('--p2', themes[s][1]);
-            Object.values(players).forEach(p => p && p.send({ type: 'skin', skin: s }));
         }
 
         function checkNameBefore(fn) {
@@ -278,48 +235,30 @@
         }
 
         function initController() {
-            if(peer) return;
             const id = document.getElementById('join-id').value.trim().toUpperCase();
             const name = document.getElementById('user-name').value.trim();
-            document.getElementById('btn-join').disabled = true;
             showScreen('controller-screen');
-            peer = new Peer(null, peerConfig);
+            peer = new Peer();
             peer.on('open', () => {
-                const conn = peer.connect(id, { reliable: false });
+                const conn = peer.connect(id);
                 conn.on('open', () => {
-                    initAudio();
                     conn.on('data', d => {
                         const b = document.getElementById('btn-tap');
                         if (d.type === 'init') {
-                            updateBtn(b, d.role, d.skin);
+                            b.style.background = d.role === 'p1' ? 'var(--p1)' : 'var(--p2)';
+                            b.innerText = "TAP!"; b.disabled = false;
                             conn.send({ type: 'join_name', role: d.role, name });
-                            b.onpointerdown = (e) => { 
-                                e.preventDefault();
-                                conn.send({ type: 'tap', role: d.role, t: Date.now() }); 
-                                if(navigator.vibrate) navigator.vibrate(40); 
-                            };
+                            b.onpointerdown = (e) => { e.preventDefault(); conn.send({ type: 'tap', role: d.role, t: Date.now() }); if(navigator.vibrate) navigator.vibrate(40); };
                         }
-                        if (d.type === 'skin') updateBtn(b, d.role, d.skin);
                         if (d.type === 'punish' && navigator.vibrate) navigator.vibrate([800, 200, 800]);
                     });
                 });
             });
         }
 
-        function updateBtn(b, r, s) {
-            const themes = { classic: ['#ff4757', '#2e86de'], space: ['#9b59b6', '#1abc9c'], forest: ['#e67e22', '#2ecc71'] };
-            b.style.background = r === 'p1' ? themes[s][0] : themes[s][1];
-            b.innerText = "TAP!"; b.disabled = false;
-        }
-
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-        }
-
-        function initAudio() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
         }
     </script>
 </body>
