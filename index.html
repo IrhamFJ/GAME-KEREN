@@ -11,31 +11,33 @@
         .screen { display: none; padding: 20px; flex-direction: column; align-items: center; justify-content: center; height: 100vh; box-sizing: border-box; }
         .active { display: flex; }
         
-        /* Landscape Warning */
         #landscape-msg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #2c3e50; color: white; z-index: 10000; flex-direction: column; justify-content: center; align-items: center; }
         @media screen and (orientation: portrait) { #monitor-screen.active ~ #landscape-msg { display: flex; } }
 
-        /* Skin Themes */
         body.skin-classic { background: #f1c40f; }
         body.skin-space { background: #2c3e50; color: #ecf0f1; }
         body.skin-forest { background: #27ae60; }
 
-        button { padding: 18px 35px; font-size: 1.2rem; cursor: pointer; border: 4px solid #2c3e50; border-radius: 15px; margin: 10px; transition: 0.1s; background: #ecf0f1; color: #2c3e50; font-weight: 900; text-transform: uppercase; box-shadow: 6px 6px 0px #2c3e50; -webkit-tap-highlight-color: transparent; }
-        button:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0px #2c3e50; }
-        .skin-btn { padding: 10px 15px; font-size: 0.8rem; margin: 5px; background: #fff; box-shadow: 3px 3px 0px #2c3e50; }
+        button { padding: 15px 30px; font-size: 1rem; cursor: pointer; border: 4px solid #2c3e50; border-radius: 15px; margin: 5px; transition: 0.1s; background: #ecf0f1; color: #2c3e50; font-weight: 900; text-transform: uppercase; box-shadow: 4px 4px 0px #2c3e50; -webkit-tap-highlight-color: transparent; }
+        button:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #2c3e50; }
+        .skin-btn { padding: 8px 12px; font-size: 0.7rem; margin: 3px; background: #fff; }
         
-        input { padding: 15px; border: 4px solid #2c3e50; border-radius: 12px; width: 260px; font-size: 1.5rem; margin-bottom: 15px; text-align: center; background: #fff; font-family: monospace; font-weight: bold; }
+        input { padding: 12px; border: 4px solid #2c3e50; border-radius: 12px; width: 220px; font-size: 1.1rem; margin-bottom: 10px; text-align: center; background: #fff; font-weight: bold; outline: none; }
+        input.error { border-color: #ff4757; animation: shake 0.3s; box-shadow: 0 0 10px #ff4757; }
 
         #room-id-display { background: #fff; color: #2c3e50; padding: 15px 30px; border: 5px solid #2c3e50; border-radius: 20px; font-size: 3.5rem; font-weight: 900; margin: 10px 0; letter-spacing: 5px; box-shadow: 8px 8px 0px #c0392b; }
         #track { display: none; width: 90%; height: 110px; background: #2c3e50; border: 6px solid #fff; border-radius: 55px; position: relative; margin: 25px 0; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        .bar { height: 100%; transition: width 0.08s ease-out; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 2rem; color: white; text-shadow: 2px 2px #000; }
-        
+        .bar { height: 100%; transition: width 0.08s ease-out; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 900; font-size: 1.2rem; color: white; text-shadow: 2px 2px #000; overflow: hidden; }
+        .bar span { font-size: 0.7rem; opacity: 0.8; text-transform: uppercase; font-weight: normal; }
+
         #status-text { font-size: 2.2rem; color: #fff; text-transform: uppercase; margin: 15px 0; min-height: 1.2em; text-shadow: 4px 4px #c0392b; -webkit-text-stroke: 1.5px #2c3e50; }
         #round-info { display: none; font-size: 1.3rem; font-weight: 900; background: #fff; color: #2c3e50; padding: 8px 25px; border-radius: 50px; border: 3px solid #2c3e50; margin-bottom: 10px; }
 
+        #speed-alert { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: #fff; color: #2c3e50; padding: 25px 50px; border: 8px solid #2c3e50; border-radius: 30px; font-size: 3rem; font-weight: 900; z-index: 5000; transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.4); pointer-events: none; white-space: nowrap; box-shadow: 15px 15px 0 rgba(0,0,0,0.3); }
+        #speed-alert.show { transform: translate(-50%, -50%) scale(1); }
+
         .tap-area { width: 100%; height: 100%; position: absolute; top: 0; left: 0; border: none; font-size: 5rem; font-weight: 900; color: white; user-select: none; }
-        
-        @keyframes shake { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-3px, -2px); } 100% { transform: translate(2px, 2px); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
         .shaking { animation: shake 0.1s infinite; }
     </style>
 </head>
@@ -49,28 +51,31 @@
     </audio>
 
     <div id="menu-screen" class="screen active">
-        <h1 style="font-size: 3rem; margin-bottom: 5px; -webkit-text-stroke: 1px #fff;">TAPTAP 1V1</h1>
-        <p style="font-weight: bold; margin-bottom: 20px;">LEGO ARCADE EDITION</p>
-        <div style="margin-bottom: 20px;">
-            <p style="margin: 5px; font-weight: bold; font-size: 0.9rem;">SELECT THEME:</p>
-            <button class="skin-btn" onclick="setSkin('classic')">Classic</button>
-            <button class="skin-btn" onclick="setSkin('space')">Space</button>
-            <button class="skin-btn" onclick="setSkin('forest')">Forest</button>
+        <h1 style="font-size: 2.5rem; margin-bottom: 5px; -webkit-text-stroke: 1px #fff;">TAPTAP 1V1</h1>
+        <div style="margin-bottom: 15px;">
+            <p style="font-weight: bold; font-size: 0.8rem; margin: 5px;">ENTER NAME TO UNLOCK:</p>
+            <input type="text" id="user-name" placeholder="NAME REQUIRED!" maxlength="10" spellcheck="false">
+            <div style="margin-top: 5px;">
+                <button class="skin-btn" onclick="setSkin('classic')">Classic</button>
+                <button class="skin-btn" onclick="setSkin('space')">Space</button>
+                <button class="skin-btn" onclick="setSkin('forest')">Forest</button>
+            </div>
         </div>
-        <button onclick="startMonitorMode()">START MONITOR</button>
-        <div style="margin: 15px 0; font-weight: bold; opacity: 0.7;">━━━━ OR ━━━━</div>
-        <input type="text" id="join-id" placeholder="CODE" maxlength="5" spellcheck="false" autocomplete="off">
-        <button onclick="initController()">JOIN BATTLE</button>
+        <button onclick="checkNameBefore(startMonitorMode)">START MONITOR</button>
+        <div style="margin: 10px 0; font-weight: bold; opacity: 0.6;">━━━━ OR ━━━━</div>
+        <input type="text" id="join-id" placeholder="ROOM CODE" maxlength="5">
+        <button onclick="checkNameBefore(initController)">JOIN BATTLE</button>
     </div>
 
     <div id="monitor-screen" class="screen">
-        <div id="round-info">ROUND 1 - P1: 0 | P2: 0</div>
+        <div id="round-info">ROUND 1</div>
         <div id="room-id-display">.....</div>
         <h3 id="status-text">WAITING...</h3>
         <div id="track">
-            <div id="bar-p1" class="bar" style="width: 50%; background: var(--p1);">P1</div>
-            <div id="bar-p2" class="bar" style="width: 50%; background: var(--p2);">P2</div>
+            <div id="bar-p1" class="bar" style="width: 50%; background: var(--p1);"><b id="name-p1">P1</b><span>READY</span></div>
+            <div id="bar-p2" class="bar" style="width: 50%; background: var(--p2);"><b id="name-p2">P2</b><span>READY</span></div>
         </div>
+        <div id="speed-alert">SO FAST!!</div>
     </div>
 
     <div id="landscape-msg">
@@ -84,12 +89,27 @@
 
     <script>
         let peer = null, players = { p1: null, p2: null };
+        let playerNames = { p1: "Player One", p2: "Player Two" };
         let score = 50, gameActive = false, currentSkin = 'classic';
         let p1Wins = 0, p2Wins = 0, currentRound = 1;
-        let commentaryLock = false;
+        let commentaryLock = false, isSpeakingMain = false;
+        
+        let tapHistory = { p1: [], p2: [] };
+        let alertTimeout = null;
+
         const menuAudio = document.getElementById('bgm-menu');
         const battleAudio = document.getElementById('bgm-battle');
         let audioCtx = null;
+
+        function checkNameBefore(action) {
+            const nameField = document.getElementById('user-name');
+            if (!nameField.value.trim()) {
+                nameField.classList.add('error');
+                setTimeout(() => nameField.classList.remove('error'), 500);
+                nameField.focus(); return;
+            }
+            action();
+        }
 
         const enableAudio = () => {
             initAudio();
@@ -138,22 +158,19 @@
             else if(mode === 'battle') { battleAudio.currentTime = 0; battleAudio.play().catch(() => {}); }
         }
 
-        function speak(text, callback) {
-            window.speechSynthesis.cancel();
+        function speak(text, isMain = false, callback) {
+            if (isMain) { window.speechSynthesis.cancel(); isSpeakingMain = true; }
+            else if (isSpeakingMain || window.speechSynthesis.speaking) return; 
+
             const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'en-US';
-            msg.rate = 1.1;
-            if (callback) msg.onend = callback;
+            msg.lang = 'en-US'; msg.rate = 1.2;
+            msg.onend = () => { if (isMain) isSpeakingMain = false; if (callback) callback(); };
             window.speechSynthesis.speak(msg);
         }
 
         async function startMonitorMode() {
-            initAudio();
-            playMusic('menu');
-            try {
-                if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
-                if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape').catch(() => {});
-            } catch (e) {}
+            initAudio(); playMusic('menu');
+            try { if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen(); } catch (e) {}
             initMonitor();
         }
 
@@ -171,41 +188,67 @@
                     if (role) {
                         players[role] = conn;
                         conn.send({ type: 'init', role: role, skin: currentSkin });
+                    }
+                });
+                conn.on('data', data => { 
+                    if (data.type === 'join_name') {
+                        playerNames[data.role] = data.name || (data.role === 'p1' ? "Player One" : "Player Two");
+                        document.getElementById('name-' + data.role).innerText = playerNames[data.role].toUpperCase();
                         if (players.p1 && players.p2) {
-                            menuAudio.pause();
                             document.getElementById('room-id-display').style.display = 'none';
                             startRoundSequence();
                         } else {
                             document.getElementById('status-text').innerText = "1 MORE PLAYER...";
                         }
                     }
+                    if (data.type === 'tap' && gameActive) { 
+                        score += (data.role === 'p1' ? 2 : -2); 
+                        checkSpeed(data.role); updateDisplay(); 
+                    } 
                 });
-                conn.on('data', data => { if (data.type === 'tap' && gameActive) { score += (data.role === 'p1' ? 2 : -2); updateDisplay(); } });
-                conn.on('close', () => location.reload()); // Auto-reload if anyone leaves
+                conn.on('close', () => location.reload());
             });
+        }
+
+        function checkSpeed(role) {
+            const now = Date.now();
+            tapHistory[role].push(now);
+            tapHistory[role] = tapHistory[role].filter(t => now - t < 1000);
+            if (tapHistory[role].length >= 8) {
+                showSpeedAlert(playerNames[role] + " SO FAST!!");
+                tapHistory[role] = []; 
+            }
+        }
+
+        function showSpeedAlert(text) {
+            const alertBox = document.getElementById('speed-alert');
+            alertBox.classList.remove('show');
+            void alertBox.offsetWidth; 
+            alertBox.innerText = text;
+            alertBox.classList.add('show');
+            speak(text, false);
+            if (alertTimeout) clearTimeout(alertTimeout);
+            alertTimeout = setTimeout(() => { alertBox.classList.remove('show'); }, 2000);
         }
 
         function startRoundSequence() {
             gameActive = false; score = 50; commentaryLock = false;
+            tapHistory = { p1: [], p2: [] };
             updateDisplay();
             document.getElementById('track').style.display = 'none';
-            document.getElementById('track').classList.remove('shaking');
             document.getElementById('status-text').innerText = "ROUND " + currentRound;
-            
             const ri = document.getElementById('round-info');
             ri.style.display = 'block';
-            ri.innerText = `ROUND ${currentRound} - P1: ${p1Wins} | P2: ${p2Wins}`;
+            ri.innerText = `ROUND ${currentRound} - ${p1Wins} : ${p2Wins}`;
             
-            speak("Round " + currentRound, () => {
+            speak("Round " + currentRound, true, () => {
                 setTimeout(() => {
-                    speak("Ready", () => {
+                    speak("Ready", true, () => {
                         setTimeout(() => {
-                            speak("Go");
-                            playTrumpet();
+                            speak("Go", true); playTrumpet();
                             document.getElementById('status-text').innerText = "FIGHT!";
                             document.getElementById('track').style.display = 'flex';
-                            gameActive = true;
-                            playMusic('battle');
+                            gameActive = true; playMusic('battle');
                         }, 800);
                     });
                 }, 800);
@@ -217,20 +260,20 @@
             document.getElementById('bar-p2').style.width = (100 - score) + '%';
             if (score > 85 || score < 15) {
                 document.getElementById('track').classList.add('shaking');
-                if (!commentaryLock) { speak("Almost there!"); commentaryLock = true; }
+                if (!commentaryLock) { speak("Almost there!", true); commentaryLock = true; }
             } else { document.getElementById('track').classList.remove('shaking'); }
 
             if (score >= 100 || score <= 0) {
                 gameActive = false; battleAudio.pause();
-                let winner = score >= 100 ? "p1" : "p2";
-                let loser = winner === "p1" ? "p2" : "p1";
-                winner === "p1" ? p1Wins++ : p2Wins++;
-                players[loser].send({ type: 'punish' });
-                speak("Player " + (winner === "p1" ? "one" : "two") + " wins the round!");
+                let winnerRole = score >= 100 ? "p1" : "p2";
+                let loserRole = winnerRole === "p1" ? "p2" : "p1";
+                winnerRole === "p1" ? p1Wins++ : p2Wins++;
+                players[loserRole].send({ type: 'punish' });
+                speak(playerNames[winnerRole] + " wins the round!", true);
                 if (p1Wins === 2 || p2Wins === 2) {
                     setTimeout(() => {
-                        speak("Final Champion is Player " + (p1Wins === 2 ? "one" : "two"));
-                        alert(`GAME OVER! PLAYER ${p1Wins === 2 ? '1' : '2'} IS THE CHAMPION!`);
+                        speak("Final Champion is " + playerNames[winnerRole], true);
+                        alert(`GAME OVER! ${playerNames[winnerRole].toUpperCase()} IS THE CHAMPION!`);
                         location.reload();
                     }, 2000);
                 } else { currentRound++; setTimeout(startRoundSequence, 3000); }
@@ -250,6 +293,7 @@
 
         function initController() {
             const id = document.getElementById('join-id').value.trim().toUpperCase();
+            const name = document.getElementById('user-name').value.trim();
             if (id.length < 5) return alert("KODE SALAH!");
             showScreen('controller-screen');
             peer = new Peer();
@@ -262,6 +306,7 @@
                         if (data.type === 'init') {
                             myRole = data.role;
                             updateControllerUI(btn, myRole, data.skin);
+                            conn.send({ type: 'join_name', role: myRole, name: name });
                             btn.onpointerdown = (e) => { e.preventDefault(); initAudio(); conn.send({ type: 'tap', role: myRole }); if(navigator.vibrate) navigator.vibrate(40); };
                         }
                         if (data.type === 'skin') { updateControllerUI(btn, myRole, data.skin); }
