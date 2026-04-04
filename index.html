@@ -3,155 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tap Tap 1v1 P2P</title>
+    <title>Tap Tap 1v1 P2P - LEGO Style</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js"></script>
     <style>
         :root { --p1: #ff4757; --p2: #2e86de; }
-        body { font-family: 'Segoe UI', sans-serif; background: #1e2124; color: white; text-align: center; margin: 0; overflow: hidden; touch-action: none; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f1c40f; color: #2c3e50; text-align: center; margin: 0; overflow: hidden; touch-action: none; }
         .screen { display: none; padding: 20px; flex-direction: column; align-items: center; justify-content: center; height: 100vh; box-sizing: border-box; }
         .active { display: flex; }
         
-        button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; border: none; border-radius: 12px; margin: 10px; transition: 0.1s; font-weight: bold; text-transform: uppercase; -webkit-tap-highlight-color: transparent; }
-        button:active { transform: scale(0.95); }
-        input { padding: 15px; border-radius: 8px; border: 2px solid #57606f; width: 260px; font-size: 1.5rem; margin-bottom: 15px; text-align: center; background: #2f3542; color: white; font-family: monospace; }
+        button { padding: 18px 35px; font-size: 1.2rem; cursor: pointer; border: 4px solid #2c3e50; border-radius: 15px; margin: 10px; transition: 0.1s; background: #ecf0f1; color: #2c3e50; font-weight: 900; text-transform: uppercase; box-shadow: 6px 6px 0px #2c3e50; -webkit-tap-highlight-color: transparent; }
+        button:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0px #2c3e50; }
+        input { padding: 15px; border: 4px solid #2c3e50; border-radius: 12px; width: 260px; font-size: 1.5rem; margin-bottom: 15px; text-align: center; background: #fff; font-family: monospace; font-weight: bold; }
 
-        /* Monitor */
-        #room-id-display { background: #eccc68; color: #2f3542; padding: 15px 35px; border-radius: 15px; font-family: 'Courier New', monospace; font-size: 3.5rem; font-weight: bold; margin: 10px 0; letter-spacing: 8px; box-shadow: 0 0 25px rgba(236, 204, 104, 0.4); }
-        #track { display: none; width: 90%; height: 120px; background: #36393e; border-radius: 60px; overflow: hidden; position: relative; margin: 30px 0; border: 6px solid #ffffff; box-shadow: 0 0 40px rgba(0,0,0,0.6); }
-        .bar { height: 100%; transition: width 0.05s linear; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 2.5rem; text-shadow: 2px 2px 6px rgba(0,0,0,0.6); }
-        #status-text { font-size: 2.2rem; color: #ffa502; text-transform: uppercase; margin: 15px 0; min-height: 1.2em; letter-spacing: 3px; font-weight: bold; }
+        #room-id-display { background: #fff; color: #2c3e50; padding: 15px 30px; border: 5px solid #2c3e50; border-radius: 20px; font-size: 3.5rem; font-weight: 900; margin: 10px 0; letter-spacing: 5px; box-shadow: 8px 8px 0px #c0392b; }
+        #track { display: none; width: 90%; height: 110px; background: #2c3e50; border: 6px solid #fff; border-radius: 55px; position: relative; margin: 25px 0; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .bar { height: 100%; transition: width 0.08s ease-out; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 2rem; color: white; text-shadow: 2px 2px #000; }
+        #status-text { font-size: 2.2rem; color: #fff; text-transform: uppercase; margin: 15px 0; min-height: 1.2em; text-shadow: 4px 4px #c0392b; -webkit-text-stroke: 1.5px #2c3e50; }
+        #round-info { font-size: 1.3rem; font-weight: 900; background: #fff; padding: 8px 25px; border-radius: 50px; border: 3px solid #2c3e50; margin-bottom: 10px; }
 
-        /* Controller */
-        .tap-area { width: 100%; height: 100%; position: absolute; top: 0; left: 0; border: none; font-size: 6rem; font-weight: 900; color: white; user-select: none; }
-        .tap-area:disabled { background: #57606f !important; font-size: 2rem; }
+        .tap-area { width: 100%; height: 100%; position: absolute; top: 0; left: 0; border: none; font-size: 5rem; font-weight: 900; color: white; user-select: none; }
     </style>
 </head>
 <body>
 
+    <audio id="bgm-menu" loop preload="auto">
+        <source src="https://image2url.com/r2/default/audio/1775290560696-3795209f-6e46-433c-a94c-18ac02c047a4.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="bgm-battle" loop preload="auto">
+        <source src="https://image2url.com/r2/default/audio/1775290622313-a7846eca-967a-4dcc-88dd-cb8e330cf6a6.mp3" type="audio/mpeg">
+    </audio>
+
     <div id="menu-screen" class="screen active">
-        <h1 style="font-size: 3.5rem; margin-bottom: 5px;">TAPTAP 1V1</h1>
-        <p style="opacity: 0.6; margin-bottom: 30px;">Ultra-Low Latency P2P Battle</p>
-        <button class="btn-p2" style="background:var(--p2); color:white;" onclick="startMonitorMode()">JADI MONITOR</button>
-        <div style="margin: 25px 0; color: #57606f; font-weight: bold;">━━━━ ATAU ━━━━</div>
-        <input type="text" id="join-id" placeholder="ID ROOM" maxlength="5" spellcheck="false" autocomplete="off">
-        <button class="btn-p1" style="background:var(--p1); color:white;" onclick="initController()">MASUK ROOM (HP)</button>
+        <h1 style="font-size: 3rem; margin-bottom: 5px; -webkit-text-stroke: 1px #fff;">TAPTAP 1V1</h1>
+        <p style="font-weight: bold; margin-bottom: 30px; letter-spacing: 1px;">LEGO-ISH ARCADE EDITION</p>
+        <button onclick="startMonitorMode()">START MONITOR</button>
+        <div style="margin: 20px 0; font-weight: bold; opacity: 0.7;">━━━━ OR ━━━━</div>
+        <input type="text" id="join-id" placeholder="ENTER CODE" maxlength="5" spellcheck="false" autocomplete="off">
+        <button onclick="initController()">JOIN BATTLE</button>
     </div>
 
     <div id="monitor-screen" class="screen">
-        <h2 style="margin:0; opacity:0.8; font-size: 1.5rem;">ROOM ID</h2>
+        <div id="round-info">ROUND 1 - P1: 0 | P2: 0</div>
         <div id="room-id-display">.....</div>
-        <h3 id="status-text">Menyiapkan...</h3>
-        
-        <div id="track" id="game-track">
+        <h3 id="status-text">WAITING...</h3>
+        <div id="track">
             <div id="bar-p1" class="bar" style="width: 50%; background: var(--p1);">P1</div>
             <div id="bar-p2" class="bar" style="width: 50%; background: var(--p2);">P2</div>
         </div>
-        <p id="instruction" style="opacity: 0.5; font-size: 1.2rem;">Masuk ke room ini lewat HP kamu!</p>
     </div>
 
     <div id="controller-screen" class="screen" style="padding:0;">
-        <button id="btn-tap" class="tap-area" disabled>MENGHUBUNGKAN...</button>
+        <button id="btn-tap" class="tap-area" disabled>CONNECTING...</button>
     </div>
 
     <script>
-        let peer = null;
-        let players = { p1: null, p2: null };
-        let score = 50;
-        let gameActive = false;
+        let peer = null, players = { p1: null, p2: null };
+        let score = 50, gameActive = false;
+        let p1Wins = 0, p2Wins = 0, currentRound = 1;
+        const menuAudio = document.getElementById('bgm-menu');
+        const battleAudio = document.getElementById('bgm-battle');
+        let audioCtx = null;
 
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
         }
 
-        function makeID() {
-            let res = "";
-            const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-            for (let i = 0; i < 5; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
-            return res;
+        function playTrumpet() {
+            initAudio();
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(now + 0.8);
+        }
+
+        function playMusic(mode) {
+            menuAudio.pause();
+            battleAudio.pause();
+            if(mode === 'menu') {
+                menuAudio.currentTime = 0;
+                menuAudio.play().catch(() => {});
+            } else if(mode === 'battle') {
+                battleAudio.currentTime = 0;
+                battleAudio.play().catch(() => {});
+            }
+        }
+
+        function speak(text, callback) {
+            window.speechSynthesis.cancel(); // Bersihkan antrean suara sebelumnya
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = 'en-US';
+            msg.rate = 1.1;
+            if (callback) msg.onend = callback;
+            window.speechSynthesis.speak(msg);
         }
 
         async function startMonitorMode() {
-            const docElm = document.documentElement;
-            // Fullscreen Request
+            initAudio();
+            playMusic('menu');
             try {
-                if (docElm.requestFullscreen) await docElm.requestFullscreen();
-                else if (docElm.webkitRequestFullscreen) await docElm.webkitRequestFullscreen();
-                else if (docElm.msRequestFullscreen) await docElm.msRequestFullscreen();
-                
-                // Orientation Lock (Landscape)
-                if (screen.orientation && screen.orientation.lock) {
-                    await screen.orientation.lock('landscape').catch(() => {});
-                }
-            } catch (e) { console.warn("UI Enhancements blocked by browser"); }
-            
+                if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+                if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape').catch(()=>{});
+            } catch (e) {}
             initMonitor();
         }
 
         function initMonitor() {
+            const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            let roomID = "";
+            for(let i=0; i<5; i++) roomID += chars.charAt(Math.floor(Math.random() * chars.length));
+            
             showScreen('monitor-screen');
-            const roomID = makeID();
             peer = new Peer(roomID);
+            peer.on('open', id => { document.getElementById('room-id-display').innerText = id; });
 
-            peer.on('open', (id) => {
-                document.getElementById('room-id-display').innerText = id;
-                updateStatus();
-            });
-
-            peer.on('error', (err) => {
-                if(err.type === 'unavailable-id') initMonitor();
-                else { alert("Koneksi Error: " + err.type); location.reload(); }
-            });
-
-            peer.on('connection', (conn) => {
+            peer.on('connection', conn => {
                 conn.on('open', () => {
-                    // Validasi: Cegah koneksi ganda dari ID yang sama
-                    if (players.p1 && players.p1.peer === conn.peer) return;
-                    
                     let role = !players.p1 ? "p1" : (!players.p2 ? "p2" : null);
                     if (role) {
                         players[role] = conn;
-                        conn.send({ type: 'assign', role: role });
-                        updateStatus();
-                    } else {
-                        conn.send({ type: 'rejected' });
-                        setTimeout(() => conn.close(), 500);
+                        conn.send({ type: 'init', role: role });
+                        if (players.p1 && players.p2) {
+                            menuAudio.pause(); // Lagu mati saat pemain lengkap
+                            startRoundSequence();
+                        } else {
+                            document.getElementById('status-text').innerText = "1 MORE PLAYER...";
+                        }
                     }
                 });
-
-                conn.on('data', (data) => {
+                conn.on('data', data => {
                     if (data.type === 'tap' && gameActive) {
                         score += (data.role === 'p1' ? 2 : -2);
                         updateDisplay();
                     }
                 });
-
-                conn.on('close', () => {
-                    if (players.p1 && players.p1.peer === conn.peer) players.p1 = null;
-                    if (players.p2 && players.p2.peer === conn.peer) players.p2 = null;
-                    gameActive = false;
-                    updateStatus();
-                });
+                conn.on('close', () => location.reload());
             });
         }
 
-        function updateStatus() {
-            const status = document.getElementById('status-text');
-            const track = document.getElementById('track');
-            const p1Ready = players.p1 !== null;
-            const p2Ready = players.p2 !== null;
+        function startRoundSequence() {
+            gameActive = false;
+            score = 50;
+            updateDisplay();
+            document.getElementById('track').style.display = 'none';
+            document.getElementById('status-text').innerText = "ROUND " + currentRound;
+            document.getElementById('round-info').innerText = `ROUND ${currentRound} - P1: ${p1Wins} | P2: ${p2Wins}`;
             
-            if (!p1Ready || !p2Ready) {
-                track.style.display = 'none';
-                gameActive = false;
-                status.innerText = (!p1Ready && !p2Ready) ? "Menunggu Pemain..." : "Menunggu Lawan...";
-                score = 50;
-            } else {
-                track.style.display = 'flex';
-                status.innerText = "SIAP... MULAI!!!";
-                gameActive = true;
-                updateDisplay();
-            }
+            speak("Round " + currentRound, () => {
+                setTimeout(() => {
+                    speak("Ready", () => {
+                        setTimeout(() => {
+                            speak("Go");
+                            playTrumpet();
+                            document.getElementById('status-text').innerText = "FIGHT!";
+                            document.getElementById('track').style.display = 'flex';
+                            gameActive = true;
+                            playMusic('battle');
+                        }, 1000);
+                    });
+                }, 1000);
+            });
         }
 
         function updateDisplay() {
@@ -160,55 +177,58 @@
 
             if (score >= 100 || score <= 0) {
                 gameActive = false;
-                const win = score >= 100 ? "PLAYER 1 (RED)" : "PLAYER 2 (BLUE)";
-                setTimeout(() => {
-                    alert(win + " MENANG!");
-                    location.reload(); 
-                }, 100);
+                battleAudio.pause();
+                let winner = score >= 100 ? "p1" : "p2";
+                let loser = winner === "p1" ? "p2" : "p1";
+                winner === "p1" ? p1Wins++ : p2Wins++;
+
+                players[loser].send({ type: 'punish' });
+                speak("Winner is Player " + (winner === "p1" ? "one" : "two"));
+
+                if (p1Wins === 2 || p2Wins === 2) {
+                    setTimeout(() => {
+                        alert(`GAME OVER! PLAYER ${p1Wins === 2 ? '1' : '2'} IS THE CHAMPION!`);
+                        location.reload();
+                    }, 2000);
+                } else {
+                    currentRound++;
+                    setTimeout(startRoundSequence, 3000);
+                }
             }
         }
 
-        function initController() {
-            const input = document.getElementById('join-id').value.trim().toUpperCase();
-            if (input.length < 5) return alert("Masukkan 5 digit ID Room!");
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
 
+        function initController() {
+            const id = document.getElementById('join-id').value.trim().toUpperCase();
+            if (id.length < 5) return alert("KODE SALAH!");
             showScreen('controller-screen');
-            const tapBtn = document.getElementById('btn-tap');
             
             peer = new Peer();
             peer.on('open', () => {
-                const conn = peer.connect(input, { reliable: true });
-
+                const conn = peer.connect(id, { reliable: true });
                 conn.on('open', () => {
-                    conn.on('data', (data) => {
-                        if (data.type === 'assign') {
-                            tapBtn.disabled = false;
-                            tapBtn.innerText = "TAP!";
-                            tapBtn.style.background = data.role === 'p1' ? 'var(--p1)' : 'var(--p2)';
-                            
-                            // PointerDown untuk respons tercepat
-                            tapBtn.onpointerdown = (e) => {
+                    conn.on('data', data => {
+                        const btn = document.getElementById('btn-tap');
+                        if (data.type === 'init') {
+                            btn.disabled = false; btn.innerText = "TAP!";
+                            btn.style.background = data.role === 'p1' ? 'var(--p1)' : 'var(--p2)';
+                            btn.onpointerdown = (e) => {
                                 e.preventDefault();
+                                initAudio();
                                 conn.send({ type: 'tap', role: data.role });
-                                if (navigator.vibrate) navigator.vibrate(40);
+                                if(navigator.vibrate) navigator.vibrate(40);
                             };
                         }
-                        if (data.type === 'rejected') {
-                            alert("Room penuh!");
-                            location.reload();
+                        if (data.type === 'punish' && navigator.vibrate) {
+                            navigator.vibrate([1000, 200, 1000]); 
                         }
                     });
                 });
-
-                conn.on('close', () => {
-                    alert("Terputus!");
-                    location.reload();
-                });
-            });
-
-            peer.on('error', () => {
-                alert("Gagal konek! ID salah?");
-                location.reload();
+                conn.on('close', () => location.reload());
             });
         }
     </script>
