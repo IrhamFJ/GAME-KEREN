@@ -9,7 +9,6 @@
         :root { --p1: #ff4757; --p2: #2e86de; }
         body { font-family: 'Segoe UI', sans-serif; background: #f1c40f; color: #2c3e50; text-align: center; margin: 0; overflow: hidden; touch-action: none; transition: background 0.4s; width: 100vw; height: 100vh; }
         
-        /* PAKSA MONITOR JADI LANDSCAPE */
         @media screen and (orientation: portrait) {
             #monitor-screen.active {
                 transform: rotate(90deg);
@@ -33,7 +32,8 @@
         body.skin-forest { background: #27ae60; }
 
         button { padding: 15px 30px; font-size: 1rem; cursor: pointer; border: 4px solid #2c3e50; border-radius: 15px; margin: 5px; transition: 0.1s; background: #ecf0f1; color: #2c3e50; font-weight: 900; text-transform: uppercase; box-shadow: 4px 4px 0px #2c3e50; -webkit-tap-highlight-color: transparent; }
-        button:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #2c3e50; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        button:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #2c3e50; }
         .skin-btn { padding: 8px 12px; font-size: 0.7rem; margin: 3px; background: #fff; }
         
         input { padding: 12px; border: 4px solid #2c3e50; border-radius: 12px; width: 220px; font-size: 1.1rem; margin-bottom: 10px; text-align: center; background: #fff; font-weight: bold; outline: none; }
@@ -75,16 +75,16 @@
                 <button class="skin-btn" onclick="setSkin('forest')">Forest</button>
             </div>
         </div>
-        <button onclick="startMonitorMode()">START MONITOR</button>
+        <button id="btn-monitor" onclick="startMonitorMode()">START MONITOR</button>
         <div style="margin: 10px 0; font-weight: bold; opacity: 0.6;">━━━━ OR ━━━━</div>
         <input type="text" id="join-id" placeholder="ROOM CODE" maxlength="5">
-        <button onclick="checkNameBefore(initController)">JOIN BATTLE</button>
+        <button id="btn-join" onclick="checkNameBefore(initController)">JOIN BATTLE</button>
     </div>
 
     <div id="monitor-screen" class="screen">
         <div id="round-info">ROUND 1</div>
         <div id="room-id-display">.....</div>
-        <h3 id="status-text">WAITING FOR PLAYERS...</h3>
+        <h3 id="status-text">WAITING...</h3>
         <div id="track">
             <div id="bar-p1" class="bar" style="width: 50%; background: var(--p1);"><b id="name-p1">P1</b><span>READY</span></div>
             <div id="bar-p2" class="bar" style="width: 50%; background: var(--p2);"><b id="name-p2">P2</b><span>READY</span></div>
@@ -121,11 +121,14 @@
 
         const enableAudio = () => {
             initAudio();
-            if (menuAudio.paused && !players.p1) menuAudio.play().catch(() => {});
+            if (menuAudio.paused && !gameActive) {
+                menuAudio.play().catch(() => {});
+            }
             document.removeEventListener('click', enableAudio);
             document.removeEventListener('touchstart', enableAudio);
         };
         document.addEventListener('click', enableAudio);
+        document.addEventListener('touchstart', enableAudio);
 
         function initAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -162,8 +165,11 @@
 
         function playMusic(mode) {
             menuAudio.pause(); battleAudio.pause();
-            if(mode === 'menu') { menuAudio.currentTime = 0; menuAudio.play().catch(() => {}); }
-            else if(mode === 'battle') { battleAudio.currentTime = 0; battleAudio.play().catch(() => {}); }
+            if(mode === 'menu') { 
+                menuAudio.currentTime = 0; menuAudio.play().catch(() => {}); 
+            } else if(mode === 'battle') { 
+                battleAudio.currentTime = 0; battleAudio.play().catch(() => {}); 
+            }
         }
 
         function speak(text, isMain = false, callback) {
@@ -176,7 +182,10 @@
         }
 
         async function startMonitorMode() {
-            initAudio(); playMusic('menu');
+            if (peer) return; // Guard anti-spam
+            document.getElementById('btn-monitor').disabled = true;
+            initAudio(); 
+            playMusic('menu'); 
             try { if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen(); } catch (e) {}
             initMonitor();
         }
@@ -186,9 +195,9 @@
             let roomID = "";
             for(let i=0; i<5; i++) roomID += chars.charAt(Math.floor(Math.random() * chars.length));
             showScreen('monitor-screen');
-            if(peer) peer.destroy();
             peer = new Peer(roomID);
             peer.on('open', id => { document.getElementById('room-id-display').innerText = id; });
+            peer.on('error', () => location.reload());
 
             peer.on('connection', conn => {
                 conn.on('open', () => {
@@ -206,7 +215,7 @@
                             document.getElementById('room-id-display').style.display = 'none';
                             startRoundSequence();
                         } else {
-                            document.getElementById('status-text').innerText = "WAITING FOR P2...";
+                            document.getElementById('status-text').innerText = "1 MORE PLAYER...";
                         }
                     }
                     if (data.type === 'tap' && gameActive) { 
@@ -215,7 +224,6 @@
                     } 
                 });
                 conn.on('close', () => location.reload());
-                conn.on('error', () => location.reload());
             });
         }
 
@@ -278,7 +286,10 @@
                 let loserRole = winnerRole === "p1" ? "p2" : "p1";
                 winnerRole === "p1" ? p1Wins++ : p2Wins++;
                 try { players[loserRole].send({ type: 'punish' }); } catch(e){}
+                
+                window.speechSynthesis.cancel(); // Force stop current speech for winner alert
                 speak(playerNames[winnerRole] + " wins the round!", true);
+                
                 if (p1Wins === 2 || p2Wins === 2) {
                     setTimeout(() => {
                         speak("Final Champion is " + playerNames[winnerRole], true);
@@ -301,6 +312,7 @@
         }
 
         function initController() {
+            if (peer) return; // Guard anti-spam
             const idInput = document.getElementById('join-id');
             const id = idInput.value.trim().toUpperCase();
             const name = document.getElementById('user-name').value.trim();
@@ -309,13 +321,14 @@
                 setTimeout(() => idInput.classList.remove('error'), 500);
                 return;
             }
+            document.getElementById('btn-join').disabled = true;
             showScreen('controller-screen');
-            if(peer) peer.destroy();
             peer = new Peer();
             peer.on('open', () => {
                 const conn = peer.connect(id, { reliable: true });
                 let myRole = null;
                 conn.on('open', () => {
+                    initAudio();
                     conn.on('data', data => {
                         const btn = document.getElementById('btn-tap');
                         if (data.type === 'init') {
@@ -328,7 +341,7 @@
                         if (data.type === 'punish' && navigator.vibrate) { navigator.vibrate([1000, 200, 1000]); }
                     });
                 });
-                conn.on('error', () => { alert("ROOM TIDAK DITEMUKAN!"); location.reload(); });
+                conn.on('error', () => { alert("ROOM NOT FOUND!"); location.reload(); });
                 conn.on('close', () => location.reload());
             });
         }
