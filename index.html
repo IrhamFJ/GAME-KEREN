@@ -11,15 +11,10 @@
         
         @media screen and (orientation: portrait) {
             #monitor-screen.active {
-                transform: rotate(90deg);
-                transform-origin: center;
-                width: 100vh !important;
-                height: 100vw !important;
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                margin-top: -50vw;
-                margin-left: -50vh;
+                transform: rotate(90deg); transform-origin: center;
+                width: 100vh !important; height: 100vw !important;
+                position: fixed; top: 50%; left: 50%;
+                margin-top: -50vw; margin-left: -50vh;
                 display: flex !important;
             }
         }
@@ -41,12 +36,14 @@
 
         #room-id-display { background: #fff; color: #2c3e50; padding: 15px 30px; border: 5px solid #2c3e50; border-radius: 20px; font-size: 3.5rem; font-weight: 900; margin: 10px 0; letter-spacing: 5px; box-shadow: 8px 8px 0px #c0392b; }
         #track { display: none; width: 85%; height: 110px; background: #2c3e50; border: 6px solid #fff; border-radius: 55px; position: relative; margin: 25px 0; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        .bar { height: 100%; transition: width 0.08s ease-out; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 900; font-size: 1.2rem; color: white; text-shadow: 2px 2px #000; overflow: hidden; }
-        .bar span { font-size: 0.7rem; opacity: 0.8; text-transform: uppercase; font-weight: normal; }
+        .bar { height: 100%; transition: width 0.08s ease-out; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 900; font-size: 1.2rem; color: white; text-shadow: 2px 2px #000; overflow: hidden; position: relative; }
+        
+        .ping-dot { width: 12px; height: 12px; background: #7f8c8d; border-radius: 50%; border: 2px solid #fff; position: absolute; top: 10px; transition: 0.3s; }
+        #ping-p1 { left: 15px; }
+        #ping-p2 { right: 15px; }
 
         #status-text { font-size: 2.2rem; color: #fff; text-transform: uppercase; margin: 15px 0; min-height: 1.2em; text-shadow: 4px 4px #c0392b; -webkit-text-stroke: 1.5px #2c3e50; }
         #round-info { display: none; font-size: 1.3rem; font-weight: 900; background: #fff; color: #2c3e50; padding: 8px 25px; border-radius: 50px; border: 3px solid #2c3e50; margin-bottom: 10px; }
-
         #speed-alert { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: #fff; color: #2c3e50; padding: 25px 50px; border: 8px solid #2c3e50; border-radius: 30px; font-size: 3rem; font-weight: 900; z-index: 5000; transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.4); pointer-events: none; white-space: nowrap; box-shadow: 15px 15px 0 rgba(0,0,0,0.3); }
         #speed-alert.show { transform: translate(-50%, -50%) scale(1); }
 
@@ -65,10 +62,10 @@
     </audio>
 
     <div id="menu-screen" class="screen active">
-        <h1 style="font-size: 2.5rem; margin-bottom: 5px; -webkit-text-stroke: 1px #fff;">TAPTAP 1V1</h1>
+        <h1 style="font-size: 2.5rem; margin-bottom: 5px;">TAPTAP 1V1</h1>
         <div style="margin-bottom: 15px;">
-            <p style="font-weight: bold; font-size: 0.8rem; margin: 5px;">PLAYER NAME (REQUIRED TO JOIN):</p>
-            <input type="text" id="user-name" placeholder="YOUR NAME..." maxlength="10" spellcheck="false">
+            <p style="font-weight: bold; font-size: 0.8rem; margin: 5px;">PLAYER NAME:</p>
+            <input type="text" id="user-name" placeholder="YOUR NAME..." maxlength="10">
             <div style="margin-top: 5px;">
                 <button class="skin-btn" onclick="setSkin('classic')">Classic</button>
                 <button class="skin-btn" onclick="setSkin('space')">Space</button>
@@ -82,12 +79,19 @@
     </div>
 
     <div id="monitor-screen" class="screen">
-        <div id="round-info">ROUND 1</div>
+        <div id="round-info">ROUND 1 | 0-0</div>
         <div id="room-id-display">.....</div>
         <h3 id="status-text">WAITING...</h3>
+        <button id="btn-add-bot" onclick="addBot()" style="margin-bottom: 10px; background: #9b59b6; color: white;">ADD BOT</button>
         <div id="track">
-            <div id="bar-p1" class="bar" style="width: 50%; background: var(--p1);"><b id="name-p1">P1</b><span>READY</span></div>
-            <div id="bar-p2" class="bar" style="width: 50%; background: var(--p2);"><b id="name-p2">P2</b><span>READY</span></div>
+            <div id="bar-p1" class="bar" style="width: 50%; background: var(--p1);">
+                <div id="ping-p1" class="ping-dot"></div>
+                <b id="name-p1">P1</b>
+            </div>
+            <div id="bar-p2" class="bar" style="width: 50%; background: var(--p2);">
+                <div id="ping-p2" class="ping-dot"></div>
+                <b id="name-p2">P2</b>
+            </div>
         </div>
         <div id="speed-alert">SO FAST!!</div>
     </div>
@@ -97,97 +101,31 @@
     </div>
 
     <script>
-        let peer = null, players = { p1: null, p2: null };
-        let playerNames = { p1: "Player One", p2: "Player Two" };
-        let score = 50, gameActive = false, currentSkin = 'classic';
-        let p1Wins = 0, p2Wins = 0, currentRound = 1;
-        let commentaryLock = false, isSpeakingMain = false;
-        let tapHistory = { p1: [], p2: [] };
-        let alertTimeout = null;
+        let peer = null, players = { p1: null, p2: null }, playerNames = { p1: "P1", p2: "P2" };
+        let score = 50, gameActive = false, currentSkin = 'classic', p1Wins = 0, p2Wins = 0, currentRound = 1;
+        let isBotMode = false, botInterval = null, botTapsInRound = 0;
+        let commentaryLock = false, tapHistory = { p1: [], p2: [] }, audioCtx = null;
+        const menuAudio = document.getElementById('bgm-menu'), battleAudio = document.getElementById('bgm-battle');
 
-        const menuAudio = document.getElementById('bgm-menu');
-        const battleAudio = document.getElementById('bgm-battle');
-        let audioCtx = null;
-
-        function checkNameBefore(action) {
-            const nameField = document.getElementById('user-name');
-            if (!nameField.value.trim()) {
-                nameField.classList.add('error');
-                setTimeout(() => nameField.classList.remove('error'), 500);
-                nameField.focus(); return;
-            }
-            action();
+        async function lockOrientation() {
+            try {
+                if (document.documentElement.requestFullscreen) {
+                    await document.documentElement.requestFullscreen();
+                    if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape').catch(() => {});
+                }
+            } catch (err) {}
         }
-
-        const enableAudio = () => {
-            initAudio();
-            if (menuAudio.paused && !gameActive) {
-                menuAudio.play().catch(() => {});
-            }
-            document.removeEventListener('click', enableAudio);
-            document.removeEventListener('touchstart', enableAudio);
-        };
-        document.addEventListener('click', enableAudio);
-        document.addEventListener('touchstart', enableAudio);
 
         function initAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
         }
 
-        function setSkin(type) {
-            currentSkin = type;
-            document.body.className = 'skin-' + type;
-            const themes = {
-                classic: { p1: '#ff4757', p2: '#2e86de' },
-                space: { p1: '#9b59b6', p2: '#1abc9c' },
-                forest: { p1: '#e67e22', p2: '#2ecc71' }
-            };
-            document.documentElement.style.setProperty('--p1', themes[type].p1);
-            document.documentElement.style.setProperty('--p2', themes[type].p2);
-            if (players.p1) try { players.p1.send({ type: 'skin', skin: type }); } catch(e){}
-            if (players.p2) try { players.p2.send({ type: 'skin', skin: type }); } catch(e){}
-        }
-
-        function playTrumpet() {
-            initAudio(); // Force resume AudioContext
-            const now = audioCtx.currentTime;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(440, now);
-            osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
-            gain.gain.setValueAtTime(0.2, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(now + 0.8);
-        }
-
-        function playMusic(mode) {
-            initAudio();
-            menuAudio.pause(); battleAudio.pause();
-            if(mode === 'menu') { 
-                menuAudio.currentTime = 0; menuAudio.play().catch(() => {}); 
-            } else if(mode === 'battle') { 
-                battleAudio.currentTime = 0; battleAudio.play().catch(() => {}); 
-            }
-        }
-
-        function speak(text, isMain = false, callback) {
-            if (isMain) { window.speechSynthesis.cancel(); isSpeakingMain = true; }
-            else if (isSpeakingMain || window.speechSynthesis.speaking) return; 
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'en-US'; msg.rate = 1.2;
-            msg.onend = () => { if (isMain) isSpeakingMain = false; if (callback) callback(); };
-            window.speechSynthesis.speak(msg);
-        }
-
         async function startMonitorMode() {
             if (peer) return;
             document.getElementById('btn-monitor').disabled = true;
-            initAudio(); 
-            playMusic('menu'); 
-            try { if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen(); } catch (e) {}
+            initAudio(); await lockOrientation();
+            menuAudio.play().catch(()=>{});
             initMonitor();
         }
 
@@ -196,157 +134,177 @@
             let roomID = "";
             for(let i=0; i<5; i++) roomID += chars.charAt(Math.floor(Math.random() * chars.length));
             showScreen('monitor-screen');
-            if(peer) peer.destroy();
             peer = new Peer(roomID);
-            peer.on('open', id => { document.getElementById('room-id-display').innerText = id; });
-            peer.on('error', (err) => { console.error(err); location.reload(); });
-
+            peer.on('open', id => document.getElementById('room-id-display').innerText = id);
             peer.on('connection', conn => {
+                if (isBotMode) return;
                 conn.on('open', () => {
                     let role = !players.p1 ? "p1" : (!players.p2 ? "p2" : null);
-                    if (role) {
-                        players[role] = conn;
-                        conn.send({ type: 'init', role: role, skin: currentSkin });
+                    if (role) { 
+                        players[role] = conn; 
+                        conn.send({ type: 'init', role, skin: currentSkin }); 
+                        document.getElementById('btn-add-bot').style.display = 'none';
                     }
                 });
-                conn.on('data', data => { 
+                conn.on('data', data => {
                     if (data.type === 'join_name') {
-                        playerNames[data.role] = data.name || (data.role === 'p1' ? "P1" : "P2");
+                        playerNames[data.role] = data.name || data.role.toUpperCase();
                         document.getElementById('name-' + data.role).innerText = playerNames[data.role].toUpperCase();
-                        if (players.p1 && players.p2) {
-                            document.getElementById('room-id-display').style.display = 'none';
-                            startRoundSequence();
-                        } else {
-                            document.getElementById('status-text').innerText = "1 MORE PLAYER...";
-                        }
+                        if (players.p1 && players.p2) startRoundSequence();
+                        else document.getElementById('status-text').innerText = "1 MORE PLAYER...";
                     }
-                    if (data.type === 'tap' && gameActive) { 
-                        score += (data.role === 'p1' ? 2 : -2); 
-                        checkSpeed(data.role); updateDisplay(); 
-                    } 
+                    if (data.type === 'tap' && gameActive) handleTap(data.role, data.t);
                 });
                 conn.on('close', () => location.reload());
             });
         }
 
-        function checkSpeed(role) {
-            const now = Date.now();
-            tapHistory[role].push(now);
-            tapHistory[role] = tapHistory[role].filter(t => now - t < 1000);
-            if (tapHistory[role].length >= 8) {
-                showSpeedAlert(playerNames[role] + " SO FAST!!");
-                tapHistory[role] = []; 
-            }
+        function addBot() {
+            if (players.p1 && players.p2) return;
+            isBotMode = true;
+            document.getElementById('btn-add-bot').style.display = 'none';
+            playerNames.p2 = "BOT-LEGO";
+            document.getElementById('name-p2').innerText = "BOT-LEGO";
+            document.getElementById('ping-p2').style.background = '#2ecc71'; 
+            if (players.p1) startRoundSequence();
         }
 
-        function showSpeedAlert(text) {
-            const alertBox = document.getElementById('speed-alert');
-            alertBox.classList.remove('show');
-            void alertBox.offsetWidth; 
-            alertBox.innerText = text;
-            alertBox.classList.add('show');
-            speak(text, false);
-            if (alertTimeout) clearTimeout(alertTimeout);
-            alertTimeout = setTimeout(() => { alertBox.classList.remove('show'); }, 2000);
+        function botLogic() {
+            if (!gameActive || !isBotMode) return;
+            let staminaPenalty = Math.floor(botTapsInRound / 10) * 8; 
+            let baseInterval = Math.floor(Math.random() * 100) + 120;
+            let finalDelay = baseInterval + staminaPenalty;
+            if (Math.random() > 0.9) finalDelay -= 50;
+
+            botInterval = setTimeout(() => {
+                if (gameActive) {
+                    botTapsInRound++;
+                    handleTap('p2', Date.now());
+                    botLogic();
+                }
+            }, finalDelay);
+        }
+
+        function handleTap(role, time) {
+            const lat = Date.now() - time;
+            const dot = document.getElementById('ping-' + role);
+            if (dot) dot.style.background = lat < 60 ? '#2ecc71' : (lat < 160 ? '#f1c40f' : '#e74c3c');
+            score += (role === 'p1' ? 2 : -2); 
+            updateDisplay(); 
+            checkSpeed(role);
         }
 
         function startRoundSequence() {
-            gameActive = false; score = 50; commentaryLock = false;
-            tapHistory = { p1: [], p2: [] };
-            updateDisplay();
+            gameActive = false; score = 50; commentaryLock = false; 
+            botTapsInRound = 0; // RESET STAMINA BOT DISINI
+            if (botInterval) clearTimeout(botInterval);
+            document.getElementById('room-id-display').style.display = 'none';
             document.getElementById('track').style.display = 'none';
             document.getElementById('status-text').innerText = "ROUND " + currentRound;
-            const ri = document.getElementById('round-info');
-            ri.style.display = 'block';
-            ri.innerText = `ROUND ${currentRound} - ${p1Wins} : ${p2Wins}`;
+            const ri = document.getElementById('round-info'); ri.style.display = 'block';
+            ri.innerText = `ROUND ${currentRound} | ${p1Wins}-${p2Wins}`;
             
             speak("Round " + currentRound, true, () => {
-                setTimeout(() => {
-                    speak("Ready", true, () => {
-                        setTimeout(() => {
-                            speak("Go", true); playTrumpet();
-                            document.getElementById('status-text').innerText = "FIGHT!";
-                            document.getElementById('track').style.display = 'flex';
-                            gameActive = true; playMusic('battle');
-                        }, 800);
-                    });
-                }, 800);
+                setTimeout(() => speak("Ready", true, () => {
+                    setTimeout(() => {
+                        speak("Go", true);
+                        document.getElementById('status-text').innerText = "FIGHT!";
+                        document.getElementById('track').style.display = 'flex';
+                        gameActive = true; 
+                        menuAudio.pause(); battleAudio.currentTime = 0; battleAudio.play().catch(()=>{});
+                        if (isBotMode) setTimeout(botLogic, Math.random() * 200 + 250);
+                    }, 800);
+                }), 800);
             });
         }
 
         function updateDisplay() {
             document.getElementById('bar-p1').style.width = score + '%';
             document.getElementById('bar-p2').style.width = (100 - score) + '%';
-            if (score > 85 || score < 15) {
-                document.getElementById('track').classList.add('shaking');
-                if (!commentaryLock) { speak("Almost there!", true); commentaryLock = true; }
-            } else { document.getElementById('track').classList.remove('shaking'); }
-
             if (score >= 100 || score <= 0) {
                 gameActive = false; battleAudio.pause();
-                let winnerRole = score >= 100 ? "p1" : "p2";
-                let loserRole = winnerRole === "p1" ? "p2" : "p1";
-                winnerRole === "p1" ? p1Wins++ : p2Wins++;
-                try { players[loserRole].send({ type: 'punish' }); } catch(e){}
-                
-                window.speechSynthesis.cancel();
-                speak(playerNames[winnerRole] + " wins the round!", true);
-                
+                if (botInterval) clearTimeout(botInterval);
+                let win = score >= 100 ? "p1" : "p2";
+                win === "p1" ? p1Wins++ : p2Wins++;
+                if (win === 'p2' && players.p1) players.p1.send({ type: 'punish' });
+                if (win === 'p1' && players.p2) players.p2.send({ type: 'punish' });
+                speak(playerNames[win] + " wins!", true);
                 if (p1Wins === 2 || p2Wins === 2) {
-                    setTimeout(() => {
-                        speak("Final Champion is " + playerNames[winnerRole], true);
-                        alert(`GAME OVER! ${playerNames[winnerRole].toUpperCase()} IS THE CHAMPION!`);
-                        location.reload();
-                    }, 2000);
+                    setTimeout(() => { alert("GAME OVER! " + playerNames[win].toUpperCase()); location.reload(); }, 2000);
                 } else { currentRound++; setTimeout(startRoundSequence, 3000); }
             }
+        }
+
+        function speak(t, main, cb) {
+            if (main) window.speechSynthesis.cancel();
+            const m = new SpeechSynthesisUtterance(t);
+            m.onend = () => cb && cb();
+            window.speechSynthesis.speak(m);
+        }
+
+        function checkSpeed(role) {
+            const now = Date.now(); tapHistory[role].push(now);
+            tapHistory[role] = tapHistory[role].filter(t => now - t < 1000);
+            if (tapHistory[role].length >= 8) {
+                const a = document.getElementById('speed-alert'); a.innerText = playerNames[role] + " SO FAST!";
+                a.classList.add('show'); setTimeout(() => a.classList.remove('show'), 1200);
+                tapHistory[role] = [];
+            }
+        }
+
+        function setSkin(s) {
+            currentSkin = s; document.body.className = 'skin-' + s;
+            const themes = { classic: ['#ff4757', '#2e86de'], space: ['#9b59b6', '#1abc9c'], forest: ['#e67e22', '#2ecc71'] };
+            document.documentElement.style.setProperty('--p1', themes[s][0]);
+            document.documentElement.style.setProperty('--p2', themes[s][1]);
+            Object.values(players).forEach(p => p && p.send({ type: 'skin', skin: s }));
+        }
+
+        function checkNameBefore(fn) {
+            const n = document.getElementById('user-name');
+            if(!n.value.trim()) { n.classList.add('error'); setTimeout(()=>n.classList.remove('error'), 500); return; }
+            fn();
+        }
+
+        function initController() {
+            if(peer) return;
+            const id = document.getElementById('join-id').value.trim().toUpperCase();
+            const name = document.getElementById('user-name').value.trim();
+            document.getElementById('btn-join').disabled = true;
+            showScreen('controller-screen');
+            peer = new Peer();
+            peer.on('open', () => {
+                const conn = peer.connect(id);
+                conn.on('open', () => {
+                    initAudio();
+                    conn.on('data', d => {
+                        const b = document.getElementById('btn-tap');
+                        if (d.type === 'init') {
+                            updateBtn(b, d.role, d.skin);
+                            conn.send({ type: 'join_name', role: d.role, name });
+                            b.onpointerdown = (e) => { 
+                                e.preventDefault(); initAudio();
+                                conn.send({ type: 'tap', role: d.role, t: Date.now() }); 
+                                if(navigator.vibrate) navigator.vibrate(40); 
+                            };
+                        }
+                        if (d.type === 'skin') updateBtn(b, d.role, d.skin);
+                        if (d.type === 'punish' && navigator.vibrate) navigator.vibrate([800, 200, 800]);
+                    });
+                });
+                conn.on('error', () => { alert("ROOM NOT FOUND!"); location.reload(); });
+            });
+        }
+
+        function updateBtn(b, r, s) {
+            const themes = { classic: ['#ff4757', '#2e86de'], space: ['#9b59b6', '#1abc9c'], forest: ['#e67e22', '#2ecc71'] };
+            b.style.background = r === 'p1' ? themes[s][0] : themes[s][1];
+            b.innerText = "TAP!"; b.disabled = false;
         }
 
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-        }
-
-        function updateControllerUI(btn, role, skin) {
-            const colors = { classic: ['#ff4757', '#2e86de'], space: ['#9b59b6', '#1abc9c'], forest: ['#e67e22', '#2ecc71'] };
-            btn.style.background = role === 'p1' ? colors[skin][0] : colors[skin][1];
-            btn.innerText = "TAP!"; btn.disabled = false;
-        }
-
-        function initController() {
-            if (peer) return;
-            const idInput = document.getElementById('join-id');
-            const id = idInput.value.trim().toUpperCase();
-            const name = document.getElementById('user-name').value.trim();
-            if (id.length < 5) {
-                idInput.classList.add('error');
-                setTimeout(() => idInput.classList.remove('error'), 500);
-                return;
-            }
-            document.getElementById('btn-join').disabled = true;
-            showScreen('controller-screen');
-            if(peer) peer.destroy();
-            peer = new Peer();
-            peer.on('open', () => {
-                const conn = peer.connect(id, { reliable: true });
-                let myRole = null;
-                conn.on('open', () => {
-                    initAudio();
-                    conn.on('data', data => {
-                        const btn = document.getElementById('btn-tap');
-                        if (data.type === 'init') {
-                            myRole = data.role;
-                            updateControllerUI(btn, myRole, data.skin);
-                            conn.send({ type: 'join_name', role: myRole, name: name });
-                            btn.onpointerdown = (e) => { e.preventDefault(); initAudio(); conn.send({ type: 'tap', role: myRole }); if(navigator.vibrate) navigator.vibrate(40); };
-                        }
-                        if (data.type === 'skin') { updateControllerUI(btn, myRole, data.skin); }
-                        if (data.type === 'punish' && navigator.vibrate) { navigator.vibrate([1000, 200, 1000]); }
-                    });
-                });
-                conn.on('error', () => { alert("ROOM NOT FOUND!"); location.reload(); });
-                conn.on('close', () => location.reload());
-            });
         }
     </script>
 </body>
