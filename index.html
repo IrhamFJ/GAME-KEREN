@@ -64,6 +64,18 @@
         const battleAudio = document.getElementById('bgm-battle');
         let audioCtx = null;
 
+        // FIX: Autoplay BGM pas pertama kali masuk
+        const enableAudio = () => {
+            initAudio();
+            if (menuAudio.paused && !players.p1 && !players.p2) {
+                menuAudio.play().catch(() => {});
+            }
+            document.removeEventListener('click', enableAudio);
+            document.removeEventListener('touchstart', enableAudio);
+        };
+        document.addEventListener('click', enableAudio);
+        document.addEventListener('touchstart', enableAudio);
+
         function initAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -96,7 +108,7 @@
         }
 
         function speak(text, callback) {
-            window.speechSynthesis.cancel(); // Bersihkan antrean suara sebelumnya
+            window.speechSynthesis.cancel();
             const msg = new SpeechSynthesisUtterance(text);
             msg.lang = 'en-US';
             msg.rate = 1.1;
