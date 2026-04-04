@@ -150,7 +150,7 @@
         }
 
         function playTrumpet() {
-            initAudio();
+            initAudio(); // Force resume AudioContext
             const now = audioCtx.currentTime;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
@@ -164,6 +164,7 @@
         }
 
         function playMusic(mode) {
+            initAudio();
             menuAudio.pause(); battleAudio.pause();
             if(mode === 'menu') { 
                 menuAudio.currentTime = 0; menuAudio.play().catch(() => {}); 
@@ -182,7 +183,7 @@
         }
 
         async function startMonitorMode() {
-            if (peer) return; // Guard anti-spam
+            if (peer) return;
             document.getElementById('btn-monitor').disabled = true;
             initAudio(); 
             playMusic('menu'); 
@@ -195,9 +196,10 @@
             let roomID = "";
             for(let i=0; i<5; i++) roomID += chars.charAt(Math.floor(Math.random() * chars.length));
             showScreen('monitor-screen');
+            if(peer) peer.destroy();
             peer = new Peer(roomID);
             peer.on('open', id => { document.getElementById('room-id-display').innerText = id; });
-            peer.on('error', () => location.reload());
+            peer.on('error', (err) => { console.error(err); location.reload(); });
 
             peer.on('connection', conn => {
                 conn.on('open', () => {
@@ -287,7 +289,7 @@
                 winnerRole === "p1" ? p1Wins++ : p2Wins++;
                 try { players[loserRole].send({ type: 'punish' }); } catch(e){}
                 
-                window.speechSynthesis.cancel(); // Force stop current speech for winner alert
+                window.speechSynthesis.cancel();
                 speak(playerNames[winnerRole] + " wins the round!", true);
                 
                 if (p1Wins === 2 || p2Wins === 2) {
@@ -312,7 +314,7 @@
         }
 
         function initController() {
-            if (peer) return; // Guard anti-spam
+            if (peer) return;
             const idInput = document.getElementById('join-id');
             const id = idInput.value.trim().toUpperCase();
             const name = document.getElementById('user-name').value.trim();
@@ -323,6 +325,7 @@
             }
             document.getElementById('btn-join').disabled = true;
             showScreen('controller-screen');
+            if(peer) peer.destroy();
             peer = new Peer();
             peer.on('open', () => {
                 const conn = peer.connect(id, { reliable: true });
