@@ -9,7 +9,7 @@
         :root { --p1: #ff4757; --p2: #2e86de; }
         body { font-family: 'Segoe UI', sans-serif; background: #f1c40f; color: #2c3e50; text-align: center; margin: 0; overflow: hidden; touch-action: none; transition: background 0.4s; width: 100vw; height: 100vh; }
         
-        /* FIX FORCED LANDSCAPE CSS */
+        /* PAKSA MONITOR JADI LANDSCAPE */
         @media screen and (orientation: portrait) {
             #monitor-screen.active {
                 transform: rotate(90deg);
@@ -67,15 +67,15 @@
     <div id="menu-screen" class="screen active">
         <h1 style="font-size: 2.5rem; margin-bottom: 5px; -webkit-text-stroke: 1px #fff;">TAPTAP 1V1</h1>
         <div style="margin-bottom: 15px;">
-            <p style="font-weight: bold; font-size: 0.8rem; margin: 5px;">ENTER NAME TO UNLOCK:</p>
-            <input type="text" id="user-name" placeholder="NAME REQUIRED!" maxlength="10" spellcheck="false">
+            <p style="font-weight: bold; font-size: 0.8rem; margin: 5px;">PLAYER NAME (REQUIRED TO JOIN):</p>
+            <input type="text" id="user-name" placeholder="YOUR NAME..." maxlength="10" spellcheck="false">
             <div style="margin-top: 5px;">
                 <button class="skin-btn" onclick="setSkin('classic')">Classic</button>
                 <button class="skin-btn" onclick="setSkin('space')">Space</button>
                 <button class="skin-btn" onclick="setSkin('forest')">Forest</button>
             </div>
         </div>
-        <button onclick="checkNameBefore(startMonitorMode)">START MONITOR</button>
+        <button onclick="startMonitorMode()">START MONITOR</button>
         <div style="margin: 10px 0; font-weight: bold; opacity: 0.6;">━━━━ OR ━━━━</div>
         <input type="text" id="join-id" placeholder="ROOM CODE" maxlength="5">
         <button onclick="checkNameBefore(initController)">JOIN BATTLE</button>
@@ -84,7 +84,7 @@
     <div id="monitor-screen" class="screen">
         <div id="round-info">ROUND 1</div>
         <div id="room-id-display">.....</div>
-        <h3 id="status-text">WAITING...</h3>
+        <h3 id="status-text">WAITING FOR PLAYERS...</h3>
         <div id="track">
             <div id="bar-p1" class="bar" style="width: 50%; background: var(--p1);"><b id="name-p1">P1</b><span>READY</span></div>
             <div id="bar-p2" class="bar" style="width: 50%; background: var(--p2);"><b id="name-p2">P2</b><span>READY</span></div>
@@ -102,7 +102,6 @@
         let score = 50, gameActive = false, currentSkin = 'classic';
         let p1Wins = 0, p2Wins = 0, currentRound = 1;
         let commentaryLock = false, isSpeakingMain = false;
-        
         let tapHistory = { p1: [], p2: [] };
         let alertTimeout = null;
 
@@ -143,8 +142,8 @@
             };
             document.documentElement.style.setProperty('--p1', themes[type].p1);
             document.documentElement.style.setProperty('--p2', themes[type].p2);
-            if (players.p1) players.p1.send({ type: 'skin', skin: type });
-            if (players.p2) players.p2.send({ type: 'skin', skin: type });
+            if (players.p1) try { players.p1.send({ type: 'skin', skin: type }); } catch(e){}
+            if (players.p2) try { players.p2.send({ type: 'skin', skin: type }); } catch(e){}
         }
 
         function playTrumpet() {
@@ -170,7 +169,6 @@
         function speak(text, isMain = false, callback) {
             if (isMain) { window.speechSynthesis.cancel(); isSpeakingMain = true; }
             else if (isSpeakingMain || window.speechSynthesis.speaking) return; 
-
             const msg = new SpeechSynthesisUtterance(text);
             msg.lang = 'en-US'; msg.rate = 1.2;
             msg.onend = () => { if (isMain) isSpeakingMain = false; if (callback) callback(); };
@@ -188,6 +186,7 @@
             let roomID = "";
             for(let i=0; i<5; i++) roomID += chars.charAt(Math.floor(Math.random() * chars.length));
             showScreen('monitor-screen');
+            if(peer) peer.destroy();
             peer = new Peer(roomID);
             peer.on('open', id => { document.getElementById('room-id-display').innerText = id; });
 
@@ -201,13 +200,13 @@
                 });
                 conn.on('data', data => { 
                     if (data.type === 'join_name') {
-                        playerNames[data.role] = data.name || (data.role === 'p1' ? "Player One" : "Player Two");
+                        playerNames[data.role] = data.name || (data.role === 'p1' ? "P1" : "P2");
                         document.getElementById('name-' + data.role).innerText = playerNames[data.role].toUpperCase();
                         if (players.p1 && players.p2) {
                             document.getElementById('room-id-display').style.display = 'none';
                             startRoundSequence();
                         } else {
-                            document.getElementById('status-text').innerText = "1 MORE PLAYER...";
+                            document.getElementById('status-text').innerText = "WAITING FOR P2...";
                         }
                     }
                     if (data.type === 'tap' && gameActive) { 
@@ -216,6 +215,7 @@
                     } 
                 });
                 conn.on('close', () => location.reload());
+                conn.on('error', () => location.reload());
             });
         }
 
@@ -277,7 +277,7 @@
                 let winnerRole = score >= 100 ? "p1" : "p2";
                 let loserRole = winnerRole === "p1" ? "p2" : "p1";
                 winnerRole === "p1" ? p1Wins++ : p2Wins++;
-                players[loserRole].send({ type: 'punish' });
+                try { players[loserRole].send({ type: 'punish' }); } catch(e){}
                 speak(playerNames[winnerRole] + " wins the round!", true);
                 if (p1Wins === 2 || p2Wins === 2) {
                     setTimeout(() => {
@@ -301,10 +301,16 @@
         }
 
         function initController() {
-            const id = document.getElementById('join-id').value.trim().toUpperCase();
+            const idInput = document.getElementById('join-id');
+            const id = idInput.value.trim().toUpperCase();
             const name = document.getElementById('user-name').value.trim();
-            if (id.length < 5) return alert("KODE SALAH!");
+            if (id.length < 5) {
+                idInput.classList.add('error');
+                setTimeout(() => idInput.classList.remove('error'), 500);
+                return;
+            }
             showScreen('controller-screen');
+            if(peer) peer.destroy();
             peer = new Peer();
             peer.on('open', () => {
                 const conn = peer.connect(id, { reliable: true });
@@ -322,6 +328,7 @@
                         if (data.type === 'punish' && navigator.vibrate) { navigator.vibrate([1000, 200, 1000]); }
                     });
                 });
+                conn.on('error', () => { alert("ROOM TIDAK DITEMUKAN!"); location.reload(); });
                 conn.on('close', () => location.reload());
             });
         }
