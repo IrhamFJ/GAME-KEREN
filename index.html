@@ -81,7 +81,7 @@
         <div id="round-info">ROUND 1 | 0-0</div>
         <div id="room-id-display">GENERATING...</div>
         <h3 id="status-text">CONNECTING...</h3>
-        <button id="btn-add-bot" onclick="addBot()" style="margin-bottom: 10px; background: #9b59b6; color: white; display: none;">ADD BOT</button>
+        <button id="btn-add-bot" onclick="addBot()" style="margin-bottom: 10px; background: #9b59b6; color: white;">ADD BOT</button>
         <div id="track">
             <div id="bar-p1" class="bar" style="width: 50%; background: var(--p1);">
                 <div id="ping-p1" class="ping-dot"></div>
@@ -111,25 +111,14 @@
         let tapHistory = { p1: [], p2: [] }, audioCtx = null;
         const menuAudio = document.getElementById('bgm-menu'), battleAudio = document.getElementById('bgm-battle');
 
-        async function lockOrientation() {
-            try {
-                if (document.documentElement.requestFullscreen) {
-                    await document.documentElement.requestFullscreen();
-                    if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape').catch(() => {});
-                }
-            } catch (err) {}
-        }
-
-        function initAudio() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-        }
-
         async function startMonitorMode() {
             if (peer) return;
             document.getElementById('btn-monitor').disabled = true;
-            document.getElementById('btn-monitor').innerText = "GENERATING...";
-            initAudio(); await lockOrientation();
+            initAudio(); 
+            try { 
+                if(document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+                if(screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape');
+            } catch(e){}
             menuAudio.play().catch(()=>{});
             initMonitor();
         }
@@ -141,19 +130,24 @@
             showScreen('monitor-screen');
             peer = new Peer(roomID, peerConfig);
             
+            setTimeout(() => {
+                if(document.getElementById('room-id-display').innerText === "GENERATING...") {
+                    document.getElementById('room-id-display').innerText = "OFFLINE";
+                    document.getElementById('status-text').innerText = "OFFLINE MODE ACTIVE";
+                }
+            }, 4000);
+
             peer.on('open', id => {
                 document.getElementById('room-id-display').innerText = id;
-                document.getElementById('status-text').innerText = "WAITING...";
-                document.getElementById('btn-add-bot').style.display = 'block';
+                document.getElementById('status-text').innerText = "WAITING FOR P1...";
             });
 
             peer.on('connection', conn => {
-                if (isBotMode && players.p1 && players.p2) return;
                 conn.on('open', () => {
                     let role = !players.p1 ? "p1" : (!players.p2 ? "p2" : null);
                     if (role) { 
                         players[role] = conn; 
-                        conn.send({ type: 'init', role, skin: currentSkin }); 
+                        conn.send({ type: 'init', role, skin: currentSkin }); // FIX: Kirim currentSkin yang sedang aktif!
                         if(players.p1 && (players.p2 || isBotMode)) document.getElementById('btn-add-bot').style.display = 'none';
                     }
                 });
@@ -166,28 +160,30 @@
                     }
                     if (data.type === 'tap' && gameActive) handleTap(data.role, data.t);
                 });
-                conn.on('close', () => location.reload());
             });
         }
 
         function addBot() {
-            if (players.p1 && players.p2) return;
             isBotMode = true;
             document.getElementById('btn-add-bot').style.display = 'none';
             playerNames.p2 = "BOT-LEGO";
             document.getElementById('name-p2').innerText = "BOT-LEGO";
             document.getElementById('ping-p2').style.background = '#2ecc71'; 
-            if (players.p1) startRoundSequence();
-            else document.getElementById('status-text').innerText = "WAITING P1...";
+            if (!players.p1) {
+                document.getElementById('status-text').innerText = "P1 MISSING (LOCAL MODE)";
+                playerNames.p1 = "PLAYER 1";
+                document.getElementById('name-p1').innerText = "PLAYER 1";
+                startRoundSequence();
+            } else {
+                startRoundSequence();
+            }
         }
 
         function botLogic() {
             if (!gameActive || !isBotMode) return;
             let staminaPenalty = Math.floor(botTapsInRound / 10) * 8; 
-            let baseInterval = Math.floor(Math.random() * 100) + 120;
+            let baseInterval = Math.floor(Math.random() * 110) + 130;
             let finalDelay = baseInterval + staminaPenalty;
-            if (Math.random() > 0.92) finalDelay -= 60; // Random Burst
-
             botInterval = setTimeout(() => {
                 if (gameActive) {
                     botTapsInRound++;
@@ -223,7 +219,7 @@
                         document.getElementById('track').style.display = 'flex';
                         gameActive = true; 
                         menuAudio.pause(); battleAudio.currentTime = 0; battleAudio.play().catch(()=>{});
-                        if (isBotMode) setTimeout(botLogic, Math.random() * 200 + 250);
+                        if (isBotMode) setTimeout(botLogic, 450);
                     }, 800);
                 }), 800);
             });
@@ -238,10 +234,9 @@
                 let win = score >= 100 ? "p1" : "p2";
                 win === "p1" ? p1Wins++ : p2Wins++;
                 if (win === 'p2' && players.p1) players.p1.send({ type: 'punish' });
-                if (win === 'p1' && players.p2) players.p2.send({ type: 'punish' });
                 speak(playerNames[win] + " wins!", true);
                 if (p1Wins === 2 || p2Wins === 2) {
-                    setTimeout(() => { alert("GAME OVER! " + playerNames[win].toUpperCase()); location.reload(); }, 2000);
+                    setTimeout(() => { alert("GAME OVER! " + playerNames[win]); location.reload(); }, 2000);
                 } else { currentRound++; setTimeout(startRoundSequence, 3000); }
             }
         }
@@ -268,6 +263,7 @@
             const themes = { classic: ['#ff4757', '#2e86de'], space: ['#9b59b6', '#1abc9c'], forest: ['#e67e22', '#2ecc71'] };
             document.documentElement.style.setProperty('--p1', themes[s][0]);
             document.documentElement.style.setProperty('--p2', themes[s][1]);
+            // Kirim ke semua pemain yang sudah konek
             Object.values(players).forEach(p => p && p.send({ type: 'skin', skin: s }));
         }
 
@@ -282,7 +278,6 @@
             const id = document.getElementById('join-id').value.trim().toUpperCase();
             const name = document.getElementById('user-name').value.trim();
             document.getElementById('btn-join').disabled = true;
-            document.getElementById('btn-join').innerText = "CONNECTING...";
             showScreen('controller-screen');
             peer = new Peer(null, peerConfig);
             peer.on('open', () => {
@@ -295,7 +290,7 @@
                             updateBtn(b, d.role, d.skin);
                             conn.send({ type: 'join_name', role: d.role, name });
                             b.onpointerdown = (e) => { 
-                                e.preventDefault(); initAudio();
+                                e.preventDefault();
                                 conn.send({ type: 'tap', role: d.role, t: Date.now() }); 
                                 if(navigator.vibrate) navigator.vibrate(40); 
                             };
@@ -304,9 +299,6 @@
                         if (d.type === 'punish' && navigator.vibrate) navigator.vibrate([800, 200, 800]);
                     });
                 });
-                conn.on('error', () => { alert("ROOM NOT FOUND!"); location.reload(); });
-                // Fallback timeout
-                setTimeout(() => { if(!document.getElementById('btn-tap').innerText.includes("TAP")) { alert("CONNECTION TIMEOUT!"); location.reload(); } }, 5000);
             });
         }
 
@@ -319,6 +311,11 @@
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+        }
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
         }
     </script>
 </body>
