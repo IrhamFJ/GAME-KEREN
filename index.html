@@ -133,9 +133,9 @@
             setTimeout(() => {
                 if(document.getElementById('room-id-display').innerText === "GENERATING...") {
                     document.getElementById('room-id-display').innerText = "OFFLINE";
-                    document.getElementById('status-text').innerText = "OFFLINE MODE ACTIVE";
+                    document.getElementById('status-text').innerHTML = 'OFFLINE <button onclick="location.reload()" style="padding:5px 10px; font-size:0.6rem;">RETRY</button>';
                 }
-            }, 4000);
+            }, 6000);
 
             peer.on('open', id => {
                 document.getElementById('room-id-display').innerText = id;
@@ -147,7 +147,7 @@
                     let role = !players.p1 ? "p1" : (!players.p2 ? "p2" : null);
                     if (role) { 
                         players[role] = conn; 
-                        conn.send({ type: 'init', role, skin: currentSkin }); // FIX: Kirim currentSkin yang sedang aktif!
+                        conn.send({ type: 'init', role, skin: currentSkin }); 
                         if(players.p1 && (players.p2 || isBotMode)) document.getElementById('btn-add-bot').style.display = 'none';
                     }
                 });
@@ -244,8 +244,13 @@
         function speak(t, main, cb) {
             if (main) window.speechSynthesis.cancel();
             const m = new SpeechSynthesisUtterance(t);
-            m.onend = () => cb && cb();
+            let called = false;
+            const safeCb = () => { if(!called) { called = true; if(cb) cb(); } };
+            m.onend = safeCb;
+            m.onerror = safeCb;
             window.speechSynthesis.speak(m);
+            // SAFETY TIMER: Jika 2.5 detik suara belum selesai/eror, paksa lanjut.
+            setTimeout(safeCb, 2500);
         }
 
         function checkSpeed(role) {
@@ -263,7 +268,6 @@
             const themes = { classic: ['#ff4757', '#2e86de'], space: ['#9b59b6', '#1abc9c'], forest: ['#e67e22', '#2ecc71'] };
             document.documentElement.style.setProperty('--p1', themes[s][0]);
             document.documentElement.style.setProperty('--p2', themes[s][1]);
-            // Kirim ke semua pemain yang sudah konek
             Object.values(players).forEach(p => p && p.send({ type: 'skin', skin: s }));
         }
 
