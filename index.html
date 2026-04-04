@@ -7,52 +7,48 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js"></script>
     <style>
         :root { --p1: #ff4757; --p2: #2e86de; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1e2124; color: white; text-align: center; margin: 0; overflow: hidden; touch-action: none; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1e2124; color: white; text-align: center; margin: 0; overflow: hidden; touch-action: none; }
         .screen { display: none; padding: 20px; flex-direction: column; align-items: center; justify-content: center; height: 100vh; box-sizing: border-box; }
         .active { display: flex; }
         
-        /* UI Elements */
-        button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; border: none; border-radius: 12px; margin: 10px; transition: transform 0.1s, background 0.2s; font-weight: bold; text-transform: uppercase; }
-        button:active { transform: scale(0.95); }
-        .btn-p1 { background: var(--p1); color: white; }
-        .btn-p2 { background: var(--p2); color: white; }
+        button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; border: none; border-radius: 12px; margin: 10px; transition: 0.1s; font-weight: bold; text-transform: uppercase; }
+        button:active { transform: scale(0.98); }
         input { padding: 15px; border-radius: 8px; border: 2px solid #57606f; width: 250px; font-size: 1.5rem; margin-bottom: 15px; text-align: center; background: #2f3542; color: white; font-family: monospace; }
 
         /* Monitor UI */
-        #room-id-display { background: #eccc68; color: #2f3542; padding: 15px 30px; border-radius: 15px; font-family: 'Courier New', monospace; font-size: 3rem; font-weight: bold; margin: 10px 0; letter-spacing: 8px; box-shadow: 0 0 15px rgba(236, 204, 104, 0.4); }
-        #track { width: 90%; height: 100px; background: #36393e; border-radius: 50px; display: flex; overflow: hidden; position: relative; margin: 40px 0; border: 6px solid #ffffff; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-        .bar { height: 100%; transition: width 0.05s linear; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 2rem; text-shadow: 2px 2px 5px rgba(0,0,0,0.7); }
-        #status-text { font-size: 1.8rem; color: #ffa502; text-transform: uppercase; letter-spacing: 2px; min-height: 1.2em; }
+        #room-id-display { background: #eccc68; color: #2f3542; padding: 15px 30px; border-radius: 15px; font-family: 'Courier New', monospace; font-size: 3.5rem; font-weight: bold; margin: 10px 0; letter-spacing: 8px; box-shadow: 0 0 20px rgba(236, 204, 104, 0.3); }
+        #track { display: none; width: 90%; height: 100px; background: #36393e; border-radius: 50px; overflow: hidden; position: relative; margin: 40px 0; border: 6px solid #ffffff; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        .bar { height: 100%; transition: width 0.05s linear; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 2rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        #status-text { font-size: 1.8rem; color: #ffa502; text-transform: uppercase; margin: 20px 0; min-height: 1.2em; letter-spacing: 2px; }
 
         /* Controller UI */
-        .tap-area { width: 100%; height: 100%; position: absolute; top: 0; left: 0; border: none; font-size: 5rem; font-weight: 900; color: white; user-select: none; -webkit-user-select: none; }
+        .tap-area { width: 100%; height: 100%; position: absolute; top: 0; left: 0; border: none; font-size: 5rem; font-weight: 900; color: white; -webkit-tap-highlight-color: transparent; }
         .tap-area:disabled { background: #57606f !important; font-size: 2rem; }
     </style>
 </head>
 <body>
 
     <div id="menu-screen" class="screen active">
-        <h1 style="font-size: 3rem; margin-bottom: 0;">TAPTAP 1V1</h1>
-        <p style="opacity: 0.7; margin-bottom: 30px;">P2P Real-time Battle</p>
-        <button class="btn-p2" onclick="initMonitor()">JADI MONITOR</button>
-        <div style="margin: 20px 0; color: #57606f; font-weight: bold;">— ATAU —</div>
+        <h1 style="font-size: 3rem; margin-bottom: 10px;">TAPTAP 1V1</h1>
+        <button class="btn-p2" style="background:var(--p2); color:white;" onclick="initMonitor()">JADI MONITOR</button>
+        <div style="margin: 20px 0; color: #57606f; font-weight: bold;">━━━━ ATAU ━━━━</div>
         <input type="text" id="join-id" placeholder="ID ROOM" maxlength="5" autocomplete="off">
-        <button class="btn-p1" onclick="initController()">MASUK ROOM (HP)</button>
+        <button class="btn-p1" style="background:var(--p1); color:white;" onclick="initController()">MASUK ROOM (HP)</button>
     </div>
 
     <div id="monitor-screen" class="screen">
-        <h2 style="margin:0; opacity:0.8;">ROOM ID</h2>
+        <h2 style="margin:0; opacity:0.7;">ROOM ID</h2>
         <div id="room-id-display">.....</div>
-        <h3 id="status-text">Memulai Peer...</h3>
+        <h3 id="status-text">Inisialisasi...</h3>
         
         <div id="track">
             <div id="bar-p1" class="bar" style="width: 50%; background: var(--p1);">P1</div>
             <div id="bar-p2" class="bar" style="width: 50%; background: var(--p2);">P2</div>
         </div>
-        <p id="instruction">Pemain harus masuk menggunakan ID di atas</p>
+        <p id="instruction" style="opacity: 0.6;">Buka link ini di HP dan masukkan ID di atas</p>
     </div>
 
-    <div id="controller-screen" class="screen" style="padding:0; position: relative;">
+    <div id="controller-screen" class="screen" style="padding:0;">
         <button id="btn-tap" class="tap-area" disabled>MENGHUBUNGKAN...</button>
     </div>
 
@@ -67,18 +63,18 @@
             document.getElementById(id).classList.add('active');
         }
 
-        function generateID() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let res = '';
-            for(let i=0; i<5; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
-            return res;
+        function makeID() {
+            let text = "";
+            const possible = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            for (let i = 0; i < 5; i++) text += possible.charAt(Math.floor(Math.random() * possible.length));
+            return text;
         }
 
-        // --- MONITOR LOGIC ---
+        // --- LOGIKA MONITOR ---
         function initMonitor() {
             showScreen('monitor-screen');
-            const myId = generateID();
-            peer = new Peer(myId);
+            const roomID = makeID();
+            peer = new Peer(roomID);
 
             peer.on('open', (id) => {
                 document.getElementById('room-id-display').innerText = id;
@@ -86,34 +82,35 @@
             });
 
             peer.on('error', (err) => {
-                if(err.type === 'unavailable-id') initMonitor(); // Tabrakan ID, regenerasi
-                else alert("Peer Error: " + err.type);
+                if(err.type === 'unavailable-id') initMonitor();
+                else console.error("PeerJS Error:", err);
             });
 
             peer.on('connection', (conn) => {
                 conn.on('open', () => {
-                    let role = !players.p1 ? "p1" : (!players.p2 ? "p2" : null);
-                    
-                    if(role) {
-                        players[role] = conn;
-                        conn.send({ type: 'assign', role: role });
+                    let role = "";
+                    if (!players.p1) { players.p1 = conn; role = "p1"; }
+                    else if (!players.p2) { players.p2 = conn; role = "p2"; }
+
+                    if (role) {
+                        conn.send({ type: 'init', role: role });
                         updateStatus();
                     } else {
-                        conn.send({ type: 'rejected', reason: 'Room Full' });
+                        conn.send({ type: 'full' });
                         setTimeout(() => conn.close(), 500);
                     }
                 });
 
                 conn.on('data', (data) => {
-                    if(data.type === 'tap' && gameActive) {
+                    if (data.type === 'tap' && gameActive) {
                         score += (data.role === 'p1' ? 2 : -2);
                         updateDisplay();
                     }
                 });
 
                 conn.on('close', () => {
-                    if(players.p1 === conn) players.p1 = null;
-                    if(players.p2 === conn) players.p2 = null;
+                    if (players.p1 === conn) players.p1 = null;
+                    if (players.p2 === conn) players.p2 = null;
                     gameActive = false;
                     updateStatus();
                 });
@@ -122,13 +119,17 @@
 
         function updateStatus() {
             const status = document.getElementById('status-text');
+            const track = document.getElementById('track');
             const count = (players.p1 ? 1 : 0) + (players.p2 ? 1 : 0);
             
-            if(count === 0) status.innerText = "Menunggu Pemain...";
-            else if(count === 1) status.innerText = "Menunggu Lawan...";
-            else {
-                status.innerText = "SIAP? MULAI!!!";
+            if (count < 2) {
+                track.style.display = 'none';
+                gameActive = false;
+                status.innerText = count === 0 ? "Menunggu Pemain..." : "Menunggu Lawan...";
                 score = 50;
+            } else {
+                track.style.display = 'flex';
+                status.innerText = "SIAP... MULAI!";
                 gameActive = true;
                 updateDisplay();
             }
@@ -138,58 +139,56 @@
             document.getElementById('bar-p1').style.width = score + '%';
             document.getElementById('bar-p2').style.width = (100 - score) + '%';
 
-            if(score >= 100 || score <= 0) {
+            if (score >= 100 || score <= 0) {
                 gameActive = false;
-                const winner = score >= 100 ? "PLAYER 1 (MERAH)" : "PLAYER 2 (BIRU)";
+                const winMsg = score >= 100 ? "PLAYER 1 (MERAH) MENANG!" : "PLAYER 2 (BIRU) MENANG!";
                 setTimeout(() => {
-                    alert(winner + " MENANG!");
-                    score = 50;
-                    updateStatus();
+                    alert(winMsg);
+                    location.reload(); 
                 }, 100);
             }
         }
 
-        // --- CONTROLLER LOGIC ---
+        // --- LOGIKA HP ---
         function initController() {
-            const targetId = document.getElementById('join-id').value.trim().toUpperCase();
-            if(targetId.length < 5) return alert("ID Harus 5 Karakter!");
+            const idInput = document.getElementById('join-id').value.trim().toUpperCase();
+            if (idInput.length < 5) return alert("ID Room tidak valid!");
 
             showScreen('controller-screen');
-            const tapBtn = document.getElementById('btn-tap');
+            const btn = document.getElementById('btn-tap');
             
             peer = new Peer();
             peer.on('open', () => {
-                const conn = peer.connect(targetId, { reliable: true });
+                const conn = peer.connect(idInput, { reliable: true });
 
                 conn.on('open', () => {
                     conn.on('data', (data) => {
-                        if(data.type === 'assign') {
-                            tapBtn.disabled = false;
-                            tapBtn.innerText = "TAP!";
-                            tapBtn.style.background = data.role === 'p1' ? 'var(--p1)' : 'var(--p2)';
+                        if (data.type === 'init') {
+                            btn.disabled = false;
+                            btn.innerText = "TAP!";
+                            btn.style.background = data.role === 'p1' ? 'var(--p1)' : 'var(--p2)';
                             
-                            // Pakai pointerdown biar respon lebih cepet dari click/touchstart
-                            tapBtn.onpointerdown = (e) => {
+                            btn.onpointerdown = (e) => {
                                 e.preventDefault();
                                 conn.send({ type: 'tap', role: data.role });
-                                if(navigator.vibrate) navigator.vibrate(40);
+                                if (navigator.vibrate) navigator.vibrate(40);
                             };
                         }
-                        if(data.type === 'rejected') {
-                            alert("Maaf, room sudah penuh!");
+                        if (data.type === 'full') {
+                            alert("Room penuh!");
                             location.reload();
                         }
                     });
                 });
 
                 conn.on('close', () => {
-                    alert("Koneksi terputus dari monitor.");
+                    alert("Koneksi Monitor terputus.");
                     location.reload();
                 });
             });
 
             peer.on('error', () => {
-                alert("Gagal terhubung. Cek kembali ID Room.");
+                alert("Gagal nyambung. ID salah atau Monitor offline.");
                 location.reload();
             });
         }
