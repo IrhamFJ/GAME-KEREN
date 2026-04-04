@@ -3,263 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ABC 5 DASAR - 2 MODE</title>
+    <title>Tap Tap 1v1 P2P</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
-        :root {
-            --bg-main: #0f172a; --primary: #38bdf8; --accent: #fbbf24;
-            --white: #ffffff; --success: #22c55e; --danger: #ef4444;
-            --card-bg: #1e293b; --log-bg: #020617;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Fredoka', sans-serif; -webkit-user-select: none; user-select: none; }
-        body { background: var(--bg-main); height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--white); }
+        :root { --p1: #ff4757; --p2: #2e86de; }
+        body { font-family: 'Segoe UI', sans-serif; background: #2f3542; color: white; text-align: center; margin: 0; overflow: hidden; touch-action: manipulation; }
+        .screen { display: none; padding: 20px; flex-direction: column; align-items: center; justify-content: center; height: 100vh; box-sizing: border-box; }
+        .active { display: flex; }
         
-        .game-card {
-            width: 95%; max-width: 600px; background: var(--card-bg); border-radius: 30px; padding: 25px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.1); position: relative; text-align: center;
-        }
-        .screen { display: none; flex-direction: column; align-items: center; width: 100%; }
-        .active { display: flex; animation: slideUp 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; border: none; border-radius: 8px; margin: 10px; transition: 0.2s; -webkit-tap-highlight-color: transparent; }
+        .btn-p1 { background: var(--p1); color: white; }
+        .btn-p2 { background: var(--p2); color: white; }
+        input { padding: 15px; border-radius: 8px; border: none; width: 250px; font-size: 1rem; margin-bottom: 10px; text-align: center; }
 
-        h1 { font-size: 2.2rem; color: var(--primary); text-shadow: 0 0 15px rgba(56, 189, 248, 0.4); margin-bottom: 15px; }
-        .btn { width: 100%; padding: 16px; margin-bottom: 12px; border-radius: 15px; border: none; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
-        .btn-blue { background: var(--primary); color: var(--bg-main); box-shadow: 0 4px 0 #0284c7; }
-        .btn-gold { background: var(--accent); color: #78350f; box-shadow: 0 4px 0 #b45309; }
-        .btn-purple { background: #a855f7; color: white; box-shadow: 0 4px 0 #7e22ce; }
-        .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 transparent; }
-        .btn:disabled { background: #475569; color: #94a3b8; box-shadow: none; cursor: not-allowed; }
-        
-        input {
-            width: 100%; padding: 18px; background: var(--log-bg); border: 3px solid #334155; border-radius: 15px;
-            color: var(--white); font-size: 1.5rem; text-align: center; margin-bottom: 15px; outline: none; transition: 0.3s;
-        }
-        input.error { border-color: var(--danger); animation: shake 0.3s; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+        #track { width: 90%; height: 80px; background: #57606f; border-radius: 40px; display: flex; overflow: hidden; position: relative; margin: 40px 0; border: 5px solid white; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .bar { height: 100%; transition: width 0.1s ease-out; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.8rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        #room-id-display { background: #eccc68; color: #2f3542; padding: 5px 15px; border-radius: 5px; font-family: monospace; font-size: 1.5rem; display: inline-block; margin-top: 10px; }
 
-        .log-panel {
-            width: 100%; height: 130px; background: var(--log-bg); border-radius: 15px; padding: 15px;
-            font-size: 0.85rem; color: #94a3b8; text-align: left; overflow-y: auto; border: 1px solid #334155;
-            margin-bottom: 15px; font-family: 'monospace'; line-height: 1.4;
-        }
-        .stats-bar { display: flex; justify-content: space-between; width: 100%; margin-bottom: 15px; font-size: 0.9rem; font-weight: 700; }
-        .stat-item { background: rgba(255,255,255,0.08); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
-
-        .finger-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 15px 0; width: 100%; }
-        .f-box {
-            aspect-ratio: 1/1; background: #334155; border-radius: 15px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.2s; font-weight: 700; color: #94a3b8; border: 3px solid transparent; font-size: 1.2rem;
-        }
-        .f-box.selected { border-color: var(--primary); background: rgba(56, 189, 248, 0.2); color: var(--primary); transform: scale(1.1); box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
-
-        .progress-track { width: 100%; height: 12px; background: #334155; border-radius: 10px; margin: 20px 0; overflow: hidden; }
-        #t-fill { width: 100%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--success)); transition: 0.1s linear; }
-
-        .char-hero { font-size: 9rem; font-weight: 800; color: var(--white); margin: -5px 0; text-shadow: 0 0 30px rgba(255,255,255,0.3); }
-        .combo-badge { position: absolute; top: -15px; right: -5px; background: var(--danger); color: white; padding: 6px 18px; border-radius: 25px; font-weight: 900; display: none; transform: rotate(12deg); z-index: 20; }
+        .tap-area { width: 100%; height: 100%; position: absolute; top: 0; left: 0; border: none; font-size: 4rem; font-weight: bold; color: white; user-select: none; }
+        #status-text { min-height: 1.5em; font-size: 1.5rem; color: #ffa502; }
     </style>
 </head>
 <body>
 
-    <div class="game-card" id="main-card">
-        <div id="scr-start" class="screen active">
-            <h1>ABC 5 DASAR <span style="color:var(--accent)">PRO</span></h1>
-            <button class="btn btn-blue" onclick="setup('MONITOR')">🖥️ Host Game (TV)</button>
-            <button class="btn btn-gold" onclick="setup('CONTROL')">📱 Join Battle (HP)</button>
-        </div>
+    <div id="menu-screen" class="screen active">
+        <h1>TAPTAP 1V1</h1>
+        <button class="btn-p2" onclick="initMonitor()">JADI MONITOR</button>
+        <div style="margin: 20px 0; opacity: 0.5;">━━━━ ATAU ━━━━</div>
+        <input type="text" id="join-id" placeholder="Masukkan ID Room">
+        <button class="btn-p1" onclick="initController()">MASUK ROOM (HP)</button>
+    </div>
 
-        <div id="scr-lobby" class="screen">
-            <div class="stats-bar">
-                <div class="stat-item">ROOM: <span id="room-id-txt" style="color:var(--accent)">---</span></div>
-                <div class="stat-item">BOT: <span id="bot-status" style="color:var(--danger)">OFF</span></div>
-            </div>
-            <div class="log-panel" id="log-box">SYSTEM: Awaiting players...</div>
-            <div id="host-controls" style="width:100%; display:none;">
-                <button class="btn btn-purple" id="btn-toggle-bot" onclick="toggleBot()">🤖 Add Bot Competitor</button>
-                <button class="btn btn-blue" id="btn-start-init" disabled onclick="nav('scr-jari')">INITIALIZE BATTLE</button>
-            </div>
-            <div id="client-wait" style="display:none; color:var(--accent); font-weight:bold; margin-top:10px;">WAITING FOR HOST TO START...</div>
+    <div id="monitor-screen" class="screen">
+        <h2>ROOM ID: <br><span id="room-id-display">Generating...</span></h2>
+        <h3 id="status-text">Inisialisasi...</h3>
+        
+        <div id="track">
+            <div id="bar-p1" class="bar" style="width: 50%; background: var(--p1);">P1</div>
+            <div id="bar-p2" class="bar" style="width: 50%; background: var(--p2);">P2</div>
         </div>
+        <p>Gunakan HP untuk menekan tombol!</p>
+    </div>
 
-        <div id="scr-jari" class="screen">
-            <h1>LOCK YOUR JARI</h1>
-            <div class="finger-grid" id="f-grid"></div>
-            <button class="btn btn-blue" onclick="confirmFingers()">READY TO BATTLE</button>
-        </div>
-
-        <div id="scr-arena" class="screen">
-            <div class="combo-badge" id="c-badge">x2 COMBO</div>
-            <div class="stats-bar">
-                <div class="stat-item">LVL <span id="lvl">1</span></div>
-                <div class="stat-item">EXP: <span id="exp">0</span></div>
-            </div>
-            <div class="char-hero" id="target-char">?</div>
-            <div id="input-zone" style="width:100%">
-                <input type="text" id="ans-in" placeholder="..." spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="characters">
-            </div>
-            <div class="progress-track"><div id="t-fill"></div></div>
-            <p id="msg-box" style="font-weight: 800; text-transform: uppercase;">PREPARE!</p>
-        </div>
+    <div id="controller-screen" class="screen" style="padding:0;">
+        <button id="btn-tap" class="tap-area">CONNECTING...</button>
     </div>
 
     <script>
-        let state = { 
-            mode: "", room: "", nick: "", fingers: new Set(), 
-            char: "", timer: null, botTimer: null, botActive: false,
-            lvl: 1, exp: 0, combo: 0, validating: false, baseTime: 30
-        };
+        let peer = null;
+        let players = {}; // Object untuk nyimpen koneksi aktif {role: conn}
+        let score = 50;
+        let gameActive = false;
 
-        const botWords = {"A":["APEL"],"B":["BANDUNG"],"C":["CINA"],"D":["DUKU"],"E":["ELANG"],"F":["FOTO"],"G":["GAJAH"],"H":["HIU"],"I":["IKAN"],"J":["JERUK"],"K":["KERA"],"L":["LEMON"],"M":["MADU"],"N":["NANAS"],"O":["OBAT"],"P":["PANDA"],"Q":["QATAR"],"R":["RUSA"],"S":["SAPI"],"T":["TIGA"],"U":["ULAR"],"V":["VAS"],"W":["WORTEL"],"X":["XRAY"],"Y":["YOYO"],"Z":["ZEBRA"]};
-
-        const grid = document.getElementById('f-grid');
-        for(let i=1; i<=10; i++){
-            let b = document.createElement('div'); b.className='f-box'; b.innerText=i;
-            b.onclick = () => { 
-                b.classList.toggle('selected'); 
-                state.fingers.has(i) ? state.fingers.delete(i) : state.fingers.add(i); 
-            };
-            grid.appendChild(b);
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
 
-        function nav(id) { 
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
-            document.getElementById(id).classList.add('active'); 
+        // --- LOGIKA MONITOR (DISPLAY) ---
+        function initMonitor() {
+            showScreen('monitor-screen');
+            peer = new Peer();
+
+            peer.on('open', (id) => {
+                document.getElementById('room-id-display').innerText = id;
+                updateStatus();
+            });
+
+            peer.on('connection', (conn) => {
+                conn.on('open', () => {
+                    let role = "";
+                    if (!players.p1) {
+                        players.p1 = conn;
+                        role = "p1";
+                    } else if (!players.p2) {
+                        players.p2 = conn;
+                        role = "p2";
+                    }
+
+                    if (role) {
+                        conn.send({ type: 'init', role: role });
+                        updateStatus();
+                    } else {
+                        conn.send({ type: 'error', msg: 'Room Penuh!' });
+                        conn.close();
+                    }
+                });
+
+                conn.on('data', (data) => {
+                    if (data.type === 'tap' && gameActive) {
+                        if (data.role === 'p1') score += 2;
+                        if (data.role === 'p2') score -= 2;
+                        updateDisplay();
+                    }
+                });
+
+                conn.on('close', () => {
+                    if (players.p1 === conn) delete players.p1;
+                    if (players.p2 === conn) delete players.p2;
+                    gameActive = false;
+                    updateStatus();
+                });
+            });
         }
-        
-        function setup(m) {
-            state.mode = m;
-            if(m === 'MONITOR') {
-                state.room = Math.floor(100000 + Math.random() * 899999);
-                document.getElementById('room-id-txt').innerText = state.room;
-                document.getElementById('host-controls').style.display = 'block';
-                document.getElementById('btn-start-init').disabled = false;
-                nav('scr-lobby');
+
+        function updateStatus() {
+            const status = document.getElementById('status-text');
+            const count = Object.keys(players).length;
+            
+            if (count === 0) {
+                status.innerText = "Menunggu Pemain...";
+                gameActive = false;
+            } else if (count === 1) {
+                status.innerText = "Menunggu Lawan...";
+                gameActive = false;
             } else {
-                state.room = prompt("ROOM ID:");
-                if(!state.room) return;
-                state.nick = (prompt("NICKNAME:") || "PLAYER").toUpperCase();
-                document.getElementById('client-wait').style.display = 'block';
-                document.getElementById('room-id-txt').innerText = state.room;
-                nav('scr-lobby');
-                log(`CONNECTED TO ROOM ${state.room}`, "#22c55e");
+                status.innerText = "GAME DIMULAI!";
+                gameActive = true;
+                score = 50; // Reset score pas game mulai
+                updateDisplay();
             }
         }
 
-        function toggleBot() {
-            state.botActive = !state.botActive;
-            const btn = document.getElementById('btn-toggle-bot');
-            const status = document.getElementById('bot-status');
-            btn.innerText = state.botActive ? "🤖 Remove Bot" : "🤖 Add Bot Competitor";
-            status.innerText = state.botActive ? "ON" : "OFF";
-            status.style.color = state.botActive ? "var(--success)" : "var(--danger)";
-            log(`BOT COMPETITOR: ${state.botActive ? 'ENABLED' : 'DISABLED'}`);
-        }
+        function updateDisplay() {
+            const bar1 = document.getElementById('bar-p1');
+            const bar2 = document.getElementById('bar-p2');
+            
+            bar1.style.width = score + '%';
+            bar2.style.width = (100 - score) + '%';
 
-        function log(m, c="#94a3b8") {
-            const box = document.getElementById('log-box');
-            if(box) {
-                box.innerHTML += `<div style="color:${c}">> ${m}</div>`;
-                box.scrollTop = box.scrollHeight;
+            if (score >= 100) {
+                gameActive = false;
+                setTimeout(() => { alert("PLAYER 1 (MERAH) MENANG!"); resetGame(); }, 50);
+            } else if (score <= 0) {
+                gameActive = false;
+                setTimeout(() => { alert("PLAYER 2 (BIRU) MENANG!"); resetGame(); }, 50);
             }
         }
 
-        function confirmFingers() {
-            if(state.fingers.size === 0) return alert("Pilih minimal 1 jari!");
-            nav('scr-arena'); 
-            setTimeout(startRound, 1000);
+        function resetGame() {
+            score = 50;
+            updateDisplay();
+            updateStatus();
         }
 
-        function startRound() {
-            if(state.timer) clearInterval(state.timer);
-            if(state.botTimer) clearTimeout(state.botTimer);
-            state.validating = false;
-            state.char = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random()*26)];
-            
-            document.getElementById('target-char').innerText = state.char;
-            const input = document.getElementById('ans-in');
-            input.value = ""; input.disabled = false;
-            document.getElementById('msg-box').innerText = "TYPE NOW!";
-            document.getElementById('msg-box').style.color = "var(--white)";
-            document.getElementById('main-card').style.borderColor = "rgba(255,255,255,0.1)";
-            
-            let timeLimit = Math.max(5, state.baseTime - (state.lvl * 2));
-            let current = timeLimit;
-            const bar = document.getElementById('t-fill');
-            bar.style.width = "100%";
-            
-            state.timer = setInterval(() => {
-                current -= 0.1;
-                bar.style.width = (current/timeLimit)*100 + "%";
-                if(current <= 0) { clearInterval(state.timer); finish(false, "TIME OUT"); }
-            }, 100);
+        // --- LOGIKA CONTROLLER (HP) ---
+        function initController() {
+            const roomId = document.getElementById('join-id').value.trim();
+            if (!roomId) return alert("Isi ID Room-nya dulu!");
 
-            if(state.mode === 'MONITOR') {
-                document.getElementById('input-zone').style.display = 'none';
-                if(state.botActive) {
-                    let botSpeed = Math.max(1200, 5000 - (state.lvl * 600));
-                    state.botTimer = setTimeout(() => {
-                        if(!state.validating) {
-                            let ans = botWords[state.char][0];
-                            finish(false, "BOT WON: " + ans);
+            showScreen('controller-screen');
+            const btn = document.getElementById('btn-tap');
+            btn.disabled = true; // Jangan kasih tap sebelum ready
+
+            peer = new Peer();
+            
+            peer.on('open', () => {
+                const conn = peer.connect(roomId);
+
+                conn.on('open', () => {
+                    conn.on('data', (data) => {
+                        if (data.type === 'init') {
+                            btn.innerText = "SIAP!";
+                            btn.style.background = data.role === 'p1' ? 'var(--p1)' : 'var(--p2)';
+                            btn.disabled = false;
+
+                            // Hapus listener lama biar gak double tap bug
+                            btn.onclick = (e) => {
+                                e.preventDefault();
+                                conn.send({ type: 'tap', role: data.role });
+                                if (navigator.vibrate) navigator.vibrate(40);
+                            };
                         }
-                    }, botSpeed);
-                }
-            }
-            setTimeout(() => input.focus(), 50);
-        }
-
-        async function finish(win, ans) {
-            if(state.validating) return;
-            state.validating = true;
-            clearInterval(state.timer);
-            clearTimeout(state.botTimer);
-            
-            const input = document.getElementById('ans-in');
-            input.disabled = true;
-            input.blur();
-            const msg = document.getElementById('msg-box');
-
-            if(win) {
-                state.combo++;
-                let gain = Math.floor(10 * state.lvl * (state.combo > 1 ? 1.5 : 1));
-                state.exp += gain;
-                msg.innerText = "SUCCESS! +" + gain + " EXP";
-                msg.style.color = "var(--success)";
-                if(state.combo > 1) { 
-                    const cb = document.getElementById('c-badge');
-                    cb.innerText = `x${state.combo} COMBO 🔥`; cb.style.display = 'block'; 
-                }
-                log(`${state.nick}: ${ans}`, "#22c55e");
-            } else {
-                state.combo = 0;
-                document.getElementById('c-badge').style.display = 'none';
-                msg.innerText = ans.includes("BOT") ? "BOT WON! 🤖" : "FAILED!";
-                msg.style.color = "var(--danger)";
-                document.getElementById('main-card').style.borderColor = "var(--danger)";
-                log(ans.includes("BOT") ? ans : `${state.nick} FAILED`, "#ef4444");
-            }
-            
-            if(state.exp >= 50) { state.lvl++; state.exp = 0; log(`LVL UP TO ${state.lvl}!`, "#38bdf8"); }
-            document.getElementById('lvl').innerText = state.lvl;
-            document.getElementById('exp').innerText = state.exp;
-            setTimeout(startRound, 3000);
-        }
-
-        document.getElementById('ans-in').addEventListener('keypress', async (e) => {
-            if(e.key === 'Enter') {
-                let ans = e.target.value.trim().toUpperCase();
-                if(!ans || ans[0] !== state.char || state.validating) return;
-                
-                document.getElementById('msg-box').innerText = "VALIDATING...";
-                try {
-                    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${ans}&format=json&limit=1`, { 
-                        signal: AbortSignal.timeout(3500) 
+                        if (data.type === 'error') {
+                            alert(data.msg);
+                            location.reload();
+                        }
                     });
-                    const data = await res.json();
-                    data.length > 0 ? finish(true, ans) : finish(false, "NOT FOUND");
-                } catch(err) { finish(true, ans); }
-            }
-        });
+                });
+
+                conn.on('close', () => {
+                    alert("Koneksi ke Monitor Terputus!");
+                    location.reload();
+                });
+            });
+
+            peer.on('error', (err) => {
+                alert("Gagal nyambung: " + err.type);
+                location.reload();
+            });
+        }
     </script>
 </body>
 </html>
