@@ -7,195 +7,166 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js"></script>
     <style>
         :root { --p1: #ff4757; --p2: #2e86de; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f1c40f; color: #2c3e50; text-align: center; margin: 0; overflow: hidden; touch-action: none; width: 100vw; height: 100vh; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f1c40f; color: #2c3e50; text-align: center; margin: 0; overflow: hidden; touch-action: none; width: 100vw; height: 100vh; transition: 0.3s; }
         
+        @media screen and (orientation: portrait) {
+            #monitor-screen.active { transform: rotate(90deg); width: 100vh; height: 100vw; position: fixed; top: 50%; left: 50%; margin: -50vw 0 0 -50vh; display: flex !important; }
+        }
+
         .screen { display: none; padding: 20px; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100vw; box-sizing: border-box; position: absolute; top: 0; left: 0; }
         .active { display: flex; }
         
-        button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; border: 4px solid #2c3e50; border-radius: 15px; margin: 5px; background: #ecf0f1; color: #2c3e50; font-weight: 900; text-transform: uppercase; box-shadow: 4px 4px 0px #2c3e50; transition: 0.1s; -webkit-tap-highlight-color: transparent; }
-        button:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #2c3e50; }
-        button:disabled { opacity: 0.5; }
+        body.skin-classic { background: #f1c40f; }
+        body.skin-space { background: #2c3e50; color: #fff; }
+        body.skin-forest { background: #27ae60; }
 
-        #room-id-display { background: #fff; color: #2c3e50; padding: 15px 30px; border: 6px solid #2c3e50; border-radius: 20px; font-size: 3.5rem; font-weight: 900; margin: 15px 0; letter-spacing: 5px; box-shadow: 8px 8px 0px #c0392b; min-width: 200px; }
+        button { padding: 15px 25px; font-size: 1.1rem; cursor: pointer; border: 4px solid #2c3e50; border-radius: 12px; margin: 5px; background: #ecf0f1; color: #2c3e50; font-weight: 900; text-transform: uppercase; box-shadow: 4px 4px 0px #2c3e50; transition: 0.1s; -webkit-tap-highlight-color: transparent; }
+        button:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #2c3e50; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        #track { display: none; width: 90%; height: 120px; background: #2c3e50; border: 6px solid #fff; border-radius: 60px; position: relative; margin: 25px 0; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        .bar { height: 100%; transition: width 0.08s ease-out; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.5rem; color: white; text-shadow: 2px 2px #000; }
-        
-        #status-text { font-size: 2.2rem; color: #fff; text-transform: uppercase; margin: 15px 0; text-shadow: 4px 4px #c0392b; -webkit-text-stroke: 1.5px #2c3e50; min-height: 1.2em; }
-        input { padding: 15px; border: 4px solid #2c3e50; border-radius: 12px; width: 250px; font-size: 1.5rem; margin-bottom: 15px; text-align: center; font-weight: bold; outline: none; }
+        input, select { padding: 12px; border: 4px solid #2c3e50; border-radius: 10px; width: 220px; font-size: 1.1rem; margin-bottom: 10px; text-align: center; font-weight: bold; background: white; }
 
-        .tap-area { width: 100%; height: 100%; border: none; font-size: 6rem; font-weight: 900; color: white; user-select: none; }
+        #room-id-display { background: #fff; color: #2c3e50; padding: 10px 20px; border: 5px solid #2c3e50; border-radius: 15px; font-size: 3rem; font-weight: 900; margin: 10px 0; letter-spacing: 5px; box-shadow: 6px 6px 0px #c0392b; min-width: 180px; }
+        
+        #track { display: none; width: 85%; height: 100px; background: #2c3e50; border: 5px solid #fff; border-radius: 50px; position: relative; margin: 20px 0; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .bar { height: 100%; transition: width 0.1s ease-out; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; text-shadow: 2px 2px #000; font-size: 1.2rem; }
+        
+        #status-text { font-size: 2rem; color: #fff; text-transform: uppercase; margin: 10px 0; text-shadow: 3px 3px #c0392b; -webkit-text-stroke: 1px #2c3e50; min-height: 1.2em; }
+        .tap-area { width: 100%; height: 100%; border: none; font-size: 5rem; font-weight: 900; color: white; position: absolute; top: 0; left: 0; }
     </style>
 </head>
-<body>
+<body class="skin-classic">
 
     <audio id="bgm-menu" loop preload="auto"><source src="https://image2url.com/r2/default/audio/1775290560696-3795209f-6e46-433c-a94c-18ac02c047a4.mp3" type="audio/mpeg"></audio>
     <audio id="bgm-battle" loop preload="auto"><source src="https://image2url.com/r2/default/audio/1775290622313-a7846eca-967a-4dcc-88dd-cb8e330cf6a6.mp3" type="audio/mpeg"></audio>
 
     <div id="menu-screen" class="screen active">
-        <h1 style="font-size: 3rem; margin-bottom: 10px;">TAPTAP 1V1</h1>
-        <button id="main-monitor-btn" onclick="initMonitor()">START MONITOR (TV)</button>
-        <div style="margin: 20px 0; font-weight: bold; opacity: 0.7;">━━━━ ATAU ━━━━</div>
+        <h1 style="font-size: 2.5rem; margin-bottom: 10px;">TAPTAP 1V1</h1>
+        <select id="select-skin" onchange="changeTheme(this.value)">
+            <option value="classic">TEMA: CLASSIC</option>
+            <option value="space">TEMA: SPACE</option>
+            <option value="forest">TEMA: FOREST</option>
+        </select>
+        <button id="btn-start-mon" onclick="startMonitor()">START MONITOR (TV)</button>
+        <div style="margin: 15px 0; font-weight: bold; opacity: 0.7;">━━━━ OR ━━━━</div>
+        <input type="text" id="user-name" placeholder="NAMA LO..." maxlength="10">
         <input type="text" id="join-id" placeholder="KODE ROOM" maxlength="5">
-        <button onclick="initHPController()">JOIN MABAR (HP)</button>
+        <button onclick="startHP()">JOIN HP (CONTROLLER)</button>
     </div>
 
     <div id="monitor-screen" class="screen">
-        <div id="room-id-display">...</div>
-        <h3 id="status-text">CONNECTING...</h3>
-        <button id="btn-add-bot" onclick="activateBot()" style="background: #9b59b6; color: white;">ADD BOT (P2)</button>
-        
+        <div id="room-id-display">KODE...</div>
+        <h3 id="status-text">MENCARI SIGNAL...</h3>
+        <button id="btn-bot" onclick="enableBot()" style="background:#9b59b6; color:#fff;">ADD BOT (P2)</button>
         <div id="track">
-            <div id="bar-p1" class="bar" style="width: 50%; background: var(--p1);">P1 (YOU)</div>
-            <div id="bar-p2" class="bar" style="width: 50%; background: var(--p2);">BOT</div>
+            <div id="bar-p1" class="bar" style="width: 50%; background: var(--p1);"><span id="name-p1">PLAYER 1</span></div>
+            <div id="bar-p2" class="bar" style="width: 50%; background: var(--p2);"><span id="name-p2">BOT</span></div>
         </div>
     </div>
 
     <div id="controller-screen" class="screen" style="padding:0;">
-        <button id="btn-tap" class="tap-area" disabled>CONNECTING...</button>
+        <button id="btn-tap" class="tap-area" disabled>WAITING...</button>
     </div>
 
     <script>
-        let peer = null, conn = null, score = 50, gameActive = false, isBotMode = false;
-        let p1Wins = 0, p2Wins = 0, round = 1, botTimer = null;
-        const bgmMenu = document.getElementById('bgm-menu'), bgmBattle = document.getElementById('bgm-battle');
+        const pConf = { config: { 'iceServers': [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] } };
+        let peer, conn, score = 50, gameActive = false, isBot = false;
+        let p1Wins = 0, p2Wins = 0, round = 1;
+        const mAud = document.getElementById('bgm-menu'), bAud = document.getElementById('bgm-battle');
 
-        // TV / MONITOR SIDE
-        function initMonitor() {
-            if(peer) return; // Anti double click
-            document.getElementById('main-monitor-btn').disabled = true;
-            
-            // Force generate ID sebelum Peer buka koneksi
-            const roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
-            document.getElementById('room-id-display').innerText = roomCode;
-            
+        function changeTheme(v) { document.body.className = 'skin-' + v; }
+
+        function startMonitor() {
+            document.getElementById('btn-start-mon').disabled = true;
+            const rid = Math.random().toString(36).substring(2, 7).toUpperCase();
             showScreen('monitor-screen');
-            bgmMenu.play().catch(()=>{});
+            mAud.play().catch(()=>{});
+            if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
 
-            peer = new Peer(roomCode);
-            
+            peer = new Peer(rid, pConf);
             peer.on('open', (id) => {
-                document.getElementById('status-text').innerText = "KODE SIAP! CONNECT HP";
-            });
-
-            peer.on('error', (err) => {
-                document.getElementById('status-text').innerText = "KONEKSI ERROR! REFRESH";
-                console.error(err);
+                document.getElementById('room-id-display').innerText = id;
+                document.getElementById('status-text').innerText = "SIAP! CONNECT DARI HP";
             });
 
             peer.on('connection', (c) => {
                 conn = c;
                 conn.on('open', () => {
                     document.getElementById('status-text').innerText = "HP CONNECTED!";
-                    if(isBotMode) startBattle();
-                });
-                conn.on('data', (d) => { 
-                    if(d === 'tap' && gameActive) { 
-                        score += 2; 
-                        syncUI(); 
-                    } 
+                    conn.on('data', (d) => {
+                        if(d.type === 'tap' && gameActive) { score += 2; updateUI(); }
+                        if(d.type === 'name') document.getElementById('name-p1').innerText = d.val.toUpperCase();
+                    });
+                    if(isBot) setTimeout(startRound, 1000);
                 });
             });
         }
 
-        function activateBot() {
-            isBotMode = true;
-            document.getElementById('btn-add-bot').style.display = 'none';
-            document.getElementById('bar-p2').innerText = "BOT-LEGO";
-            if(conn && conn.open) {
-                startBattle();
-            } else {
-                document.getElementById('status-text').innerText = "BOT SIAP. KONEK HP!";
-            }
+        function enableBot() {
+            isBot = true; 
+            document.getElementById('btn-bot').style.display = 'none';
+            document.getElementById('name-p2').innerText = "BOT-LEGO";
+            document.getElementById('status-text').innerText = "BOT READY! JOIN HP";
         }
 
-        function botAI() {
-            if (!gameActive || !isBotMode) return;
-            // Bot dorong bar ke kiri (skor berkurang)
-            let difficulty = 165 + (score < 40 ? -30 : 15); 
-            botTimer = setTimeout(() => {
-                if (gameActive) { 
-                    score -= 2; 
-                    syncUI(); 
-                    botAI(); 
-                }
-            }, difficulty + Math.random() * 90);
-        }
-
-        function startBattle() {
-            if(botTimer) clearTimeout(botTimer);
-            gameActive = false; 
-            score = 50; // RESET PASTI
-            syncUI();
-            
+        function startRound() {
+            gameActive = false; score = 50; updateUI();
             document.getElementById('track').style.display = 'none';
-            document.getElementById('status-text').innerText = "ROUND " + round + " | " + p1Wins + "-" + p2Wins;
-            
+            document.getElementById('status-text').innerText = "ROUND " + round + " (" + p1Wins + "-" + p2Wins + ")";
             setTimeout(() => {
-                document.getElementById('status-text').innerText = "GO!";
+                document.getElementById('status-text').innerText = "FIGHT!";
                 document.getElementById('track').style.display = 'flex';
                 gameActive = true;
-                bgmMenu.pause(); 
-                bgmBattle.currentTime = 0;
-                bgmBattle.play().catch(()=>{});
-                if(isBotMode) botAI();
+                mAud.pause(); bAud.currentTime = 0; bAud.play().catch(()=>{});
+                if(isBot) botLogic();
             }, 2000);
         }
 
-        function syncUI() {
-            const b1 = document.getElementById('bar-p1');
-            const b2 = document.getElementById('bar-p2');
-            b1.style.width = score + '%';
-            b2.style.width = (100 - score) + '%';
-            
-            if (score >= 100 || score <= 0) {
-                gameActive = false;
-                if(botTimer) clearTimeout(botTimer);
-                bgmBattle.pause();
-                
-                let win = score >= 100 ? "P1" : "BOT";
-                document.getElementById('status-text').innerText = win + " MENANG!";
-                
-                if(score >= 100) p1Wins++; else p2Wins++;
-                
+        function botLogic() {
+            if(!gameActive || !isBot) return;
+            let spd = 175 + (score < 40 ? -35 : 15); 
+            setTimeout(() => {
+                if(gameActive) { score -= 2; updateUI(); botLogic(); }
+            }, spd + Math.random() * 80);
+        }
+
+        function updateUI() {
+            document.getElementById('bar-p1').style.width = score + '%';
+            document.getElementById('bar-p2').style.width = (100 - score) + '%';
+            if(score >= 100 || score <= 0) {
+                gameActive = false; bAud.pause();
+                let winner = score >= 100 ? document.getElementById('name-p1').innerText : "BOT";
+                document.getElementById('status-text').innerText = winner + " WINS!";
+                score >= 100 ? p1Wins++ : p2Wins++;
                 setTimeout(() => {
-                    if (p1Wins === 2 || p2Wins === 2) {
-                        alert("GAME OVER! " + win + " JUARANYA!");
-                        location.reload();
-                    } else {
-                        round++;
-                        startBattle();
-                    }
+                    if(p1Wins === 2 || p2Wins === 2) { alert("MATCH OVER! " + winner); location.reload(); }
+                    else { round++; startRound(); }
                 }, 3000);
             }
         }
 
-        // HP / CONTROLLER SIDE
-        function initHPController() {
-            const rid = document.getElementById('join-id').value.trim().toUpperCase();
-            if(!rid) return alert("Masukin Kodenya dulu, Ham!");
-            
+        function startHP() {
+            const rid = document.getElementById('join-id').value.toUpperCase();
+            const n = document.getElementById('user-name').value.trim();
+            if(!rid || !n) return alert("ISI NAMA & KODE ROOM!");
             showScreen('controller-screen');
-            peer = new Peer();
-            
+            if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+
+            peer = new Peer(pConf);
             peer.on('open', () => {
                 const c = peer.connect(rid);
                 c.on('open', () => {
+                    // FIX: Delay sedikit kirim nama biar TV siap
+                    setTimeout(() => { c.send({type: 'name', val: n}); }, 500);
                     const b = document.getElementById('btn-tap');
-                    b.innerText = "TAP!"; 
-                    b.disabled = false;
+                    b.innerText = "TAP!"; b.disabled = false;
                     b.style.background = "var(--p1)";
-                    
                     b.onpointerdown = (e) => { 
-                        e.preventDefault(); 
-                        c.send('tap'); 
+                        e.preventDefault(); c.send({type: 'tap'}); 
                         if(navigator.vibrate) navigator.vibrate(40); 
                     };
                 });
-                c.on('error', () => {
-                    alert("Gagal Konek ke TV! Cek kodenya.");
-                    location.reload();
-                });
+                c.on('error', () => { alert("KODE SALAH / TV OFFLINE!"); location.reload(); });
             });
         }
 
